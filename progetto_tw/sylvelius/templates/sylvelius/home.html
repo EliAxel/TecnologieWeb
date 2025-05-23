@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Sylvelius{% endblock %}
+{% block sign_in_sign_up %}
+    {% include "sylvelius/_btn_toprightbuttons.html" %}
+{% endblock %}
+
+{% block middle %}
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-12 text-center">
+            <h1>Benvenuto su <strong>Sylvelius</strong>!</h1>
+            <p class="lead">Questa è la piattaforma ideale per gli appassionati di sport!</p>
+            <div class="row">
+                {% for annuncio in annunci %}
+                    {% if not request.GET.filtro or annuncio.categoria == request.GET.filtro %}
+                        <div class="col-md-4 mb-4">
+                            <div class="card h-100">
+                                {# <img src="{{ annuncio.immagine.url }}" class="card-img-top" alt="{{ annuncio.titolo }}"> #}
+                                <div class="card-body">
+                                    <h5 class="card-title"><strong>{{ annuncio.titolo }}</strong></h5>
+                                    <p class="card-text">{{ annuncio.descrizione|truncatewords:15 }}</p>
+                                    <p class="card-text">Prezzo: {{ annuncio.prezzo }} €</p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+
+                <div class="col-12 d-flex justify-content-center mt-4">
+    <form method="get" class="me-2">
+        {% for key, value in request.GET.items %}
+            {% if key != "page" %}
+                <input type="hidden" name="{{ key }}" value="{{ value }}">
+            {% endif %}
+        {% endfor %}
+        <button type="submit" name="page" value="{{ page|add:'-1' }}" class="btn btn-primary"
+            {% if page <= 1 %}disabled{% endif %}>
+            Indietro
+        </button>
+    </form>
+    <form method="get">
+        {% for key, value in request.GET.items %}
+            {% if key != "page" %}
+                <input type="hidden" name="{{ key }}" value="{{ value }}">
+            {% endif %}
+        {% endfor %}
+        <button type="submit" name="page" value="{{ page|add:'1' }}" class="btn btn-primary"
+            {% if not has_next %}disabled{% endif %}>
+            Avanti
+        </button>
+    </form>
+</div>
+
+            </div>
+            <p>Scopri ciò che cerchi veramente e molto altro ancora filtrando la ricerca!</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

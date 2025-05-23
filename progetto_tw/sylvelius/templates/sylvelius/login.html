@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block middle %}
+<div class="container mt-5" style="max-width: 400px;">
+    <div class="card shadow" style="border-color: #7c3aed;">
+        <div class="card-header text-white" style="background-color: #7c3aed;">
+            <h4 class="mb-0">Login</h4>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" class="form-control" id="username" name="username" required style="border-color: #a78bfa;">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" class="form-control" id="password" name="password" required style="border-color: #a78bfa;">
+                </div>
+                <button type="submit" class="btn btn-block text-white" style="background-color: #7c3aed;">Accedi</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

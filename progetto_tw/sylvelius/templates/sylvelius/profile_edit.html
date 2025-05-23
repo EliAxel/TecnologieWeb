@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Modifica Profilo{% endblock %}
+
+{% block middle %}
+<div class="container mt-5 mb-5" style="max-width: 500px;">
+    <div class="card shadow">
+        <div class="card-header text-white" style="background-color: #6f42c1;">
+            <h4 class="mb-0">Modifica Profilo</h4>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="id_username">Username</label>
+                    <input type="text" class="form-control" id="id_username" name="username" value="{{ user.username }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="id_email">Email</label>
+                    <input type="email" class="form-control" id="id_email" name="email" value="{{ user.email }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="id_password">Nuova Password</label>
+                    <input type="password" class="form-control" id="id_password" name="password" placeholder="Lascia vuoto per non cambiare">
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Salva Modifiche</button>
+            </form>
+            <hr>
+            <a href="{% url 'sylvelius:profile_delete' %}" class="btn btn-danger btn-block">
+                Chiudi Account
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
