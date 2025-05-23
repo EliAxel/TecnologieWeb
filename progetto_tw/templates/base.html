@@ -34,7 +34,20 @@
     <a class="navbar-brand text-white d-flex align-items-center" href="{% url 'sylvelius:home' %}" style="font-family: 'Copperplate', 'Copperplate Gothic Light', fantasy; font-size: 1.1rem; font-weight: bold;">
         <img src="{% static 'img/splash_art.png' %}" width="105" height="30" class="d-inline-block align-top mr-2" alt="Favicon">
     </a>
-    {% block sign_in_sign_up%}
+    <div class="d-flex justify-content-center flex-grow-1">
+        <form class="form-inline d-flex justify-content-center w-100" method="get" {#action="{% url 'sylvelius:search' %}"#} style="max-width: 600px; width: 100%;">
+            <div class="input-group w-100">
+                <div class="input-group-prepend">
+                    <a {#href="{% url 'sylvelius:advanced_search' %}"#} class="btn btn-outline-light mr-2">Ricerca avanzata</a>
+                </div>
+                <input class="form-control" type="search" placeholder="Cerca..." aria-label="Cerca" name="q">
+                <div class="input-group-append">
+                    <button class="btn btn-light" type="submit" style="margin-left: 3px;">Cerca</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    {% block sign_in_sign_up %}
     {% endblock %}
 </nav>
 {% block middle %}

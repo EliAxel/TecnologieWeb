@@ -1,0 +1,61 @@
+{% extends "sylvelius/home.html" %}
+{% load static %}
+{% block main_header %}{% endblock %}
+{% block middle %}
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <h2 class="mb-4">I tuoi ordini</h2>
+            {% if ordini %}
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Annuncio</th>
+                            <th>Prodotto</th>
+                            <th>Quantità</th>
+                            <th>Prezzo cad.</th>
+                            <th>Totale</th>
+                            <th>Stato</th>
+                            <th>Data ordine</th>
+                            <th>Azioni</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ordine in ordini %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'sylvelius:dettagli_annuncio' ordine.annuncio.id %}">
+                                    {{ ordine.annuncio.titolo }}
+                                </a>
+                            </td>
+                            <td>
+                                {% if ordine.annuncio.immagine %}
+                                    <img src="{{ ordine.annuncio.immagine.url }}" alt="{{ ordine.annuncio.titolo }}" style="max-width: 60px; max-height: 60px;">
+                                {% else %}
+                                    <img src="{% static 'img/default_product.png' %}" alt="Immagine non disponibile" style="max-width: 60px; max-height: 60px;">
+                                {% endif %}
+                            </td>
+                            <td>{{ ordine.quantita }}</td>
+                            <td>{{ ordine.annuncio.prezzo }} €</td>
+                            <td>{{ ordine.totale }} €</td>
+                            <td>{{ ordine.stato|capfirst }}</td>
+                            <td>{{ ordine.data_ordine|date:"d/m/Y H:i" }}</td>
+                            <td>
+                                {% if ordine.stato != "completato" %}
+                                    <a {#href="{% url 'sylvelius:annulla_ordine' ordine.id %}"#} class="btn btn-danger btn-sm">Annulla</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <!-- Include della paginazione -->
+                {% include "sylvelius/_btn_paginazione.html" %}
+            {% else %}
+                <div class="alert alert-info">Non hai ancora effettuato ordini.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

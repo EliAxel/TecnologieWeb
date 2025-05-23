@@ -5,1050 +5,1200 @@
       "titolo": "Pallone da calcio",
       "descrizione": "Pallone ufficiale misura 5.",
       "prezzo": "19.99",
-      "data_pubblicazione": "2024-06-01T10:00:00Z"
+      "data_pubblicazione": "2024-06-01T10:00:00Z",
+      "immagine": "/annunci/immagini/pallone.jpg"
     },
     {
       "id": 2,
       "titolo": "Scarpe da corsa",
       "descrizione": "Scarpe leggere e traspiranti.",
       "prezzo": "59.90",
-      "data_pubblicazione": "2024-06-02T11:00:00Z"
+      "data_pubblicazione": "2024-06-02T11:00:00Z",
+      "immagine": "/annunci/immagini/scarpe_da_corsa.jpg"
     },
     {
       "id": 3,
       "titolo": "Bicicletta da montagna",
       "descrizione": "Bicicletta con telaio in alluminio e 21 velocità.",
       "prezzo": "299.99",
-      "data_pubblicazione": "2024-06-03T12:00:00Z"
+      "data_pubblicazione": "2024-06-03T12:00:00Z",
+      "immagine": "/annunci/immagini/bicicletta_da_montagna.jpg"
     },
     {
       "id": 4,
       "titolo": "Racchetta da tennis",
       "descrizione": "Racchetta leggera per principianti.",
       "prezzo": "49.50",
-      "data_pubblicazione": "2024-06-04T13:00:00Z"
+      "data_pubblicazione": "2024-06-04T13:00:00Z",
+      "immagine": null
     },
     {
       "id": 5,
       "titolo": "Tappetino yoga",
       "descrizione": "Tappetino antiscivolo, ideale per yoga e pilates.",
       "prezzo": "25.00",
-      "data_pubblicazione": "2024-06-05T14:00:00Z"
+      "data_pubblicazione": "2024-06-05T14:00:00Z",
+      "immagine": null
     },
     {
       "id": 6,
       "titolo": "Set di pesi",
       "descrizione": "Set di pesi regolabili da 5 a 20 kg.",
       "prezzo": "89.99",
-      "data_pubblicazione": "2024-06-06T15:00:00Z"
+      "data_pubblicazione": "2024-06-06T15:00:00Z",
+      "immagine": null
     },
     {
       "id": 7,
       "titolo": "Casco da bici",
       "descrizione": "Casco leggero e sicuro per ciclisti.",
       "prezzo": "34.99",
-      "data_pubblicazione": "2024-06-07T16:00:00Z"
+      "data_pubblicazione": "2024-06-07T16:00:00Z",
+      "immagine": null
     },
     {
       "id": 8,
       "titolo": "Guanti da boxe",
       "descrizione": "Guanti professionali per allenamento.",
       "prezzo": "45.00",
-      "data_pubblicazione": "2024-06-08T17:00:00Z"
+      "data_pubblicazione": "2024-06-08T17:00:00Z",
+      "immagine": null
     },
     {
       "id": 9,
       "titolo": "Corda per saltare",
       "descrizione": "Corda regolabile per allenamento cardio.",
       "prezzo": "12.50",
-      "data_pubblicazione": "2024-06-09T18:00:00Z"
+      "data_pubblicazione": "2024-06-09T18:00:00Z",
+      "immagine": null
     },
     {
       "id": 10,
       "titolo": "Zaino da trekking",
       "descrizione": "Zaino ergonomico 30L per escursioni.",
       "prezzo": "49.99",
-      "data_pubblicazione": "2024-06-10T19:00:00Z"
+      "data_pubblicazione": "2024-06-10T19:00:00Z",
+      "immagine": null
     },
     {
       "id": 11,
       "titolo": "Occhialini da nuoto",
       "descrizione": "Occhialini antiappannamento per piscina.",
       "prezzo": "15.99",
-      "data_pubblicazione": "2024-06-11T20:00:00Z"
+      "data_pubblicazione": "2024-06-11T20:00:00Z",
+      "immagine": null
     },
     {
       "id": 12,
       "titolo": "Borraccia termica",
       "descrizione": "Borraccia da 750ml che mantiene la temperatura.",
       "prezzo": "18.50",
-      "data_pubblicazione": "2024-06-12T21:00:00Z"
+      "data_pubblicazione": "2024-06-12T21:00:00Z",
+      "immagine": null
     },
     {
       "id": 13,
       "titolo": "Tappeto elastico",
       "descrizione": "Mini trampolino per allenamento domestico.",
       "prezzo": "79.99",
-      "data_pubblicazione": "2024-06-13T22:00:00Z"
+      "data_pubblicazione": "2024-06-13T22:00:00Z",
+      "immagine": null
     },
     {
       "id": 14,
       "titolo": "Palla medica",
       "descrizione": "Palla da 5kg per esercizi funzionali.",
       "prezzo": "29.99",
-      "data_pubblicazione": "2024-06-14T23:00:00Z"
+      "data_pubblicazione": "2024-06-14T23:00:00Z",
+      "immagine": null
     },
     {
       "id": 15,
       "titolo": "Bande elastiche",
       "descrizione": "Set di 5 bande con diversi livelli di resistenza.",
       "prezzo": "22.99",
-      "data_pubblicazione": "2024-06-15T10:00:00Z"
+      "data_pubblicazione": "2024-06-15T10:00:00Z",
+      "immagine": null
     },
     {
       "id": 16,
       "titolo": "Smartwatch sportivo",
       "descrizione": "Smartwatch con GPS e monitoraggio attività.",
       "prezzo": "129.99",
-      "data_pubblicazione": "2024-06-16T11:00:00Z"
+      "data_pubblicazione": "2024-06-16T11:00:00Z",
+      "immagine": null
     },
     {
       "id": 17,
       "titolo": "Pattini in linea",
       "descrizione": "Pattini regolabili per adulti e ragazzi.",
       "prezzo": "89.99",
-      "data_pubblicazione": "2024-06-17T12:00:00Z"
+      "data_pubblicazione": "2024-06-17T12:00:00Z",
+      "immagine": null
     },
     {
       "id": 18,
       "titolo": "Giubbotto zavorrato",
       "descrizione": "Giubbotto regolabile fino a 20kg.",
       "prezzo": "59.99",
-      "data_pubblicazione": "2024-06-18T13:00:00Z"
+      "data_pubblicazione": "2024-06-18T13:00:00Z",
+      "immagine": null
     },
     {
       "id": 19,
       "titolo": "Bastoni da trekking",
       "descrizione": "Bastoni telescopici in alluminio.",
       "prezzo": "39.99",
-      "data_pubblicazione": "2024-06-19T14:00:00Z"
+      "data_pubblicazione": "2024-06-19T14:00:00Z",
+      "immagine": null
     },
     {
       "id": 20,
       "titolo": "Sacco da boxe",
       "descrizione": "Sacco da boxe da appendere, 50kg.",
       "prezzo": "69.99",
-      "data_pubblicazione": "2024-06-20T15:00:00Z"
+      "data_pubblicazione": "2024-06-20T15:00:00Z",
+      "immagine": null
     },
     {
       "id": 21,
       "titolo": "Fascia per capelli sportiva",
       "descrizione": "Fascia assorbente per allenamenti intensi.",
       "prezzo": "8.99",
-      "data_pubblicazione": "2024-06-21T16:00:00Z"
+      "data_pubblicazione": "2024-06-21T16:00:00Z",
+      "immagine": null
     },
     {
       "id": 22,
       "titolo": "Pedometro digitale",
       "descrizione": "Contapassi preciso con display LCD.",
       "prezzo": "14.99",
-      "data_pubblicazione": "2024-06-22T17:00:00Z"
+      "data_pubblicazione": "2024-06-22T17:00:00Z",
+      "immagine": null
     },
     {
       "id": 23,
       "titolo": "Tappeto per addominali",
       "descrizione": "Tappeto spesso per esercizi a terra.",
       "prezzo": "19.99",
-      "data_pubblicazione": "2024-06-23T18:00:00Z"
+      "data_pubblicazione": "2024-06-23T18:00:00Z",
+      "immagine": null
     },
     {
       "id": 24,
       "titolo": "Disco volante",
       "descrizione": "Disco per giochi all'aperto.",
       "prezzo": "9.99",
-      "data_pubblicazione": "2024-06-24T19:00:00Z"
+      "data_pubblicazione": "2024-06-24T19:00:00Z",
+      "immagine": null
     },
     {
       "id": 25,
       "titolo": "Set badminton",
       "descrizione": "Racchette e volano per giocare a badminton.",
       "prezzo": "24.99",
-      "data_pubblicazione": "2024-06-25T20:00:00Z"
+      "data_pubblicazione": "2024-06-25T20:00:00Z",
+      "immagine": null
     },
     {
       "id": 26,
       "titolo": "Palla da basket",
       "descrizione": "Palla da basket ufficiale misura 7.",
       "prezzo": "29.99",
-      "data_pubblicazione": "2024-06-26T21:00:00Z"
+      "data_pubblicazione": "2024-06-26T21:00:00Z",
+      "immagine": null
     },
     {
       "id": 27,
       "titolo": "Palla da pallavolo",
       "descrizione": "Palla ufficiale per pallavolo.",
       "prezzo": "27.50",
-      "data_pubblicazione": "2024-06-27T22:00:00Z"
+      "data_pubblicazione": "2024-06-27T22:00:00Z",
+      "immagine": null
     },
     {
       "id": 28,
       "titolo": "Borsa sportiva",
       "descrizione": "Borsa capiente per attrezzatura sportiva.",
       "prezzo": "34.99",
-      "data_pubblicazione": "2024-06-28T23:00:00Z"
+      "data_pubblicazione": "2024-06-28T23:00:00Z",
+      "immagine": null
     },
     {
       "id": 29,
       "titolo": "Tappeto da palestra",
       "descrizione": "Tappeto antiscivolo per esercizi.",
       "prezzo": "42.99",
-      "data_pubblicazione": "2024-06-29T10:00:00Z"
+      "data_pubblicazione": "2024-06-29T10:00:00Z",
+      "immagine": null
     },
     {
       "id": 30,
       "titolo": "Panca pieghevole",
       "descrizione": "Panca regolabile per allenamento a casa.",
       "prezzo": "79.99",
-      "data_pubblicazione": "2024-06-30T11:00:00Z"
+      "data_pubblicazione": "2024-06-30T11:00:00Z",
+      "immagine": null
     },
     {
       "id": 31,
       "titolo": "Set golf per principianti",
       "descrizione": "Mazze e palline per iniziare a giocare a golf.",
       "prezzo": "99.99",
-      "data_pubblicazione": "2024-07-01T12:00:00Z"
+      "data_pubblicazione": "2024-07-01T12:00:00Z",
+      "immagine": null
     },
     {
       "id": 32,
       "titolo": "Roller per schiena",
       "descrizione": "Massaggiatore per rilassare i muscoli.",
       "prezzo": "19.99",
-      "data_pubblicazione": "2024-07-02T13:00:00Z"
+      "data_pubblicazione": "2024-07-02T13:00:00Z",
+      "immagine": null
     },
     {
       "id": 33,
       "titolo": "Bilancia pesapersone",
       "descrizione": "Bilancia digitale precisa fino a 180kg.",
       "prezzo": "24.99",
-      "data_pubblicazione": "2024-07-03T14:00:00Z"
+      "data_pubblicazione": "2024-07-03T14:00:00Z",
+      "immagine": null
     },
     {
       "id": 34,
       "titolo": "Set ping pong",
       "descrizione": "Racchette, palline e rete per ping pong.",
       "prezzo": "39.99",
-      "data_pubblicazione": "2024-07-04T15:00:00Z"
+      "data_pubblicazione": "2024-07-04T15:00:00Z",
+      "immagine": null
     },
     {
       "id": 35,
       "titolo": "Palla da rugby",
       "descrizione": "Palla ufficiale per partite di rugby.",
       "prezzo": "34.99",
-      "data_pubblicazione": "2024-07-05T16:00:00Z"
+      "data_pubblicazione": "2024-07-05T16:00:00Z",
+      "immagine": null
     },
     {
       "id": 36,
       "titolo": "Bicicletta stazionaria",
       "descrizione": "Bicicletta per allenamento indoor.",
       "prezzo": "199.99",
-      "data_pubblicazione": "2024-07-06T17:00:00Z"
+      "data_pubblicazione": "2024-07-06T17:00:00Z",
+      "immagine": null
     },
     {
       "id": 37,
       "titolo": "Tapis roulant pieghevole",
       "descrizione": "Tapis roulant compatto per casa.",
       "prezzo": "349.99",
-      "data_pubblicazione": "2024-07-07T18:00:00Z"
+      "data_pubblicazione": "2024-07-07T18:00:00Z",
+      "immagine": null
     },
     {
       "id": 38,
       "titolo": "Ellittica domestica",
       "descrizione": "Attrezzo per allenamento cardio completo.",
       "prezzo": "279.99",
-      "data_pubblicazione": "2024-07-08T19:00:00Z"
+      "data_pubblicazione": "2024-07-08T19:00:00Z",
+      "immagine": null
     },
     {
       "id": 39,
       "titolo": "Palla da pilates",
       "descrizione": "Palla grande per esercizi di equilibrio.",
       "prezzo": "22.99",
-      "data_pubblicazione": "2024-07-09T20:00:00Z"
+      "data_pubblicazione": "2024-07-09T20:00:00Z",
+      "immagine": null
     },
     {
       "id": 40,
       "titolo": "Set hockey su prato",
       "descrizione": "Mazze e pallina per hockey su prato.",
       "prezzo": "49.99",
-      "data_pubblicazione": "2024-07-10T21:00:00Z"
+      "data_pubblicazione": "2024-07-10T21:00:00Z",
+      "immagine": null
     },
     {
       "id": 41,
       "titolo": "Gilet termico",
       "descrizione": "Gilet per correre con temperature fredde.",
       "prezzo": "39.99",
-      "data_pubblicazione": "2024-07-11T22:00:00Z"
+      "data_pubblicazione": "2024-07-11T22:00:00Z",
+      "immagine": null
     },
     {
       "id": 42,
       "titolo": "Pantaloni da running",
       "descrizione": "Pantaloni traspiranti per correre.",
       "prezzo": "29.99",
-      "data_pubblicazione": "2024-07-12T23:00:00Z"
+      "data_pubblicazione": "2024-07-12T23:00:00Z",
+      "immagine": null
     },
     {
       "id": 43,
       "titolo": "Maglia termica",
       "descrizione": "Maglia a maniche lunghe per sport invernali.",
       "prezzo": "24.99",
-      "data_pubblicazione": "2024-07-13T10:00:00Z"
+      "data_pubblicazione": "2024-07-13T10:00:00Z",
+      "immagine": null
     },
     {
       "id": 44,
       "titolo": "Calze tecniche running",
       "descrizione": "Calze con supporto per arco plantare.",
       "prezzo": "12.99",
-      "data_pubblicazione": "2024-07-14T11:00:00Z"
+      "data_pubblicazione": "2024-07-14T11:00:00Z",
+      "immagine": null
     },
     {
       "id": 45,
       "titolo": "Braccialetto fitness",
       "descrizione": "Braccialetto che monitora passi e calorie.",
       "prezzo": "19.99",
-      "data_pubblicazione": "2024-07-15T12:00:00Z"
+      "data_pubblicazione": "2024-07-15T12:00:00Z",
+      "immagine": null
     },
     {
       "id": 46,
       "titolo": "Bilancino da cucina",
       "descrizione": "Bilancia digitale per alimenti.",
       "prezzo": "14.99",
-      "data_pubblicazione": "2024-07-16T13:00:00Z"
+      "data_pubblicazione": "2024-07-16T13:00:00Z",
+      "immagine": null
     },
     {
       "id": 47,
       "titolo": "Frullatore sportivo",
       "descrizione": "Frullatore portatile per proteine.",
       "prezzo": "29.99",
-      "data_pubblicazione": "2024-07-17T14:00:00Z"
+      "data_pubblicazione": "2024-07-17T14:00:00Z",
+      "immagine": null
     },
     {
       "id": 48,
       "titolo": "Shaker proteico",
       "descrizione": "Shaker con misurino incluso.",
       "prezzo": "9.99",
-      "data_pubblicazione": "2024-07-18T15:00:00Z"
+      "data_pubblicazione": "2024-07-18T15:00:00Z",
+      "immagine": null
     },
     {
       "id": 49,
       "titolo": "Cintura per idratazione",
       "descrizione": "Cintura con borracce per running.",
       "prezzo": "24.99",
-      "data_pubblicazione": "2024-07-19T16:00:00Z"
+      "data_pubblicazione": "2024-07-19T16:00:00Z",
+      "immagine": null
     },
     {
       "id": 50,
       "titolo": "Orologio impermeabile",
       "descrizione": "Orologio sportivo resistente all'acqua.",
       "prezzo": "34.99",
-      "data_pubblicazione": "2024-07-20T17:00:00Z"
+      "data_pubblicazione": "2024-07-20T17:00:00Z",
+      "immagine": null
     },
     {
       "id": 51,
       "titolo": "Borsa termica",
       "descrizione": "Borsa per mantenere fredde bevande.",
       "prezzo": "19.99",
-      "data_pubblicazione": "2024-07-21T18:00:00Z"
+      "data_pubblicazione": "2024-07-21T18:00:00Z",
+      "immagine": null
     },
     {
       "id": 52,
       "titolo": "Cuffie sportive",
       "descrizione": "Cuffie wireless resistenti al sudore.",
       "prezzo": "59.99",
-      "data_pubblicazione": "2024-07-22T19:00:00Z"
+      "data_pubblicazione": "2024-07-22T19:00:00Z",
+      "immagine": null
     },
     {
       "id": 53,
       "titolo": "Fascia braccio per smartphone",
       "descrizione": "Fascia per correre con lo smartphone.",
       "prezzo": "12.99",
-      "data_pubblicazione": "2024-07-23T20:00:00Z"
+      "data_pubblicazione": "2024-07-23T20:00:00Z",
+      "immagine": null
     },
     {
       "id": 54,
       "titolo": "Borsa per scarpe",
       "descrizione": "Borsa impermeabile per scarpe sportive.",
       "prezzo": "14.99",
-      "data_pubblicazione": "2024-07-24T21:00:00Z"
+      "data_pubblicazione": "2024-07-24T21:00:00Z",
+      "immagine": null
     },
     {
       "id": 55,
       "titolo": "Porta bicicletta",
       "descrizione": "Supporto per appendere la bicicletta.",
       "prezzo": "24.99",
-      "data_pubblicazione": "2024-07-25T22:00:00Z"
+      "data_pubblicazione": "2024-07-25T22:00:00Z",
+      "immagine": null
     },
     {
       "id": 56,
       "titolo": "Lucchetto per bici",
       "descrizione": "Lucchetto a combinazione resistente.",
       "prezzo": "19.99",
-      "data_pubblicazione": "2024-07-26T23:00:00Z"
+      "data_pubblicazione": "2024-07-26T23:00:00Z",
+      "immagine": null
     },
     {
       "id": 57,
       "titolo": "Pompa per bici",
       "descrizione": "Pompa portatile per gonfiare le gomme.",
       "prezzo": "15.99",
-      "data_pubblicazione": "2024-07-27T10:00:00Z"
+      "data_pubblicazione": "2024-07-27T10:00:00Z",
+      "immagine": null
     },
     {
       "id": 58,
       "titolo": "Kit riparazione bici",
       "descrizione": "Kit con tutto il necessario per riparazioni.",
       "prezzo": "12.99",
-      "data_pubblicazione": "2024-07-28T11:00:00Z"
+      "data_pubblicazione": "2024-07-28T11:00:00Z",
+      "immagine": null
     },
     {
       "id": 59,
       "titolo": "Fan portatile",
       "descrizione": "Ventilatore per allenamenti estivi.",
       "prezzo": "14.99",
-      "data_pubblicazione": "2024-07-29T12:00:00Z"
+      "data_pubblicazione": "2024-07-29T12:00:00Z",
+      "immagine": null
     },
     {
       "id": 60,
       "titolo": "Termos portatile",
       "descrizione": "Termos per mantenere bevande calde/fredde.",
       "prezzo": "22.99",
-      "data_pubblicazione": "2024-07-30T13:00:00Z"
+      "data_pubblicazione": "2024-07-30T13:00:00Z",
+      "immagine": null
     },
     {
       "id": 61,
       "titolo": "Bilancia da cucina",
       "descrizione": "Bilancia digitale per alimenti.",
       "prezzo": "16.99",
-      "data_pubblicazione": "2024-07-31T14:00:00Z"
+      "data_pubblicazione": "2024-07-31T14:00:00Z",
+      "immagine": null
     },
     {
       "id": 62,
       "titolo": "Set per smoothie",
       "descrizione": "Frullatore e tazze per smoothie.",
       "prezzo": "34.99",
-      "data_pubblicazione": "2024-08-01T15:00:00Z"
+      "data_pubblicazione": "2024-08-01T15:00:00Z",
+      "immagine": null
     },
     {
       "id": 63,
       "titolo": "Borsa frigo",
       "descrizione": "Borsa termica per picnic e sport.",
       "prezzo": "19.99",
-      "data_pubblicazione": "2024-08-02T16:00:00Z"
+      "data_pubblicazione": "2024-08-02T16:00:00Z",
+      "immagine": null
     },
     {
       "id": 64,
       "titolo": "Porta borraccia",
       "descrizione": "Supporto per borraccia su bici.",
       "prezzo": "9.99",
-      "data_pubblicazione": "2024-08-03T17:00:00Z"
+      "data_pubblicazione": "2024-08-03T17:00:00Z",
+      "immagine": null
     },
     {
       "id": 65,
       "titolo": "Tenda da campeggio",
       "descrizione": "Tenda 2 posti per escursioni.",
       "prezzo": "59.99",
-      "data_pubblicazione": "2024-08-04T18:00:00Z"
+      "data_pubblicazione": "2024-08-04T18:00:00Z",
+      "immagine": null
     },
     {
       "id": 66,
       "titolo": "Sacco a pelo",
       "descrizione": "Sacco a pelo per temperature fino a 10°C.",
       "prezzo": "39.99",
-      "data_pubblicazione": "2024-08-05T19:00:00Z"
+      "data_pubblicazione": "2024-08-05T19:00:00Z",
+      "immagine": null
     },
     {
       "id": 67,
       "titolo": "Lanterna frontale",
       "descrizione": "Lanterna per escursioni notturne.",
       "prezzo": "19.99",
-      "data_pubblicazione": "2024-08-06T20:00:00Z"
+      "data_pubblicazione": "2024-08-06T20:00:00Z",
+      "immagine": null
     },
     {
       "id": 68,
       "titolo": "Coltello multiuso",
       "descrizione": "Coltello svizzero con 12 funzioni.",
       "prezzo": "29.99",
-      "data_pubblicazione": "2024-08-07T21:00:00Z"
+      "data_pubblicazione": "2024-08-07T21:00:00Z",
+      "immagine": null
     },
     {
       "id": 69,
       "titolo": "Materassino gonfiabile",
       "descrizione": "Materassino per campeggio.",
       "prezzo": "24.99",
-      "data_pubblicazione": "2024-08-08T22:00:00Z"
+      "data_pubblicazione": "2024-08-08T22:00:00Z",
+      "immagine": null
     },
     {
       "id": 70,
       "titolo": "Bussola digitale",
       "descrizione": "Bussola con altimetro e barometro.",
       "prezzo": "34.99",
-      "data_pubblicazione": "2024-08-09T23:00:00Z"
+      "data_pubblicazione": "2024-08-09T23:00:00Z",
+      "immagine": null
     },
     {
       "id": 71,
       "titolo": "Zaino idrico",
       "descrizione": "Zaino con sacca per acqua da 2L.",
       "prezzo": "44.99",
-      "data_pubblicazione": "2024-08-10T10:00:00Z"
+      "data_pubblicazione": "2024-08-10T10:00:00Z",
+      "immagine": null
     },
     {
       "id": 72,
       "titolo": "Scarponi da trekking",
       "descrizione": "Scarponi impermeabili per montagna.",
       "prezzo": "89.99",
-      "data_pubblicazione": "2024-08-11T11:00:00Z"
+      "data_pubblicazione": "2024-08-11T11:00:00Z",
+      "immagine": null
     },
     {
       "id": 73,
       "titolo": "Giacca antivento",
       "descrizione": "Giacca leggera e impermeabile.",
       "prezzo": "49.99",
-      "data_pubblicazione": "2024-08-12T12:00:00Z"
+      "data_pubblicazione": "2024-08-12T12:00:00Z",
+      "immagine": null
     },
     {
       "id": 74,
       "titolo": "Pantaloni da trekking",
       "descrizione": "Pantaloni resistenti e traspiranti.",
       "prezzo": "39.99",
-      "data_pubblicazione": "2024-08-13T13:00:00Z"
+      "data_pubblicazione": "2024-08-13T13:00:00Z",
+      "immagine": null
     },
     {
       "id": 75,
       "titolo": "Cappello da sole",
       "descrizione": "Cappello con protezione UV.",
       "prezzo": "14.99",
-      "data_pubblicazione": "2024-08-14T14:00:00Z"
+      "data_pubblicazione": "2024-08-14T14:00:00Z",
+      "immagine": null
     },
     {
       "id": 76,
       "titolo": "Occhiali da sole sportivi",
       "descrizione": "Occhiali con lenti polarizzate.",
       "prezzo": "29.99",
-      "data_pubblicazione": "2024-08-15T15:00:00Z"
+      "data_pubblicazione": "2024-08-15T15:00:00Z",
+      "immagine": null
     },
     {
       "id": 77,
       "titolo": "Crema solare sportiva",
       "descrizione": "Crema resistente all'acqua SPF 50.",
       "prezzo": "12.99",
-      "data_pubblicazione": "2024-08-16T16:00:00Z"
+      "data_pubblicazione": "2024-08-16T16:00:00Z",
+      "immagine": null
     },
     {
       "id": 78,
       "titolo": "Repellente per insetti",
       "descrizione": "Spray repellente per escursioni.",
       "prezzo": "9.99",
-      "data_pubblicazione": "2024-08-17T17:00:00Z"
+      "data_pubblicazione": "2024-08-17T17:00:00Z",
+      "immagine": null
     },
     {
       "id": 79,
       "titolo": "Kit pronto soccorso",
       "descrizione": "Kit base per escursioni.",
       "prezzo": "19.99",
-      "data_pubblicazione": "2024-08-18T18:00:00Z"
+      "data_pubblicazione": "2024-08-18T18:00:00Z",
+      "immagine": null
     },
     {
       "id": 80,
       "titolo": "Mappa escursionistica",
       "descrizione": "Mappa dettagliata per sentieri.",
       "prezzo": "7.99",
-      "data_pubblicazione": "2024-08-19T19:00:00Z"
+      "data_pubblicazione": "2024-08-19T19:00:00Z",
+      "immagine": null
     },
     {
       "id": 81,
       "titolo": "Binocolo compatto",
       "descrizione": "Binocolo 8x21 per osservazioni.",
       "prezzo": "39.99",
-      "data_pubblicazione": "2024-08-20T20:00:00Z"
+      "data_pubblicazione": "2024-08-20T20:00:00Z",
+      "immagine": null
     },
     {
       "id": 82,
       "titolo": "Caricatore solare",
       "descrizione": "Caricatore portatile a energia solare.",
       "prezzo": "49.99",
-      "data_pubblicazione": "2024-08-21T21:00:00Z"
+      "data_pubblicazione": "2024-08-21T21:00:00Z",
+      "immagine": null
     },
     {
       "id": 83,
       "titolo": "Power bank",
       "descrizione": "Batteria portatile da 10000mAh.",
       "prezzo": "24.99",
-      "data_pubblicazione": "2024-08-22T22:00:00Z"
+      "data_pubblicazione": "2024-08-22T22:00:00Z",
+      "immagine": null
     },
     {
       "id": 84,
       "titolo": "Cavo universale",
       "descrizione": "Cavo per ricaricare dispositivi.",
       "prezzo": "9.99",
-      "data_pubblicazione": "2024-08-23T23:00:00Z"
+      "data_pubblicazione": "2024-08-23T23:00:00Z",
+      "immagine": null
     },
     {
       "id": 85,
       "titolo": "Adattatore universale",
       "descrizione": "Adattatore per viaggi all'estero.",
       "prezzo": "19.99",
-      "data_pubblicazione": "2024-08-24T10:00:00Z"
+      "data_pubblicazione": "2024-08-24T10:00:00Z",
+      "immagine": null
     },
     {
       "id": 86,
       "titolo": "Cuscino da viaggio",
       "descrizione": "Cuscino gonfiabile per viaggi.",
       "prezzo": "14.99",
-      "data_pubblicazione": "2024-08-25T11:00:00Z"
+      "data_pubblicazione": "2024-08-25T11:00:00Z",
+      "immagine": null
     },
     {
       "id": 87,
       "titolo": "Tappi per le orecchie",
       "descrizione": "Tappi in silicone per dormire.",
       "prezzo": "4.99",
-      "data_pubblicazione": "2024-08-26T12:00:00Z"
+      "data_pubblicazione": "2024-08-26T12:00:00Z",
+      "immagine": null
     },
     {
       "id": 88,
       "titolo": "Maschera per dormire",
       "descrizione": "Maschera per riposare al buio.",
       "prezzo": "7.99",
-      "data_pubblicazione": "2024-08-27T13:00:00Z"
+      "data_pubblicazione": "2024-08-27T13:00:00Z",
+      "immagine": null
     },
     {
       "id": 89,
       "titolo": "Telo termico",
       "descrizione": "Telo di emergenza per escursioni.",
       "prezzo": "5.99",
-      "data_pubblicazione": "2024-08-28T14:00:00Z"
+      "data_pubblicazione": "2024-08-28T14:00:00Z",
+      "immagine": null
     },
     {
       "id": 90,
       "titolo": "Sega pieghevole",
       "descrizione": "Sega compatta per escursionisti.",
       "prezzo": "19.99",
-      "data_pubblicazione": "2024-08-29T15:00:00Z"
+      "data_pubblicazione": "2024-08-29T15:00:00Z",
+      "immagine": null
     },
     {
       "id": 91,
       "titolo": "Acciarino",
       "descrizione": "Acciarino per accendere fuochi.",
       "prezzo": "8.99",
-      "data_pubblicazione": "2024-08-30T16:00:00Z"
+      "data_pubblicazione": "2024-08-30T16:00:00Z",
+      "immagine": null
     },
     {
       "id": 92,
       "titolo": "Torcia frontale",
       "descrizione": "Torcia LED per mani libere.",
       "prezzo": "14.99",
-      "data_pubblicazione": "2024-08-31T17:00:00Z"
+      "data_pubblicazione": "2024-08-31T17:00:00Z",
+      "immagine": null
     },
     {
       "id": 93,
       "titolo": "Borraccia filtrante",
       "descrizione": "Borraccia con filtro integrato.",
       "prezzo": "29.99",
-      "data_pubblicazione": "2024-09-01T18:00:00Z"
+      "data_pubblicazione": "2024-09-01T18:00:00Z",
+      "immagine": null
     },
     {
       "id": 94,
       "titolo": "Set posate da viaggio",
       "descrizione": "Posate pieghevoli in acciaio.",
       "prezzo": "12.99",
-      "data_pubblicazione": "2024-09-02T19:00:00Z"
+      "data_pubblicazione": "2024-09-02T19:00:00Z",
+      "immagine": null
     },
     {
       "id": 95,
       "titolo": "Tavolino pieghevole",
       "descrizione": "Tavolino leggero per campeggio.",
       "prezzo": "24.99",
-      "data_pubblicazione": "2024-09-03T20:00:00Z"
+      "data_pubblicazione": "2024-09-03T20:00:00Z",
+      "immagine": null
     },
     {
       "id": 96,
       "titolo": "Sedia pieghevole",
       "descrizione": "Sedia compatta per escursioni.",
       "prezzo": "19.99",
-      "data_pubblicazione": "2024-09-04T21:00:00Z"
+      "data_pubblicazione": "2024-09-04T21:00:00Z",
+      "immagine": null
     },
     {
       "id": 97,
       "titolo": "Ammaccatrice per tende",
       "descrizione": "Set di picchetti per tende.",
       "prezzo": "9.99",
-      "data_pubblicazione": "2024-09-05T22:00:00Z"
+      "data_pubblicazione": "2024-09-05T22:00:00Z",
+      "immagine": null
     },
     {
       "id": 98,
       "titolo": "Corda paracord",
       "descrizione": "Corda resistente per sopravvivenza.",
       "prezzo": "12.99",
-      "data_pubblicazione": "2024-09-06T23:00:00Z"
+      "data_pubblicazione": "2024-09-06T23:00:00Z",
+      "immagine": null
     },
     {
       "id": 99,
       "titolo": "Bussola analogica",
       "descrizione": "Bussola classica per orientamento.",
       "prezzo": "9.99",
-      "data_pubblicazione": "2024-09-07T10:00:00Z"
+      "data_pubblicazione": "2024-09-07T10:00:00Z",
+      "immagine": null
     },
     {
       "id": 100,
       "titolo": "Machete da campeggio",
       "descrizione": "Machete con fodero in nylon.",
       "prezzo": "29.99",
-      "data_pubblicazione": "2024-09-08T11:00:00Z"
+      "data_pubblicazione": "2024-09-08T11:00:00Z",
+      "immagine": null
     },
     {
       "id": 101,
       "titolo": "Pala pieghevole",
       "descrizione": "Pala compatta per escursionisti.",
       "prezzo": "19.99",
-      "data_pubblicazione": "2024-09-09T12:00:00Z"
+      "data_pubblicazione": "2024-09-09T12:00:00Z",
+      "immagine": null
     },
     {
       "id": 102,
       "titolo": "Fischietto di emergenza",
       "descrizione": "Fischietto per segnalazioni.",
       "prezzo": "4.99",
-      "data_pubblicazione": "2024-09-10T13:00:00Z"
+      "data_pubblicazione": "2024-09-10T13:00:00Z",
+      "immagine": null
     },
     {
       "id": 103,
       "titolo": "Specchio segnalatore",
       "descrizione": "Specchio per segnalazioni di soccorso.",
       "prezzo": "7.99",
-      "data_pubblicazione": "2024-09-11T14:00:00Z"
+      "data_pubblicazione": "2024-09-11T14:00:00Z",
+      "immagine": null
     },
     {
       "id": 104,
       "titolo": "Kit pesca tascabile",
       "descrizione": "Kit di sopravvivenza per pesca.",
       "prezzo": "14.99",
-      "data_pubblicazione": "2024-09-12T15:00:00Z"
+      "data_pubblicazione": "2024-09-12T15:00:00Z",
+      "immagine": null
     },
     {
       "id": 105,
       "titolo": "Filtro per acqua",
       "descrizione": "Filtro portatile per purificare acqua.",
       "prezzo": "24.99",
-      "data_pubblicazione": "2024-09-13T16:00:00Z"
+      "data_pubblicazione": "2024-09-13T16:00:00Z",
+      "immagine": null
     },
     {
       "id": 106,
       "titolo": "Bollitore pieghevole",
       "descrizione": "Bollitore per campeggio.",
       "prezzo": "19.99",
-      "data_pubblicazione": "2024-09-14T17:00:00Z"
+      "data_pubblicazione": "2024-09-14T17:00:00Z",
+      "immagine": null
     },
     {
       "id": 107,
       "titolo": "Tazza termica",
       "descrizione": "Tazza che mantiene la temperatura.",
       "prezzo": "12.99",
-      "data_pubblicazione": "2024-09-15T18:00:00Z"
+      "data_pubblicazione": "2024-09-15T18:00:00Z",
+      "immagine": null
     },
     {
       "id": 108,
       "titolo": "Set cucina da campeggio",
       "descrizione": "Pentoline e padella per campeggio.",
       "prezzo": "29.99",
-      "data_pubblicazione": "2024-09-16T19:00:00Z"
+      "data_pubblicazione": "2024-09-16T19:00:00Z",
+      "immagine": null
     },
     {
       "id": 109,
       "titolo": "Forno portatile",
       "descrizione": "Forno a gas per campeggio.",
       "prezzo": "49.99",
-      "data_pubblicazione": "2024-09-17T20:00:00Z"
+      "data_pubblicazione": "2024-09-17T20:00:00Z",
+      "immagine": null
     },
     {
       "id": 110,
       "titolo": "Lampada a gas",
       "descrizione": "Lampada per illuminare il campo.",
       "prezzo": "34.99",
-      "data_pubblicazione": "2024-09-18T21:00:00Z"
+      "data_pubblicazione": "2024-09-18T21:00:00Z",
+      "immagine": null
     },
     {
       "id": 111,
       "titolo": "Rasoio multiuso",
       "descrizione": "Rasoio con lama per sopravvivenza.",
       "prezzo": "14.99",
-      "data_pubblicazione": "2024-09-19T22:00:00Z"
+      "data_pubblicazione": "2024-09-19T22:00:00Z",
+      "immagine": null
     },
     {
       "id": 112,
       "titolo": "Forbici multiuso",
       "descrizione": "Forbici robuste per vari usi.",
       "prezzo": "9.99",
-      "data_pubblicazione": "2024-09-20T23:00:00Z"
+      "data_pubblicazione": "2024-09-20T23:00:00Z",
+      "immagine": null
     },
     {
       "id": 113,
       "titolo": "Pinza multiuso",
       "descrizione": "Pinza per riparazioni e sopravvivenza.",
       "prezzo": "19.99",
-      "data_pubblicazione": "2024-09-21T10:00:00Z"
+      "data_pubblicazione": "2024-09-21T10:00:00Z",
+      "immagine": null
     },
     {
       "id": 114,
       "titolo": "Cacciavite multiuso",
       "descrizione": "Set di cacciaviti per riparazioni.",
       "prezzo": "12.99",
-      "data_pubblicazione": "2024-09-22T11:00:00Z"
+      "data_pubblicazione": "2024-09-22T11:00:00Z",
+      "immagine": null
     },
     {
       "id": 115,
       "titolo": "Nastro adesivo resistente",
       "descrizione": "Nastro per riparazioni di emergenza.",
       "prezzo": "7.99",
-      "data_pubblicazione": "2024-09-23T12:00:00Z"
+      "data_pubblicazione": "2024-09-23T12:00:00Z",
+      "immagine": null
     },
     {
       "id": 116,
       "titolo": "Corda elastica",
       "descrizione": "Corda per fissare carichi.",
       "prezzo": "9.99",
-      "data_pubblicazione": "2024-09-24T13:00:00Z"
+      "data_pubblicazione": "2024-09-24T13:00:00Z",
+      "immagine": null
     },
     {
       "id": 117,
       "titolo": "Gancio per carico",
       "descrizione": "Gancio resistente per zaino.",
       "prezzo": "4.99",
-      "data_pubblicazione": "2024-09-25T14:00:00Z"
+      "data_pubblicazione": "2024-09-25T14:00:00Z",
+      "immagine": null
     },
     {
       "id": 118,
       "titolo": "Porta documenti",
       "descrizione": "Porta documenti impermeabile.",
       "prezzo": "12.99",
-      "data_pubblicazione": "2024-09-26T15:00:00Z"
+      "data_pubblicazione": "2024-09-26T15:00:00Z",
+      "immagine": null
     },
     {
       "id": 119,
       "titolo": "Borsa stagna",
       "descrizione": "Borsa impermeabile per elettronica.",
       "prezzo": "14.99",
-      "data_pubblicazione": "2024-09-27T16:00:00Z"
+      "data_pubblicazione": "2024-09-27T16:00:00Z",
+      "immagine": null
     },
     {
       "id": 120,
       "titolo": "Custodia per smartphone",
       "descrizione": "Custodia resistente all'acqua.",
       "prezzo": "9.99",
-      "data_pubblicazione": "2024-09-28T17:00:00Z"
+      "data_pubblicazione": "2024-09-28T17:00:00Z",
+      "immagine": null
     },
     {
       "id": 121,
       "titolo": "Supporto per telefono",
       "descrizione": "Supporto per smartphone su bici.",
       "prezzo": "12.99",
-      "data_pubblicazione": "2024-09-29T18:00:00Z"
+      "data_pubblicazione": "2024-09-29T18:00:00Z",
+      "immagine": null
     },
     {
       "id": 122,
       "titolo": "Custodia per occhiali",
       "descrizione": "Custodia rigida per occhiali.",
       "prezzo": "7.99",
-      "data_pubblicazione": "2024-09-30T19:00:00Z"
+      "data_pubblicazione": "2024-09-30T19:00:00Z",
+      "immagine": null
     },
     {
       "id": 123,
       "titolo": "Portachiavi multiuso",
       "descrizione": "Portachiavi con strumenti incorporati.",
       "prezzo": "9.99",
-      "data_pubblicazione": "2024-10-01T20:00:00Z"
+      "data_pubblicazione": "2024-10-01T20:00:00Z",
+      "immagine": null
     },
     {
       "id": 124,
       "titolo": "Adesivi riflettenti",
       "descrizione": "Adesivi per aumentare la visibilità.",
       "prezzo": "4.99",
-      "data_pubblicazione": "2024-10-02T21:00:00Z"
+      "data_pubblicazione": "2024-10-02T21:00:00Z",
+      "immagine": null
     },
     {
       "id": 125,
       "titolo": "Faro per bici",
       "descrizione": "Faro LED per bicicletta.",
       "prezzo": "14.99",
-      "data_pubblicazione": "2024-10-03T22:00:00Z"
+      "data_pubblicazione": "2024-10-03T22:00:00Z",
+      "immagine": null
     },
     {
       "id": 126,
       "titolo": "Fanale posteriore bici",
       "descrizione": "Fanale LED per sicurezza.",
       "prezzo": "9.99",
-      "data_pubblicazione": "2024-10-04T23:00:00Z"
+      "data_pubblicazione": "2024-10-04T23:00:00Z",
+      "immagine": null
     },
     {
       "id": 127,
       "titolo": "Campanello per bici",
       "descrizione": "Campanello classico per bici.",
       "prezzo": "5.99",
-      "data_pubblicazione": "2024-10-05T10:00:00Z"
+      "data_pubblicazione": "2024-10-05T10:00:00Z",
+      "immagine": null
     },
     {
       "id": 128,
       "titolo": "Catena per bici",
       "descrizione": "Catena di ricambio per bici.",
       "prezzo": "12.99",
-      "data_pubblicazione": "2024-10-06T11:00:00Z"
+      "data_pubblicazione": "2024-10-06T11:00:00Z",
+      "immagine": null
     },
     {
       "id": 129,
       "titolo": "Copertura per sella",
       "descrizione": "Copertura impermeabile per sella.",
       "prezzo": "7.99",
-      "data_pubblicazione": "2024-10-07T12:00:00Z"
+      "data_pubblicazione": "2024-10-07T12:00:00Z",
+      "immagine": null
     },
     {
       "id": 130,
       "titolo": "Parafango per bici",
       "descrizione": "Parafango anteriore e posteriore.",
       "prezzo": "14.99",
-      "data_pubblicazione": "2024-10-08T13:00:00Z"
+      "data_pubblicazione": "2024-10-08T13:00:00Z",
+      "immagine": null
     },
     {
       "id": 131,
       "titolo": "Portapacchi posteriore",
       "descrizione": "Portapacchi per bici.",
       "prezzo": "19.99",
-      "data_pubblicazione": "2024-10-09T14:00:00Z"
+      "data_pubblicazione": "2024-10-09T14:00:00Z",
+      "immagine": null
     },
     {
       "id": 132,
       "titolo": "Borsa da manubrio",
       "descrizione": "Borsa per accessori su bici.",
       "prezzo": "12.99",
-      "data_pubblicazione": "2024-10-10T15:00:00Z"
+      "data_pubblicazione": "2024-10-10T15:00:00Z",
+      "immagine": null
     },
     {
       "id": 133,
       "titolo": "Pompa a pedale",
       "descrizione": "Pompa per gonfiare le gomme.",
       "prezzo": "24.99",
-      "data_pubblicazione": "2024-10-11T16:00:00Z"
+      "data_pubblicazione": "2024-10-11T16:00:00Z",
+      "immagine": null
     },
     {
       "id": 134,
       "titolo": "Manometro per pneumatici",
       "descrizione": "Misuratore di pressione gomme.",
       "prezzo": "9.99",
-      "data_pubblicazione": "2024-10-12T17:00:00Z"
+      "data_pubblicazione": "2024-10-12T17:00:00Z",
+      "immagine": null
     },
     {
       "id": 135,
       "titolo": "Kit toppe per gomme",
       "descrizione": "Kit per riparare forature.",
       "prezzo": "7.99",
-      "data_pubblicazione": "2024-10-13T18:00:00Z"
+      "data_pubblicazione": "2024-10-13T18:00:00Z",
+      "immagine": null
     },
     {
       "id": 136,
       "titolo": "Lubrificante per catena",
       "descrizione": "Lubrificante per catena bici.",
       "prezzo": "8.99",
-      "data_pubblicazione": "2024-10-14T19:00:00Z"
+      "data_pubblicazione": "2024-10-14T19:00:00Z",
+      "immagine": null
     },
     {
       "id": 137,
       "titolo": "Panno per pulizia bici",
       "descrizione": "Panno per pulire la bici.",
       "prezzo": "5.99",
-      "data_pubblicazione": "2024-10-15T20:00:00Z"
+      "data_pubblicazione": "2024-10-15T20:00:00Z",
+      "immagine": null
     },
     {
       "id": 138,
       "titolo": "Copertura per bici",
       "descrizione": "Copertura impermeabile per bici.",
       "prezzo": "19.99",
-      "data_pubblicazione": "2024-10-16T21:00:00Z"
+      "data_pubblicazione": "2024-10-16T21:00:00Z",
+      "immagine": null
     },
     {
       "id": 139,
       "titolo": "Supporto per bici da parete",
       "descrizione": "Supporto per appendere la bici.",
       "prezzo": "24.99",
-      "data_pubblicazione": "2024-10-17T22:00:00Z"
+      "data_pubblicazione": "2024-10-17T22:00:00Z",
+      "immagine": null
     },
     {
       "id": 140,
       "titolo": "Seggiolino per bici",
       "descrizione": "Seggiolino per bambini su bici.",
       "prezzo": "59.99",
-      "data_pubblicazione": "2024-10-18T23:00:00Z"
+      "data_pubblicazione": "2024-10-18T23:00:00Z",
+      "immagine": null
     },
     {
       "id": 141,
       "titolo": "Rimorchio per bici",
       "descrizione": "Rimorchio per trasporto merci.",
       "prezzo": "89.99",
-      "data_pubblicazione": "2024-10-19T10:00:00Z"
+      "data_pubblicazione": "2024-10-19T10:00:00Z",
+      "immagine": null
     },
     {
       "id": 142,
       "titolo": "Cestino per bici",
       "descrizione": "Cestino anteriore per bici.",
       "prezzo": "19.99",
-      "data_pubblicazione": "2024-10-20T11:00:00Z"
+      "data_pubblicazione": "2024-10-20T11:00:00Z",
+      "immagine": null
     },
     {
       "id": 143,
       "titolo": "Specchietto retrovisore",
       "descrizione": "Specchietto per sicurezza bici.",
       "prezzo": "9.99",
-      "data_pubblicazione": "2024-10-21T12:00:00Z"
+      "data_pubblicazione": "2024-10-21T12:00:00Z",
+      "immagine": null
     },
     {
       "id": 144,
       "titolo": "Porta bici da auto",
       "descrizione": "Porta bici per gancio traino.",
       "prezzo": "79.99",
-      "data_pubblicazione": "2024-10-22T13:00:00Z"
+      "data_pubblicazione": "2024-10-22T13:00:00Z",
+      "immagine": null
     },
     {
       "id": 145,
       "titolo": "Borsa da sella",
       "descrizione": "Borsa per accessori da sella.",
       "prezzo": "14.99",
-      "data_pubblicazione": "2024-10-23T14:00:00Z"
+      "data_pubblicazione": "2024-10-23T14:00:00Z",
+      "immagine": null
     },
     {
       "id": 146,
       "titolo": "Porta bici da balcone",
       "descrizione": "Supporto per bici su balcone.",
       "prezzo": "39.99",
-      "data_pubblicazione": "2024-10-24T15:00:00Z"
+      "data_pubblicazione": "2024-10-24T15:00:00Z",
+      "immagine": null
     },
     {
       "id": 147,
       "titolo": "Casco per bambini",
       "descrizione": "Casco sicuro per bambini.",
       "prezzo": "19.99",
-      "data_pubblicazione": "2024-10-25T16:00:00Z"
+      "data_pubblicazione": "2024-10-25T16:00:00Z",
+      "immagine": null
     },
     {
       "id": 148,
       "titolo": "Ginocchiere per bici",
       "descrizione": "Ginocchiere protettive.",
       "prezzo": "24.99",
-      "data_pubblicazione": "2024-10-26T17:00:00Z"
+      "data_pubblicazione": "2024-10-26T17:00:00Z",
+      "immagine": null
     },
     {
       "id": 149,
       "titolo": "Gomitiere per bici",
       "descrizione": "Gomitiere protettive.",
       "prezzo": "22.99",
-      "data_pubblicazione": "2024-10-27T18:00:00Z"
+      "data_pubblicazione": "2024-10-27T18:00:00Z",
+      "immagine": null
     },
     {
       "id": 150,
       "titolo": "Guanti per bici",
       "descrizione": "Guanti imbottiti per bici.",
       "prezzo": "19.99",
-      "data_pubblicazione": "2024-10-28T19:00:00Z"
+      "data_pubblicazione": "2024-10-28T19:00:00Z",
+      "immagine": null
     }
   ],
   "ordini": [

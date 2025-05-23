@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}{{user.username}}{% endblock %}
 {% block middle %}
 <div class="container mt-5 mb-5">
@@ -12,50 +13,63 @@
         </div>
     </div>
 
-    <!-- Sezione Inserzioni (Creazioni) -->
-    <div class="row justify-content-center mb-4">
-        <div class="col-md-8 text-center">
-            <h2>Le mie inserzioni</h2>
-            {% if creazioni %}
-                <div class="scrolling-wrapper d-flex flex-row overflow-auto py-2">
-                    {% for creazione in creazioni %}
-                        <div class="card mx-2" style="min-width: 18rem; max-width: 18rem;">
-                            {# Se hai immagini, puoi aggiungere qui: <img src="{{ creazione.annuncio.image_url }}" ... > #}
-                            <div class="card-body">
-                                <h5 class="card-title">{{ creazione.annuncio.titolo }}</h5>
-                                <p class="card-text">{{ creazione.annuncio.descrizione|truncatewords:15 }}</p>
-                                <p class="card-text">Prezzo: {{ creazione.annuncio.prezzo }} €</p>
-                                {#<a href="{% url 'sylvelius:annuncio_detail' creazione.annuncio.id %}" class="btn btn-primary">Dettagli</a>#}
-                            </div>
-                        </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <p>Non hai ancora inserzioni.</p>
-            {% endif %}
-        </div>
-    </div>
-
     <!-- Sezione Ordini -->
     <div class="row justify-content-center mb-4">
         <div class="col-md-8 text-center">
-            <h2>I miei ordini</h2>
+            <h2>
+                I miei ordini
+                <a href="{% url 'sylvelius:profile_ordini' %}" class="btn btn-link btn-sm" style="font-size: 1rem;">Vedi tutti</a>
+            </h2>
             {% if ordini %}
-                <div class="scrolling-wrapper d-flex flex-row overflow-auto py-2" style="margin-bottom: 8px;">
-                    {% for ordine in ordini %}
+                <div class="scrolling-wrapper d-flex flex-row overflow-auto py-2">
+                    {% for ordine in ordini|slice:5 %}
                         <div class="card mx-2" style="min-width: 18rem; max-width: 18rem;">
+                            {% if ordine.annuncio.immagine %}
+                                <img src="{{ ordine.annuncio.immagine.url }}" class="card-img-top" alt="{{ ordine.annuncio.titolo }}">
+                            {% else %}
+                                <img src="{% static 'img/default_product.png' %}" class="card-img-top" alt="Immagine non disponibile">
+                            {% endif %}
                             <div class="card-body">
                                 <h5 class="card-text">{{ ordine.annuncio.titolo }}</h5>
                                 <p class="card-text">Quantità: {{ ordine.quantita }}</p>
                                 <p class="card-text">{{ ordine.data_ordine|date:"d/m/Y" }}</p>
                                 <p class="card-text">Totale: {{ ordine.totale }} €</p>
-                                {#<a href="{% url 'sylvelius:ordine_detail' ordine.id %}" class="btn btn-secondary">Dettagli</a>#}
                             </div>
                         </div>
                     {% endfor %}
                 </div>
             {% else %}
                 <p>Non hai ancora effettuato ordini.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Sezione Inserzioni (Creazioni) -->
+    <div class="row justify-content-center mb-4">
+        <div class="col-md-8 text-center">
+            <h2>
+                Le mie inserzioni
+                <a {#href="{% url 'sylvelius:profile_creazioni' %}"#} class="btn btn-link btn-sm" style="font-size: 1rem;">Vedi tutte</a>
+            </h2>
+            {% if creazioni %}
+                <div class="scrolling-wrapper d-flex flex-row overflow-auto py-2" style="margin-bottom: 14px;">
+                    {% for creazione in creazioni|slice:5 %}
+                        <div class="card mx-2" style="min-width: 18rem; max-width: 18rem;">
+                            {% if creazione.annuncio.immagine %}
+                                <img src="{{ creazione.annuncio.immagine.url }}" class="card-img-top" alt="{{ creazione.annuncio.titolo }}">
+                            {% else %}
+                                <img src="{% static 'img/default_product.png' %}" class="card-img-top" alt="Immagine non disponibile">
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">{{ creazione.annuncio.titolo }}</h5>
+                                <p class="card-text">{{ creazione.annuncio.descrizione|truncatewords:15 }}</p>
+                                <p class="card-text">Prezzo: {{ creazione.annuncio.prezzo }} €</p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>Non hai ancora inserzioni.</p>
             {% endif %}
         </div>
     </div>

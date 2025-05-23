@@ -1,0 +1,27 @@
+<div class="col-12 d-flex justify-content-center mt-4" style="margin-bottom: 15px;">
+    <form method="get" class="me-2">
+        {% for key, value in request.GET.items %}
+            {% if key != "page" %}
+                <input type="hidden" name="{{ key }}" value="{{ value }}">
+            {% endif %}
+        {% endfor %}
+        <button type="submit" name="page" value="{{ page|add:'-1' }}" class="btn btn-primary"
+            {% if page <= 1 %}disabled{% endif %}>
+            Indietro
+        </button>
+    </form>
+    <div class="align-self-center mx-2">
+        Pagina {{ page }}
+    </div>
+    <form method="get">
+        {% for key, value in request.GET.items %}
+            {% if key != "page" %}
+                <input type="hidden" name="{{ key }}" value="{{ value }}">
+            {% endif %}
+        {% endfor %}
+        <button type="submit" name="page" value="{{ page|add:'1' }}" class="btn btn-primary"
+            {% if not has_next %}disabled{% endif %}>
+            Avanti
+        </button>
+    </form>
+</div>
