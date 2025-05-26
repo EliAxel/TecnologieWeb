@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 
 {% block title %}Modifica Profilo{% endblock %}
-
+{% block sign_in_sign_up %}
+    {% include "_btn_toprightbuttons.html" %}
+{% endblock %}
 {% block middle %}
 <div class="container mt-5 mb-5" style="max-width: 500px;">
     <div class="card shadow">
@@ -9,15 +11,27 @@
             <h4 class="mb-0">Modifica Profilo</h4>
         </div>
         <div class="card-body">
-            <form method="post">
+            <form id="profileEditForm" method="post" novalidate>
                 {% csrf_token %}
                 <div class="form-group">
                     <label for="id_username">Username</label>
                     <input type="text" class="form-control" id="id_username" name="username" value="{{ user.username }}" required>
+                    <div class="invalid-feedback">Inserisci un username valido.</div>
                 </div>
                 <div class="form-group">
-                    <label for="id_password">Nuova Password</label>
-                    <input type="password" class="form-control" id="id_password" name="password" placeholder="Lascia vuoto per non cambiare">
+                    <label for="id_old_password">Vecchia Password</label>
+                    <input type="password" class="form-control" id="id_old_password" name="old_password" required>
+                    <div class="invalid-feedback">Inserisci la vecchia password.</div>
+                </div>
+                <div class="form-group">
+                    <label for="id_new_password1">Nuova Password</label>
+                    <input type="password" class="form-control" id="id_new_password1" name="new_password1" placeholder="Lascia vuoto per non cambiare">
+                    <div class="invalid-feedback">La nuova password non è valida.</div>
+                </div>
+                <div class="form-group">
+                    <label for="id_new_password2">Ripeti Nuova Password</label>
+                    <input type="password" class="form-control" id="id_new_password2" name="new_password2" placeholder="Ripeti la nuova password">
+                    <div class="invalid-feedback">Le password non coincidono.</div>
                 </div>
                 <button type="submit" class="btn btn-primary btn-block">Salva Modifiche</button>
             </form>
@@ -28,4 +42,82 @@
         </div>
     </div>
 </div>
+<script>
+document.getElementById('profileEditForm').addEventListener('submit', function(event) {
+    let form = event.target;
+    let valid = true;
+
+    // Username
+    let username = form.username;
+    if (!username.value.trim()) {
+        username.classList.add('is-invalid');
+        valid = false;
+    } else {
+        username.classList.remove('is-invalid');
+    }
+
+    // Old password
+    let oldPassword = form.old_password;
+    if (!oldPassword.value.trim()) {
+        oldPassword.classList.add('is-invalid');
+        valid = false;
+    } else {
+        oldPassword.classList.remove('is-invalid');
+    }
+
+    // New password (optional)
+    let newPassword1 = form.new_password1;
+    let newPassword2 = form.new_password2;
+    if (newPassword1.value || newPassword2.value) {
+        if (newPassword1.value.length < 6) {
+            newPassword1.classList.add('is-invalid');
+            valid = false;
+        } else {
+            newPassword1.classList.remove('is-invalid');
+        }
+        if (newPassword1.value !== newPassword2.value) {
+            newPassword2.classList.add('is-invalid');
+            valid = false;
+        } else {
+            newPassword2.classList.remove('is-invalid');
+        }
+    } else {
+        newPassword1.classList.remove('is-invalid');
+        newPassword2.classList.remove('is-invalid');
+    }
+
+    if (!valid) {
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+    }
+
+    // 🚀 Se il form è valido, controlla la vecchia password con AJAX
+    event.preventDefault();  // ⚠️ blocca l'invio per fare la chiamata AJAX
+
+    fetch("{% url 'sylvelius:check_old_password' %}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}",
+        },
+        body: JSON.stringify({ old_password: oldPassword.value })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.valid) {
+            // La password è giusta! Invia davvero il form
+            form.submit();
+        } else {
+            // Password errata, mostra errore
+            alert("La vecchia password inserita non è corretta.");
+            oldPassword.classList.add('is-invalid');
+        }
+    })
+    .catch(() => {
+        alert("Errore di connessione. Riprova.");
+    });
+});
+</script>
+
 {% endblock %}

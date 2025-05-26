@@ -1,0 +1,61 @@
+{% extends "sylvelius/home.html" %}
+{% load static %}
+{% block title %}Crea Annuncio{% endblock %}
+
+{% block middle %}
+<div class="container mt-5 mb-5" style="max-width: 700px;">
+    <div class="card shadow">
+        <div class="card-header text-white" style="background-color: #6f42c1;">
+            <h4 class="mb-0">Crea un nuovo annuncio</h4>
+        </div>
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data" novalidate>
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="id_titolo">Titolo</label>
+                    <input type="text" class="form-control" id="id_titolo" name="titolo" maxlength="100" required placeholder="Inserisci il titolo dell'annuncio">
+                </div>
+                <div class="form-group">
+                    <label for="id_descrizione">Descrizione</label>
+                    <textarea class="form-control" id="id_descrizione" name="descrizione" rows="4" required placeholder="Descrivi il tuo annuncio"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="id_prezzo">Prezzo (€)</label>
+                    <input type="number" class="form-control" id="id_prezzo" name="prezzo" step="0.01" min="0" required placeholder="0.00">
+                </div>
+                <div class="form-group">
+                    <label for="id_tags_input">Tag</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="id_tags_input" placeholder="Scrivi un tag..." autocomplete="off">
+                        <div id="id_tags_suggestions" class="list-group position-absolute w-100" style="top: 100%; left: 0; display: none; max-height: 200px; overflow-y: auto; z-index: 1200;"></div>
+                    </div>
+                    <div id="id_tags_selected" class="mt-2" style="min-height: 38px;"></div>
+                    <input type="hidden" name="tags" id="id_tags_hidden">
+                    <small class="form-text text-muted">Aggiungi più tag e clicca sulla “x” per rimuoverli.</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="id_immagini">Immagini</label>
+                    <input type="file" class="form-control-file" id="id_immagini" name="immagini" multiple accept="image/*">
+                    <small class="form-text text-muted">Puoi caricare più immagini.</small>
+                </div>
+                <button type="submit" class="btn btn-primary" style="background-color: #6f42c1; border: none;">Crea Annuncio</button>
+            </form>
+        </div>
+    </div>
+</div>
+<script src="{% static 'js/suggestions.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    setupSuggestions({
+        inputId: 'id_tags_input',
+        suggestionsId: 'id_tags_suggestions',
+        wsUrl: '/ws/tags/',
+        containerId: 'id_tags_selected',
+        hiddenInputId: 'id_tags_hidden',
+        isMulti: true
+    });
+});
+</script>
+
+{% endblock %}

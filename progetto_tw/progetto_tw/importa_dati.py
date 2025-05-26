@@ -1,24 +1,24 @@
 import json
 import os
 import django
+from django.contrib.auth.models import User
+from sylvelius.models import Annuncio, ImmagineAnnuncio, Ordine, Creazione, Tag
 
 # Imposta le variabili d'ambiente per Django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'progetto_tw.settings')
 django.setup()
 
-from django.contrib.auth.models import User
-from sylvelius.models import Annuncio, Ordine, Creazione
-from datetime import datetime
-
 def delete_db():
     # Elimina tutti gli oggetti esistenti
-    Annuncio.objects.all().delete()
-    Ordine.objects.all().delete()
+    # Prima elimina le dipendenze dirette (ImmagineAnnuncio, Creazione, Ordine)
+    ImmagineAnnuncio.objects.all().delete()
     Creazione.objects.all().delete()
-
-import json
-from django.contrib.auth.models import User
-from sylvelius.models import Annuncio, Ordine, Creazione
+    Ordine.objects.all().delete()
+    # Poi elimina Annuncio (che ha FK da ImmagineAnnuncio, Creazione, Ordine)
+    Annuncio.objects.all().delete()
+    # Infine elimina Tag (che ha M2M con Annuncio)
+    Tag.objects.all().delete()
+    
 
 def init_db():
     # Carica il file JSON
@@ -33,10 +33,23 @@ def init_db():
                 'titolo': annuncio_data['titolo'],
                 'descrizione': annuncio_data['descrizione'],
                 'prezzo': annuncio_data['prezzo'],
-                'data_pubblicazione': annuncio_data['data_pubblicazione'],
-                'immagine': annuncio_data['immagine'],
             }
         )
+        # Gestione dei tag
+        tag_names = annuncio_data.get('tag', [])
+        annuncio.tags.clear()
+        for tag_name in tag_names:
+            tag_obj, _ = Tag.objects.get_or_create(nome=tag_name.lower())
+            annuncio.tags.add(tag_obj)
+
+        # Gestione delle immagini
+        immagini = annuncio_data.get('immagini', []) or []
+        annuncio.immagini.all().delete()
+        for img in immagini:
+            ImmagineAnnuncio.objects.update_or_create(
+            annuncio=annuncio,
+            immagine=img['immagine']  
+            )
 
     # Importa Ordini
     for ordine_data in dati.get('ordini', []):

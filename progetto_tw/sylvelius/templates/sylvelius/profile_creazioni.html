@@ -1,0 +1,74 @@
+{% extends "sylvelius/home.html" %}
+{% load static %}
+{% block main_header %}{% endblock %}
+{% block middle %}
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <h2 class="mb-4">Le tue inserzioni</h2>
+            <a href="{% url 'sylvelius:crea_annuncio' %}" class="btn btn-success mb-3">Crea inserzione</a>
+            {% if creazioni %}
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Annuncio</th>
+                            <th>Prodotto</th>
+                            <th>Data creazione</th>
+                            <th>Azioni</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for creazione in creazioni %}
+                        <tr>
+                            <td>
+                                {% if creazione.annuncio.is_published %}
+                                    <a href="{% url 'sylvelius:dettagli_annuncio' creazione.annuncio.id %}">
+                                        {{ creazione.annuncio.titolo }}
+                                    </a>
+                                {% else %}
+                                    {{ creazione.annuncio.titolo }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if creazione.annuncio.immagini.all %}
+                                    {% with prima_immagine=creazione.annuncio.immagini.all.0 %}
+                                        {% if prima_immagine.immagine %}
+                                            <img src="{{ prima_immagine.immagine.url }}" class="card-img-top" alt="{{ creazione.annuncio.titolo }}" style="max-width: 60px; max-height: 60px;">
+                                        {% else %}
+                                            <img src="{% static 'img/default_product.png' %}" class="card-img-top" alt="Immagine non disponibile" style="max-width: 60px; max-height: 60px;">
+                                        {% endif %}
+                                    {% endwith %}
+                                {% else %}
+                                    <img src="{% static 'img/default_product.png' %}" class="card-img-top" alt="Immagine non disponibile" style="max-width: 60px; max-height: 60px;">
+                                {% endif %}
+
+                            </td>
+                            <td>{{ creazione.data_creazione|date:"d/m/Y H:i" }}</td>
+                            <td>
+                                <form action="{% url 'sylvelius:nascondi_annuncio' creazione.annuncio.id %}?page={{ page }}" method="post" style="display:inline;">
+                                    {% csrf_token %}
+                                    {% if creazione.annuncio.is_published %}
+                                        <button type="submit" class="btn btn-warning btn-sm" onclick="return confirm('Sei sicuro di voler nascondere questa inserzione? Chiunque abbia ordinato il prodotto avrà comunque il diritto di riceverlo. ');">Nascondi</button>
+                                    {% else %}
+                                        <button type="submit" class="btn btn-success btn-sm" >Pubblica</button>
+                                    {% endif %}
+                                </form>
+                                <form action="{% url 'sylvelius:elimina_annuncio' creazione.id %}?page={{ page }}" method="post" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Sei sicuro di voler eliminare questa inserzione? Chiunque abbia ordinato il prodotto avrà comunque il diritto di riceverlo.');">Elimina</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <!-- Include della paginazione -->
+                {% include "_btn_paginazione.html" %}
+            {% else %}
+                <div class="alert alert-info">Non hai ancora creato nessuna inserzione.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
