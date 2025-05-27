@@ -24,9 +24,13 @@
                         {% for ordine in ordini %}
                         <tr>
                             <td>
-                                <a href="{% url 'sylvelius:dettagli_annuncio' ordine.annuncio.id %}">
+                                {% if ordine.annuncio.is_published %}
+                                    <a href="{% url 'sylvelius:dettagli_annuncio' ordine.annuncio.id %}">
+                                        {{ ordine.annuncio.titolo }}
+                                    </a>
+                                {% else %}
                                     {{ ordine.annuncio.titolo }}
-                                </a>
+                                {% endif %}
                             </td>
                             <td>
                                 {% if ordine.annuncio.immagini.all %}

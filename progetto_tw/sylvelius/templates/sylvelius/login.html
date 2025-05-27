@@ -7,19 +7,88 @@
             <h4 class="mb-0">Login</h4>
         </div>
         <div class="card-body">
-            <form method="post">
+            <form id="login-form" method="post" autocomplete="off">
                 {% csrf_token %}
                 <div class="form-group">
                     <label for="username">Username</label>
                     <input type="text" class="form-control" id="username" name="username" required style="border-color: #a78bfa;">
+                    <div id="username-error" class="invalid-feedback" style="display:none;"></div>
                 </div>
                 <div class="form-group">
                     <label for="password">Password</label>
                     <input type="password" class="form-control" id="password" name="password" required style="border-color: #a78bfa;">
+                    <div id="password-error" class="invalid-feedback" style="display:none;"></div>
                 </div>
                 <button type="submit" class="btn btn-block text-white" style="background-color: #7c3aed;">Accedi</button>
             </form>
         </div>
     </div>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('login-form');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const usernameError = document.getElementById('username-error');
+    const passwordError = document.getElementById('password-error');
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault(); // Previeni invio del form
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value;
+
+        // Controlla che i campi non siano vuoti
+        if (!username || !password) {
+            if (!username) {
+                usernameError.textContent = "Inserisci l'username.";
+                usernameError.style.display = "block";
+                usernameInput.classList.add("is-invalid");
+            }
+            if (!password) {
+                passwordError.textContent = "Inserisci la password.";
+                passwordError.style.display = "block";
+                passwordInput.classList.add("is-invalid");
+            }
+            return;
+        }
+
+        // Invia la richiesta AJAX per controllare username e password
+        fetch("{% url 'sylvelius:check_login_credentials' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}",
+            },
+            body: JSON.stringify({username: username, password: password})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (!data.exists) {
+                usernameError.textContent = "Username non esistente.";
+                usernameError.style.display = "block";
+                usernameInput.classList.add("is-invalid");
+            } else {
+                usernameError.textContent = "";
+                usernameError.style.display = "none";
+                usernameInput.classList.remove("is-invalid");
+            }
+
+            if (!data.valid_password) {
+                passwordError.textContent = "Password non corretta.";
+                passwordError.style.display = "block";
+                passwordInput.classList.add("is-invalid");
+            } else {
+                passwordError.textContent = "";
+                passwordError.style.display = "none";
+                passwordInput.classList.remove("is-invalid");
+            }
+
+            // Se tutto è valido, invia il form normalmente
+            if (data.exists && data.valid_password) {
+                form.submit();
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

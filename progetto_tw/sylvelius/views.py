@@ -17,7 +17,8 @@ from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from functools import reduce
-import operator
+from django.contrib.auth.models import User
+from django.views.decorators.http import require_POST
 
 # Create your views here.
 class HomePageView(TemplateView):
@@ -365,3 +366,31 @@ def check_old_password(request):
         else:
             return JsonResponse({'valid': False})
     return JsonResponse({'valid': False}, status=400)
+
+@require_POST
+def check_username_exists(request):
+    import json
+    data = json.loads(request.body)
+    username = data.get("username", "").strip()
+    exists = User.objects.filter(username=username).exists()
+    return JsonResponse({"exists": exists})
+
+@require_POST
+def check_login_credentials(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        username = data.get("username")
+        password = data.get("password")
+        try:
+            user = User.objects.get(username=username)
+            exists = True
+            valid_password = user.check_password(password)
+        except User.DoesNotExist:
+            exists = False
+            valid_password = False
+
+        return JsonResponse({
+            "exists": exists,
+            "valid_password": valid_password,
+        })
+    return JsonResponse({"exists": False, "valid_password": False})

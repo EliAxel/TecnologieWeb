@@ -19,4 +19,6 @@ urlpatterns = [
     path("account/profile/creazioni/elimina/<int:id>/", views.delete_pubblicazione, name="elimina_annuncio"),
     path('check_old_password/', views.check_old_password, name='check_old_password'),
     path("ricerca/", views.RicercaAnnunciView.as_view(), name="ricerca_annunci"),
+    path("check_username_exists/", views.check_username_exists, name="check_username_exists"),
+    path("check_login_credentials/", views.check_login_credentials, name="check_login_credentials"),
 ]

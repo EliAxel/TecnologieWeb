@@ -16,3 +16,14 @@
         transform: translateY(0);
     }
 }
+
+#search-form {
+    position: relative;
+    z-index: 1500; /* o più alto, a seconda del contesto */
+}
+
+#search-suggestions,
+#category-suggestions {
+    position: absolute; /* importante! */
+    z-index: 2000 !important;
+}

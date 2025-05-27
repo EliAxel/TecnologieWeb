@@ -40,13 +40,13 @@
         </nav>
 
         <!-- Ricerca avanzata -->
-        <div id="advanced-search-bar" class="container-fluid py-3 bg-light border-bottom" style="display: none;">
+        <div id="advanced-search-bar" class="container-fluid py-3 bg-light border-bottom" style="display: none; position: relative; z-index: 1050;">
             <form class="form-row">
                 <div class="form-group col-md-3">
-                    <label for="search-category">Categoria</label>
+                    <label for="search-category">Categorie</label>
                     <div class="input-group">
                         <input type="text" class="form-control" id="category-input" placeholder="Scrivi una categoria..." autocomplete="off">
-                        <div id="category-suggestions" class="list-group position-absolute w-100" style="top: 100%; left: 0; display: none; max-height: 200px; overflow-y: auto; z-index: 1200;"></div>
+                        <div id="category-suggestions" class="list-group position-absolute w-100" style="top: 100%; left: 0; display: none; max-height: 200px; overflow-y: auto; z-index: 2000;"></div>
                     </div>
                     <div id="category-tags" class="mt-2" style="min-height: 38px;"></div>
                 </div>
