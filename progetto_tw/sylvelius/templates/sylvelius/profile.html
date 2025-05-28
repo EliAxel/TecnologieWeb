@@ -2,7 +2,7 @@
 {% load static %}
 {% block title %}{{user.username}}{% endblock %}
 {% block middle %}
-<div class="container mt-5 mb-5">
+<div class="container-fluid mt-5 mb-5">
     <div class="row justify-content-center">
         <div class="col-md-8 text-center">
             <h1>Benvenuto/a {{ user.username }}!</h1>
@@ -24,22 +24,18 @@
                 <div class="scrolling-wrapper d-flex flex-row overflow-auto py-2">
                     {% for ordine in ordini|slice:5 %}
                         <div class="card mx-2" style="min-width: 18rem; max-width: 18rem;">
-                            {% if ordine.annuncio.immagini.all %}
-                                    {% with prima_immagine=ordine.annuncio.immagini.all.0 %}
-                                        {% if prima_immagine.immagine %}
-                                            <img src="{{ prima_immagine.immagine.url }}" class="card-img-top" alt="{{ ordine.annuncio.titolo }}">
-                                        {% else %}
-                                            <img src="{% static 'img/default_product.png' %}" class="card-img-top" alt="Immagine non disponibile" >
-                                        {% endif %}
-                                    {% endwith %}
-                                {% else %}
-                                    <img src="{% static 'img/default_product.png' %}" class="card-img-top" alt="Immagine non disponibile" >
-                                {% endif %}
+                            <img
+                                data-prodotto-id="{{ ordine.prodotto.id }}"
+                                class="card-img-top immagine-asincrona"
+                                alt="{{ ordine.prodotto.nome }}"
+                                src="{% static 'img/default_loading.png' %}"
+                            >
                             <div class="card-body">
-                                <h5 class="card-text">{{ ordine.annuncio.titolo }}</h5>
+                                <h5 class="card-text">{{ ordine.prodotto.nome }}</h5>
                                 <p class="card-text">Quantità: {{ ordine.quantita }}</p>
                                 <p class="card-text">{{ ordine.data_ordine|date:"d/m/Y" }}</p>
                                 <p class="card-text">Totale: {{ ordine.totale }} €</p>
+                                <p class="card-text">Stato: {{ ordine.stato }}</p>
                             </div>
                         </div>
                     {% endfor %}
@@ -61,21 +57,16 @@
                 <div class="scrolling-wrapper d-flex flex-row overflow-auto py-2" style="margin-bottom: 14px;">
                     {% for creazione in creazioni|slice:5 %}
                         <div class="card mx-2" style="min-width: 18rem; max-width: 18rem;">
-                            {% if creazione.annuncio.immagini.all %}
-                                    {% with prima_immagine=creazione.annuncio.immagini.all.0 %}
-                                        {% if prima_immagine.immagine %}
-                                            <img src="{{ prima_immagine.immagine.url }}" class="card-img-top" alt="{{ creazione.annuncio.titolo }}" >
-                                        {% else %}
-                                            <img src="{% static 'img/default_product.png' %}" class="card-img-top" alt="Immagine non disponibile" >
-                                        {% endif %}
-                                    {% endwith %}
-                                {% else %}
-                                    <img src="{% static 'img/default_product.png' %}" class="card-img-top" alt="Immagine non disponibile" >
-                                {% endif %}
+                            <img
+                                data-prodotto-id="{{ creazione.annuncio.prodotto.id }}"
+                                class="card-img-top immagine-asincrona"
+                                alt="{{ creazione.annuncio.prodotto.nome }}"
+                                src="{% static 'img/default_loading.png' %}"
+                            >
                             <div class="card-body">
-                                <h5 class="card-title">{{ creazione.annuncio.titolo }}</h5>
-                                <p class="card-text">{{ creazione.annuncio.descrizione|truncatewords:15 }}</p>
-                                <p class="card-text">Prezzo: {{ creazione.annuncio.prezzo }} €</p>
+                                <h5 class="card-title">{{ creazione.annuncio.prodotto.nome }}</h5>
+                                <p class="card-text">{{ creazione.annuncio.prodotto.descrizione_breve|truncatewords:15 }}</p>
+                                <p class="card-text">Prezzo: {{ creazione.annuncio.prodotto.prezzo }} €</p>
                             </div>
                         </div>
                     {% endfor %}
@@ -99,13 +90,12 @@
                         <div class="card mx-2" style="min-width: 18rem; max-width: 18rem;">
                             <div class="card-body">
                                 <h5 class="card-title">{{ cliente.username }}</h5>
-                                <p class="card-text">Email: {{ cliente.email }}</p>
                                 {% if cliente.ordini_da_rifornire %}
                                     <p class="card-text">Ordini da rifornire: {{ cliente.ordini_da_rifornire|length }}</p>
                                     <ul class="list-unstyled">
                                         {% for ordine in cliente.ordini_da_rifornire|slice:3 %}
                                             <li>
-                                                {{ ordine.annuncio.titolo }} (Quantità: {{ ordine.quantita }})
+                                                {{ ordine.prodotto.nome }} (Quantità: {{ ordine.quantita }})
                                             </li>
                                         {% endfor %}
                                     </ul>
@@ -135,4 +125,5 @@
     border-radius: 4px;
 }
 </style>
+<script src="{% static 'js/img_loader.js' %}"></script>
 {% endblock %}

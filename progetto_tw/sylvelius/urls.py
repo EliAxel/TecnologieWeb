@@ -1,5 +1,6 @@
 from django.urls import path, re_path
 from . import views
+from .api_views import get_immagine_prodotto, get_immagini_prodotto
 
 app_name = "sylvelius"
 
@@ -21,4 +22,6 @@ urlpatterns = [
     path("ricerca/", views.RicercaAnnunciView.as_view(), name="ricerca_annunci"),
     path("check_username_exists/", views.check_username_exists, name="check_username_exists"),
     path("check_login_credentials/", views.check_login_credentials, name="check_login_credentials"),
+    path('api/immagine/<int:prodotto_id>/', get_immagine_prodotto, name='get_immagine_prodotto'),
+    path('api/immagini/<int:prodotto_id>/', get_immagini_prodotto, name='api_immagini'),
 ]

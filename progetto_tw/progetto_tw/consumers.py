@@ -13,32 +13,33 @@ class SearchConsumer(AsyncWebsocketConsumer):
         pass
 
     async def receive(self, text_data):
-        data = json.loads(text_data)
-        query = data.get('query', '').strip()
-        suggestions = []
+        try:
+            data = json.loads(text_data)
+            query = data.get('query', '').strip()
+            
+            if query:
+                suggestions = await self.get_suggestions(query)
+            else:
+                suggestions = []
 
-        if query:
-            # Cerca titoli di Annuncio che contengono la query (case-insensitive)
-            annunci = await self.get_annunci_by_query(query)
-            suggestions = [a.titolo for a in annunci][:10]
-
-        await self.send(text_data=json.dumps({
-            'suggestions': suggestions
-        }))
+            await self.send(text_data=json.dumps({
+                'suggestions': suggestions
+            }))
+        except Exception as e:
+            await self.send(text_data=json.dumps({
+                'error': str(e)
+            }))
 
     @database_sync_to_async
-    def get_annunci_by_query(self, query):
-        # Trova annunci dove almeno una parola del titolo inizia per la query (case-insensitive)
-
-        # Split il titolo in parole e cerca quelle che iniziano per la query
-        # Usa regex per trovare parole che iniziano per la query
-        regex = r'\b' + query
-        return list(
-            Annuncio.objects.filter(
-                Q(titolo__iregex=regex),
-                is_published=True
-            ).order_by('titolo')
-        )
+    def get_suggestions(self, query):
+        # Versione più sicura della regex
+        regex = r'\b' + query  # \m è l'equivalente di \b ma più robusto per le regex PostgreSQL
+        annunci = Annuncio.objects.filter(
+            Q(prodotto__nome__iregex=regex),
+            is_published=True
+        ).order_by('prodotto__nome').select_related('prodotto')[:10]
+        
+        return [annuncio.prodotto.nome for annuncio in annunci]
 
 class SearchTags(AsyncWebsocketConsumer):
     async def connect(self):

@@ -1,22 +1,19 @@
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.views.generic import TemplateView, CreateView
-from .models import Annuncio, Creazione, ImmagineAnnuncio, Ordine, Tag
+from .models import Annuncio, Creazione, ImmagineProdotto, Ordine, Tag, Prodotto
 from django.urls import reverse_lazy
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
-from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
 from django.core.paginator import Paginator
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import get_user_model
 import json
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-from functools import reduce
 from django.contrib.auth.models import User
 from django.views.decorators.http import require_POST
 
@@ -27,10 +24,7 @@ class HomePageView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        filtro = self.request.GET.get('filtro')
         annunci = Annuncio.objects.filter(is_published=True).order_by('-data_pubblicazione')
-        if filtro:
-            annunci = annunci.filter(categoria=filtro)
 
         paginator = Paginator(annunci, 21)
 
@@ -67,7 +61,6 @@ class ProfiloPageView(LoginRequiredMixin, TemplateView):
     login_url = reverse_lazy('sylvelius:login')
 
     def get_context_data(self, **kwargs):
-        User = get_user_model()
         context = super().get_context_data(**kwargs)
         utente = self.request.user
         context['user'] = utente
@@ -77,10 +70,14 @@ class ProfiloPageView(LoginRequiredMixin, TemplateView):
         # Trova tutti gli utenti che hanno fatto ordini su annunci creati dall'utente corrente
         # e per cui almeno un ordine è "in attesa"
         mie_creazioni = Creazione.objects.filter(utente=utente).values_list('annuncio_id', flat=True)
+        prodotti_mie_creazioni = Annuncio.objects.filter(
+            id__in=mie_creazioni
+        ).values_list('prodotto_id', flat=True)
+
         ordini_clienti = (
             Ordine.objects
-            .filter(annuncio_id__in=mie_creazioni, stato='in attesa')
-            .select_related('utente', 'annuncio')
+            .filter(prodotto_id__in=prodotti_mie_creazioni, stato='in attesa')
+            .select_related('utente', 'prodotto')
         )
 
         clienti_dict = {}
@@ -89,7 +86,6 @@ class ProfiloPageView(LoginRequiredMixin, TemplateView):
             if cliente not in clienti_dict:
                 clienti_dict[cliente] = {
                     'username': cliente.username,
-                    'email': cliente.email,
                     'ordini_da_rifornire': []
                 }
             clienti_dict[cliente]['ordini_da_rifornire'].append(ordine)
@@ -120,7 +116,6 @@ class ProfiloEditPageView(LoginRequiredMixin, View):
 
         # Verifica la vecchia password
         if not user.check_password(old_password):
-            messages.error(request, "La vecchia password non è corretta.")
             return render(request, self.template_name, {'user': user})
 
         # Aggiorna username se cambiato
@@ -130,14 +125,12 @@ class ProfiloEditPageView(LoginRequiredMixin, View):
         # Gestione cambio password
         if new_password1 or new_password2:
             if new_password1 != new_password2:
-                messages.error(request, "Le nuove password non coincidono.")
                 return render(request, self.template_name, {'user': user})
             if new_password1:
                 user.set_password(new_password1)
                 update_session_auth_hash(request, user)
 
         user.save()
-        messages.success(request, "Profilo aggiornato con successo.")
         return redirect('sylvelius:profile')
 
 
@@ -207,7 +200,6 @@ class ProfiloCreazioniPageView(LoginRequiredMixin, TemplateView):
         context['has_previous'] = page_obj.has_previous()
         context['request'] = self.request
 
-        
         return context
 
 class ProfiloCreaCreazionePageView(LoginRequiredMixin, View):
@@ -219,28 +211,35 @@ class ProfiloCreaCreazionePageView(LoginRequiredMixin, View):
         return render(request, self.template_name, {'tags': tags})
 
     def post(self, request):
-        titolo = request.POST.get('titolo')
+        nome = request.POST.get('nome')
         descrizione = request.POST.get('descrizione')
+        descrizione_breve = request.POST.get('descrizione_breve', '')  # opzionale
         prezzo = request.POST.get('prezzo')
         tag_string = request.POST.get('tags', '')  # è una stringa unica!
         immagini = request.FILES.getlist('immagini')
+        qta_magazzino = request.POST.get('qta_magazzino', 0)
 
         # Validazione base
-        if not titolo or not descrizione or not prezzo:
-            messages.error(request, "Compila tutti i campi obbligatori.")
+        if not nome or not descrizione or not prezzo:
             return render(request, self.template_name, {'tags': Tag.objects.all()})
 
         try:
             prezzo = float(prezzo)
         except ValueError:
-            messages.error(request, "Il prezzo non è valido.")
             return render(request, self.template_name, {'tags': Tag.objects.all()})
 
+        prodotto=Prodotto.objects.create(
+                nome=nome,
+                descrizione_breve=descrizione_breve,
+                descrizione=descrizione,
+                prezzo=prezzo
+            )
         # Creazione dell'annuncio
         annuncio = Annuncio.objects.create(
-            titolo=titolo,
-            descrizione=descrizione,
-            prezzo=prezzo
+            prodotto=prodotto,
+            data_pubblicazione=None,
+            qta_magazzino=qta_magazzino,
+            is_published=True
         )
 
         # Gestione dei tag (split manuale)
@@ -249,11 +248,11 @@ class ProfiloCreaCreazionePageView(LoginRequiredMixin, View):
         for nome in tag_names:
             tag, _ = Tag.objects.get_or_create(nome=nome)
             tag_instances.append(tag)
-        annuncio.tags.set(tag_instances)
+        annuncio.prodotto.tags.set(tag_instances)
 
         # Salva immagini
         for img in immagini:
-            ImmagineAnnuncio.objects.create(annuncio=annuncio, immagine=img)
+            ImmagineProdotto.objects.create(prodotto=prodotto, immagine=img)
 
         # Crea la creazione associata all'utente
         Creazione.objects.create(
@@ -261,7 +260,6 @@ class ProfiloCreaCreazionePageView(LoginRequiredMixin, View):
             annuncio=annuncio
         )
 
-        messages.success(request, "Annuncio creato con successo!")
         return redirect('sylvelius:home')
 
 class RicercaAnnunciView(TemplateView):
@@ -279,27 +277,27 @@ class RicercaAnnunciView(TemplateView):
 
         if query:
             annunci = annunci.filter(
-                Q(titolo__icontains=query) |
-                Q(descrizione__icontains=query) |
-                Q(tags__nome__icontains=query)
+                Q(prodotto__nome__icontains=query) |
+                Q(prodotto__descrizione_breve__icontains=query) |
+                Q(prodotto__tags__nome__icontains=query)
             )
 
         if categoria_str:
             tag_list = [tag.strip() for tag in categoria_str.split(',') if tag.strip()]
             if tag_list:
                 for tag in tag_list:
-                    annunci = annunci.filter(tags__nome=tag)
+                    annunci = annunci.filter(prodotto__tags__nome=tag)
 
 
         if prezzo_min:
             try:
-                annunci = annunci.filter(prezzo__gte=float(prezzo_min))
+                annunci = annunci.filter(prodotto__prezzo__gte=float(prezzo_min))
             except ValueError:
                 pass
 
         if prezzo_max:
             try:
-                annunci = annunci.filter(prezzo__lte=float(prezzo_max))
+                annunci = annunci.filter(prodotto__prezzo__lte=float(prezzo_max))
             except ValueError:
                 pass
 

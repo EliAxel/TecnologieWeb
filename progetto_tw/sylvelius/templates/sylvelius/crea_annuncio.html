@@ -12,17 +12,30 @@
             <form method="post" enctype="multipart/form-data" novalidate>
                 {% csrf_token %}
                 <div class="form-group">
-                    <label for="id_titolo">Titolo</label>
-                    <input type="text" class="form-control" id="id_titolo" name="titolo" maxlength="100" required placeholder="Inserisci il titolo dell'annuncio">
+                    <label for="id_nome">Titolo</label>
+                    <input type="text" class="form-control" id="id_nome" name="nome" maxlength="100" required placeholder="Inserisci il titolo dell'annuncio">
                 </div>
+
+                <div class="form-group">
+                    <label for="id_descrizione_breve">Descrizione Breve</label>
+                    <input type="text" class="form-control" id="id_descrizione_breve" name="descrizione_breve" maxlength="255" placeholder="Una breve descrizione (opzionale)">
+                </div>
+
                 <div class="form-group">
                     <label for="id_descrizione">Descrizione</label>
                     <textarea class="form-control" id="id_descrizione" name="descrizione" rows="4" required placeholder="Descrivi il tuo annuncio"></textarea>
                 </div>
+
                 <div class="form-group">
                     <label for="id_prezzo">Prezzo (€)</label>
                     <input type="number" class="form-control" id="id_prezzo" name="prezzo" step="0.01" min="0" required placeholder="0.00">
                 </div>
+
+                <div class="form-group">
+                    <label for="id_qta_magazzino">Quantità in Magazzino</label>
+                    <input type="number" class="form-control" id="id_qta_magazzino" name="qta_magazzino" min="0" value="1">
+                </div>
+
                 <div class="form-group">
                     <label for="id_tags_input">Categorie</label>
                     <div class="input-group">
@@ -39,11 +52,13 @@
                     <input type="file" class="form-control-file" id="id_immagini" name="immagini" multiple accept="image/*">
                     <small class="form-text text-muted">Puoi caricare più immagini.</small>
                 </div>
+
                 <button type="submit" class="btn btn-primary" style="background-color: #6f42c1; border: none;">Crea Annuncio</button>
             </form>
         </div>
     </div>
 </div>
+
 <script src="{% static 'js/suggestions.js' %}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -57,5 +72,4 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-
 {% endblock %}

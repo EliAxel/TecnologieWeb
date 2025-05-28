@@ -1,1268 +1,1756 @@
 {
-  "annunci": [
+  "prodotti": [
     {
       "id": 1,
-      "titolo": "Pallone da calcio",
-      "descrizione": "Pallone ufficiale misura 5.",
+      "nome": "Pallone da calcio",
+      "descrizione_breve": "Pallone ufficiale misura 5.",
       "prezzo": "19.99",
-      "data_pubblicazione": "2024-06-01T10:00:00Z",
       "immagini": [
         {
           "id": 1,
-          "immagine": "/annunci/immagini/pallone.jpg"
+          "immagine": "/prodotti/immagini/pallone_da_calcio.jpg"
         }
       ],
       "tag": ["calcio", "pallone", "outdoor"]
     },
     {
       "id": 2,
-      "titolo": "Scarpe da corsa",
-      "descrizione": "Scarpe leggere e traspiranti.",
+      "nome": "Scarpe da corsa",
+      "descrizione_breve": "Scarpe leggere e traspiranti.",
       "prezzo": "59.90",
-      "data_pubblicazione": "2024-06-02T11:00:00Z",
       "immagini": [
         {
           "id": 2,
-          "immagine": "/annunci/immagini/scarpe_da_corsa.jpg"
+          "immagine": "/prodotti/immagini/scarpe_da_corsa.jpg"
         }
       ],
       "tag": ["running", "scarpe", "outdoor"]
     },
     {
       "id": 3,
-      "titolo": "Bicicletta da montagna",
-      "descrizione": "Bicicletta con telaio in alluminio e 21 velocità.",
+      "nome": "Bicicletta da montagna",
+      "descrizione_breve": "Bicicletta con telaio in alluminio e 21 velocità.",
       "prezzo": "299.99",
-      "data_pubblicazione": "2024-06-03T12:00:00Z",
       "immagini": [
         {
           "id": 3,
-          "immagine": "/annunci/immagini/bicicletta_da_montagna.jpg"
+          "immagine": "/prodotti/immagini/bicicletta_da_montagna.jpg"
         }
       ],
       "tag": ["bicicletta", "outdoor", "ciclismo"]
     },
     {
       "id": 4,
-      "titolo": "Racchetta da tennis",
-      "descrizione": "Racchetta leggera per principianti.",
+      "nome": "Racchetta da tennis",
+      "descrizione_breve": "Racchetta leggera per principianti.",
       "prezzo": "49.50",
-      "data_pubblicazione": "2024-06-04T13:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 4,
+          "immagine": "/prodotti/immagini/racchetta_da_tennis.jpg"
+        }
+      ],
       "tag": ["tennis", "racchetta", "outdoor"]
     },
     {
       "id": 5,
-      "titolo": "Tappetino yoga",
-      "descrizione": "Tappetino antiscivolo, ideale per yoga e pilates.",
+      "nome": "Tappetino yoga",
+      "descrizione_breve": "Tappetino antiscivolo, ideale per yoga e pilates.",
       "prezzo": "25.00",
-      "data_pubblicazione": "2024-06-05T14:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 5,
+          "immagine": "/prodotti/immagini/tappetino_yoga.jpg"
+        }
+      ],
       "tag": ["yoga", "pilates", "indoor"]
     },
     {
       "id": 6,
-      "titolo": "Set di pesi",
-      "descrizione": "Set di pesi regolabili da 5 a 20 kg.",
+      "nome": "Set di pesi",
+      "descrizione_breve": "Set di pesi regolabili da 5 a 20 kg.",
       "prezzo": "89.99",
-      "data_pubblicazione": "2024-06-06T15:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 6,
+          "immagine": "/prodotti/immagini/set_di_pesi.jpg"
+        }
+      ],
       "tag": ["fitness", "pesi", "indoor"]
     },
     {
       "id": 7,
-      "titolo": "Casco da bici",
-      "descrizione": "Casco leggero e sicuro per ciclisti.",
+      "nome": "Casco da bici",
+      "descrizione_breve": "Casco leggero e sicuro per ciclisti.",
       "prezzo": "34.99",
-      "data_pubblicazione": "2024-06-07T16:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 7,
+          "immagine": "/prodotti/immagini/casco_da_bici.jpg"
+        }
+      ],
       "tag": ["bicicletta", "sicurezza", "ciclismo"]
     },
     {
       "id": 8,
-      "titolo": "Guanti da boxe",
-      "descrizione": "Guanti professionali per allenamento.",
+      "nome": "Guanti da boxe",
+      "descrizione_breve": "Guanti professionali per allenamento.",
       "prezzo": "45.00",
-      "data_pubblicazione": "2024-06-08T17:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 8,
+          "immagine": "/prodotti/immagini/guanti_da_boxe.jpg"
+        }
+      ],
       "tag": ["boxe", "guanti", "indoor"]
     },
     {
       "id": 9,
-      "titolo": "Corda per saltare",
-      "descrizione": "Corda regolabile per allenamento cardio.",
+      "nome": "Corda per saltare",
+      "descrizione_breve": "Corda regolabile per allenamento cardio.",
       "prezzo": "12.50",
-      "data_pubblicazione": "2024-06-09T18:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 9,
+          "immagine": "/prodotti/immagini/corda_per_saltare.jpg"
+        }
+      ],
       "tag": ["fitness", "cardio", "indoor"]
     },
     {
       "id": 10,
-      "titolo": "Zaino da trekking",
-      "descrizione": "Zaino ergonomico 30L per escursioni.",
+      "nome": "Zaino da trekking",
+      "descrizione_breve": "Zaino ergonomico 30L per escursioni.",
       "prezzo": "49.99",
-      "data_pubblicazione": "2024-06-10T19:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 10,
+          "immagine": "/prodotti/immagini/zaino_da_trekking.jpg"
+        }
+      ],
       "tag": ["trekking", "outdoor", "zaino"]
     },
     {
       "id": 11,
-      "titolo": "Occhialini da nuoto",
-      "descrizione": "Occhialini antiappannamento per piscina.",
+      "nome": "Occhialini da nuoto",
+      "descrizione_breve": "Occhialini antiappannamento per piscina.",
       "prezzo": "15.99",
-      "data_pubblicazione": "2024-06-11T20:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 11,
+          "immagine": "/prodotti/immagini/occhialini_da_nuoto.jpg"
+        }
+      ],
       "tag": ["nuoto", "occhialini", "acqua"]
     },
     {
       "id": 12,
-      "titolo": "Borraccia termica",
-      "descrizione": "Borraccia da 750ml che mantiene la temperatura.",
+      "nome": "Borraccia termica",
+      "descrizione_breve": "Borraccia da 750ml che mantiene la temperatura.",
       "prezzo": "18.50",
-      "data_pubblicazione": "2024-06-12T21:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 12,
+          "immagine": "/prodotti/immagini/borraccia_termica.jpg"
+        }
+      ],
       "tag": ["borraccia", "outdoor", "accessori"]
     },
     {
       "id": 13,
-      "titolo": "Tappeto elastico",
-      "descrizione": "Mini trampolino per allenamento domestico.",
+      "nome": "Tappeto elastico",
+      "descrizione_breve": "Mini trampolino per allenamento domestico.",
       "prezzo": "79.99",
-      "data_pubblicazione": "2024-06-13T22:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 13,
+          "immagine": "/prodotti/immagini/tappeto_elastico.jpg"
+        }
+      ],
       "tag": ["fitness", "indoor", "trampolino"]
     },
     {
       "id": 14,
-      "titolo": "Palla medica",
-      "descrizione": "Palla da 5kg per esercizi funzionali.",
+      "nome": "Palla medica",
+      "descrizione_breve": "Palla da 5kg per esercizi funzionali.",
       "prezzo": "29.99",
-      "data_pubblicazione": "2024-06-14T23:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 14,
+          "immagine": "/prodotti/immagini/palla_medica.jpg"
+        }
+      ],
       "tag": ["fitness", "palla", "indoor"]
     },
     {
       "id": 15,
-      "titolo": "Bande elastiche",
-      "descrizione": "Set di 5 bande con diversi livelli di resistenza.",
+      "nome": "Bande elastiche",
+      "descrizione_breve": "Set di 5 bande con diversi livelli di resistenza.",
       "prezzo": "22.99",
-      "data_pubblicazione": "2024-06-15T10:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 15,
+          "immagine": "/prodotti/immagini/bande_elastiche.jpg"
+        }
+      ],
       "tag": ["fitness", "elastici", "indoor"]
     },
     {
       "id": 16,
-      "titolo": "Smartwatch sportivo",
-      "descrizione": "Smartwatch con GPS e monitoraggio attività.",
+      "nome": "Smartwatch sportivo",
+      "descrizione_breve": "Smartwatch con GPS e monitoraggio attività.",
       "prezzo": "129.99",
-      "data_pubblicazione": "2024-06-16T11:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 16,
+          "immagine": "/prodotti/immagini/smartwatch_sportivo.jpg"
+        }
+      ],
       "tag": ["tecnologia", "accessori", "fitness"]
     },
     {
       "id": 17,
-      "titolo": "Pattini in linea",
-      "descrizione": "Pattini regolabili per adulti e ragazzi.",
+      "nome": "Pattini in linea",
+      "descrizione_breve": "Pattini regolabili per adulti e ragazzi.",
       "prezzo": "89.99",
-      "data_pubblicazione": "2024-06-17T12:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 17,
+          "immagine": "/prodotti/immagini/pattini_in_linea.jpg"
+        }
+      ],
       "tag": ["pattinaggio", "outdoor", "sport"]
     },
     {
       "id": 18,
-      "titolo": "Giubbotto zavorrato",
-      "descrizione": "Giubbotto regolabile fino a 20kg.",
+      "nome": "Giubbotto zavorrato",
+      "descrizione_breve": "Giubbotto regolabile fino a 20kg.",
       "prezzo": "59.99",
-      "data_pubblicazione": "2024-06-18T13:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 18,
+          "immagine": "/prodotti/immagini/giubbotto_zavorrato.jpg"
+        }
+      ],
       "tag": ["fitness", "accessori", "indoor"]
     },
     {
       "id": 19,
-      "titolo": "Bastoni da trekking",
-      "descrizione": "Bastoni telescopici in alluminio.",
+      "nome": "Bastoni da trekking",
+      "descrizione_breve": "Bastoni telescopici in alluminio.",
       "prezzo": "39.99",
-      "data_pubblicazione": "2024-06-19T14:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 19,
+          "immagine": "/prodotti/immagini/bastoni_da_trekking.jpg"
+        }
+      ],
       "tag": ["trekking", "outdoor", "accessori"]
     },
     {
       "id": 20,
-      "titolo": "Sacco da boxe",
-      "descrizione": "Sacco da boxe da appendere, 50kg.",
+      "nome": "Sacco da boxe",
+      "descrizione_breve": "Sacco da boxe da appendere, 50kg.",
       "prezzo": "69.99",
-      "data_pubblicazione": "2024-06-20T15:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 20,
+          "immagine": "/prodotti/immagini/sacco_da_boxe.jpg"
+        }
+      ],
       "tag": ["boxe", "indoor", "fitness"]
     },
     {
       "id": 21,
-      "titolo": "Fascia per capelli sportiva",
-      "descrizione": "Fascia assorbente per allenamenti intensi.",
+      "nome": "Fascia per capelli sportiva",
+      "descrizione_breve": "Fascia assorbente per allenamenti intensi.",
       "prezzo": "8.99",
-      "data_pubblicazione": "2024-06-21T16:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 21,
+          "immagine": "/prodotti/immagini/fascia_per_capelli_sportiva.jpg"
+        }
+      ],
       "tag": ["accessori", "fitness", "indoor"]
     },
     {
       "id": 22,
-      "titolo": "Pedometro digitale",
-      "descrizione": "Contapassi preciso con display LCD.",
+      "nome": "Pedometro digitale",
+      "descrizione_breve": "Contapassi preciso con display LCD.",
       "prezzo": "14.99",
-      "data_pubblicazione": "2024-06-22T17:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 22,
+          "immagine": "/prodotti/immagini/pedometro_digitale.jpg"
+        }
+      ],
       "tag": ["tecnologia", "accessori", "fitness"]
     },
     {
       "id": 23,
-      "titolo": "Tappeto per addominali",
-      "descrizione": "Tappeto spesso per esercizi a terra.",
+      "nome": "Tappeto per addominali",
+      "descrizione_breve": "Tappeto spesso per esercizi a terra.",
       "prezzo": "19.99",
-      "data_pubblicazione": "2024-06-23T18:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 23,
+          "immagine": "/prodotti/immagini/tappeto_per_addominali.jpg"
+        }
+      ],
       "tag": ["fitness", "indoor", "tappeto"]
     },
     {
       "id": 24,
-      "titolo": "Disco volante",
-      "descrizione": "Disco per giochi all'aperto.",
+      "nome": "Disco volante",
+      "descrizione_breve": "Disco per giochi all'aperto.",
       "prezzo": "9.99",
-      "data_pubblicazione": "2024-06-24T19:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 24,
+          "immagine": "/prodotti/immagini/disco_volante.jpg"
+        }
+      ],
       "tag": ["outdoor", "giochi", "accessori"]
     },
     {
       "id": 25,
-      "titolo": "Set badminton",
-      "descrizione": "Racchette e volano per giocare a badminton.",
+      "nome": "Set badminton",
+      "descrizione_breve": "Racchette e volano per giocare a badminton.",
       "prezzo": "24.99",
-      "data_pubblicazione": "2024-06-25T20:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 25,
+          "immagine": "/prodotti/immagini/set_badminton.jpg"
+        }
+      ],
       "tag": ["badminton", "outdoor", "racchetta"]
     },
     {
       "id": 26,
-      "titolo": "Palla da basket",
-      "descrizione": "Palla da basket ufficiale misura 7.",
+      "nome": "Palla da basket",
+      "descrizione_breve": "Palla da basket ufficiale misura 7.",
       "prezzo": "29.99",
-      "data_pubblicazione": "2024-06-26T21:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 26,
+          "immagine": "/prodotti/immagini/palla_da_basket.jpg"
+        }
+      ],
       "tag": ["basket", "pallone", "outdoor"]
     },
     {
       "id": 27,
-      "titolo": "Palla da pallavolo",
-      "descrizione": "Palla ufficiale per pallavolo.",
+      "nome": "Palla da pallavolo",
+      "descrizione_breve": "Palla ufficiale per pallavolo.",
       "prezzo": "27.50",
-      "data_pubblicazione": "2024-06-27T22:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 27,
+          "immagine": "/prodotti/immagini/palla_da_pallavolo.jpg"
+        }
+      ],
       "tag": ["pallavolo", "pallone", "outdoor"]
     },
     {
       "id": 28,
-      "titolo": "Borsa sportiva",
-      "descrizione": "Borsa capiente per attrezzatura sportiva.",
+      "nome": "Borsa sportiva",
+      "descrizione_breve": "Borsa capiente per attrezzatura sportiva.",
       "prezzo": "34.99",
-      "data_pubblicazione": "2024-06-28T23:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 28,
+          "immagine": "/prodotti/immagini/borsa_sportiva.jpg"
+        }
+      ],
       "tag": ["borsa", "accessori", "fitness"]
     },
     {
       "id": 29,
-      "titolo": "Tappeto da palestra",
-      "descrizione": "Tappeto antiscivolo per esercizi.",
+      "nome": "Tappeto da palestra",
+      "descrizione_breve": "Tappeto antiscivolo per esercizi.",
       "prezzo": "42.99",
-      "data_pubblicazione": "2024-06-29T10:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 29,
+          "immagine": "/prodotti/immagini/tappeto_da_palestra.jpg"
+        }
+      ],
       "tag": ["fitness", "indoor", "tappeto"]
     },
     {
       "id": 30,
-      "titolo": "Panca pieghevole",
-      "descrizione": "Panca regolabile per allenamento a casa.",
+      "nome": "Panca pieghevole",
+      "descrizione_breve": "Panca regolabile per allenamento a casa.",
       "prezzo": "79.99",
-      "data_pubblicazione": "2024-06-30T11:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 30,
+          "immagine": "/prodotti/immagini/panca_pieghevole.jpg"
+        }
+      ],
       "tag": ["fitness", "indoor", "panca"]
     },
     {
       "id": 31,
-      "titolo": "Set golf per principianti",
-      "descrizione": "Mazze e palline per iniziare a giocare a golf.",
+      "nome": "Set golf per principianti",
+      "descrizione_breve": "Mazze e palline per iniziare a giocare a golf.",
       "prezzo": "99.99",
-      "data_pubblicazione": "2024-07-01T12:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 31,
+          "immagine": "/prodotti/immagini/set_golf_per_principianti.jpg"
+        }
+      ],
       "tag": ["golf", "outdoor", "set"]
     },
     {
       "id": 32,
-      "titolo": "Roller per schiena",
-      "descrizione": "Massaggiatore per rilassare i muscoli.",
+      "nome": "Roller per schiena",
+      "descrizione_breve": "Massaggiatore per rilassare i muscoli.",
       "prezzo": "19.99",
-      "data_pubblicazione": "2024-07-02T13:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 32,
+          "immagine": "/prodotti/immagini/roller_per_schiena.jpg"
+        }
+      ],
       "tag": ["fitness", "indoor", "accessori"]
     },
     {
       "id": 33,
-      "titolo": "Bilancia pesapersone",
-      "descrizione": "Bilancia digitale precisa fino a 180kg.",
+      "nome": "Bilancia pesapersone",
+      "descrizione_breve": "Bilancia digitale precisa fino a 180kg.",
       "prezzo": "24.99",
-      "data_pubblicazione": "2024-07-03T14:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 33,
+          "immagine": "/prodotti/immagini/bilancia_pesapersone.jpg"
+        }
+      ],
       "tag": ["tecnologia", "accessori", "indoor"]
     },
     {
       "id": 34,
-      "titolo": "Set ping pong",
-      "descrizione": "Racchette, palline e rete per ping pong.",
+      "nome": "Set ping pong",
+      "descrizione_breve": "Racchette, palline e rete per ping pong.",
       "prezzo": "39.99",
-      "data_pubblicazione": "2024-07-04T15:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 34,
+          "immagine": "/prodotti/immagini/set_ping_pong.jpg"
+        }
+      ],
       "tag": ["ping pong", "racchetta", "indoor"]
     },
     {
       "id": 35,
-      "titolo": "Palla da rugby",
-      "descrizione": "Palla ufficiale per partite di rugby.",
+      "nome": "Palla da rugby",
+      "descrizione_breve": "Palla ufficiale per partite di rugby.",
       "prezzo": "34.99",
-      "data_pubblicazione": "2024-07-05T16:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 35,
+          "immagine": "/prodotti/immagini/palla_da_rugby.jpg"
+        }
+      ],
       "tag": ["rugby", "pallone", "outdoor"]
     },
     {
       "id": 36,
-      "titolo": "Bicicletta stazionaria",
-      "descrizione": "Bicicletta per allenamento indoor.",
+      "nome": "Bicicletta stazionaria",
+      "descrizione_breve": "Bicicletta per allenamento indoor.",
       "prezzo": "199.99",
-      "data_pubblicazione": "2024-07-06T17:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 36,
+          "immagine": "/prodotti/immagini/bicicletta_stazionaria.jpg"
+        }
+      ],
       "tag": ["bicicletta", "indoor", "fitness"]
     },
     {
       "id": 37,
-      "titolo": "Tapis roulant pieghevole",
-      "descrizione": "Tapis roulant compatto per casa.",
+      "nome": "Tapis roulant pieghevole",
+      "descrizione_breve": "Tapis roulant compatto per casa.",
       "prezzo": "349.99",
-      "data_pubblicazione": "2024-07-07T18:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 37,
+          "immagine": "/prodotti/immagini/tapis_roulant_pieghevole.jpg"
+        }
+      ],
       "tag": ["fitness", "indoor", "tapis roulant"]
     },
     {
       "id": 38,
-      "titolo": "Ellittica domestica",
-      "descrizione": "Attrezzo per allenamento cardio completo.",
+      "nome": "Ellittica domestica",
+      "descrizione_breve": "Attrezzo per allenamento cardio completo.",
       "prezzo": "279.99",
-      "data_pubblicazione": "2024-07-08T19:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 38,
+          "immagine": "/prodotti/immagini/ellittica_domestica.jpg"
+        }
+      ],
       "tag": ["fitness", "indoor", "ellittica"]
     },
     {
       "id": 39,
-      "titolo": "Palla da pilates",
-      "descrizione": "Palla grande per esercizi di equilibrio.",
+      "nome": "Palla da pilates",
+      "descrizione_breve": "Palla grande per esercizi di equilibrio.",
       "prezzo": "22.99",
-      "data_pubblicazione": "2024-07-09T20:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 39,
+          "immagine": "/prodotti/immagini/palla_da_pilates.jpg"
+        }
+      ],
       "tag": ["pilates", "fitness", "indoor"]
     },
     {
       "id": 40,
-      "titolo": "Set hockey su prato",
-      "descrizione": "Mazze e pallina per hockey su prato.",
+      "nome": "Set hockey su prato",
+      "descrizione_breve": "Mazze e pallina per hockey su prato.",
       "prezzo": "49.99",
-      "data_pubblicazione": "2024-07-10T21:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 40,
+          "immagine": "/prodotti/immagini/set_hockey_su_prato.jpg"
+        }
+      ],
       "tag": ["hockey", "outdoor", "set"]
     },
     {
       "id": 41,
-      "titolo": "Gilet termico",
-      "descrizione": "Gilet per correre con temperature fredde.",
+      "nome": "Gilet termico",
+      "descrizione_breve": "Gilet per correre con temperature fredde.",
       "prezzo": "39.99",
-      "data_pubblicazione": "2024-07-11T22:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 41,
+          "immagine": "/prodotti/immagini/gilet_termico.jpg"
+        }
+      ],
       "tag": ["running", "abbigliamento", "outdoor"]
     },
     {
       "id": 42,
-      "titolo": "Pantaloni da running",
-      "descrizione": "Pantaloni traspiranti per correre.",
+      "nome": "Pantaloni da running",
+      "descrizione_breve": "Pantaloni traspiranti per correre.",
       "prezzo": "29.99",
-      "data_pubblicazione": "2024-07-12T23:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 42,
+          "immagine": "/prodotti/immagini/pantaloni_da_running.jpg"
+        }
+      ],
       "tag": ["running", "abbigliamento", "outdoor"]
     },
     {
       "id": 43,
-      "titolo": "Maglia termica",
-      "descrizione": "Maglia a maniche lunghe per sport invernali.",
+      "nome": "Maglia termica",
+      "descrizione_breve": "Maglia a maniche lunghe per sport invernali.",
       "prezzo": "24.99",
-      "data_pubblicazione": "2024-07-13T10:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 43,
+          "immagine": "/prodotti/immagini/maglia_termica.jpg"
+        }
+      ],
       "tag": ["abbigliamento", "outdoor", "inverno"]
     },
     {
       "id": 44,
-      "titolo": "Calze tecniche running",
-      "descrizione": "Calze con supporto per arco plantare.",
+      "nome": "Calze tecniche running",
+      "descrizione_breve": "Calze con supporto per arco plantare.",
       "prezzo": "12.99",
-      "data_pubblicazione": "2024-07-14T11:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 44,
+          "immagine": "/prodotti/immagini/calze_tecniche_running.jpg"
+        }
+      ],
       "tag": ["running", "abbigliamento", "accessori"]
     },
     {
       "id": 45,
-      "titolo": "Braccialetto fitness",
-      "descrizione": "Braccialetto che monitora passi e calorie.",
+      "nome": "Braccialetto fitness",
+      "descrizione_breve": "Braccialetto che monitora passi e calorie.",
       "prezzo": "19.99",
-      "data_pubblicazione": "2024-07-15T12:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 45,
+          "immagine": "/prodotti/immagini/braccialetto_fitness.jpg"
+        }
+      ],
       "tag": ["tecnologia", "fitness", "accessori"]
     },
     {
       "id": 46,
-      "titolo": "Bilancino da cucina",
-      "descrizione": "Bilancia digitale per alimenti.",
+      "nome": "Bilancino da cucina",
+      "descrizione_breve": "Bilancia digitale per alimenti.",
       "prezzo": "14.99",
-      "data_pubblicazione": "2024-07-16T13:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 46,
+          "immagine": "/prodotti/immagini/bilancino_da_cucina.jpg"
+        }
+      ],
       "tag": ["tecnologia", "accessori", "cucina"]
     },
     {
       "id": 47,
-      "titolo": "Frullatore sportivo",
-      "descrizione": "Frullatore portatile per proteine.",
+      "nome": "Frullatore sportivo",
+      "descrizione_breve": "Frullatore portatile per proteine.",
       "prezzo": "29.99",
-      "data_pubblicazione": "2024-07-17T14:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 47,
+          "immagine": "/prodotti/immagini/frullatore_sportivo.jpg"
+        }
+      ],
       "tag": ["cucina", "accessori", "tecnologia"]
     },
     {
       "id": 48,
-      "titolo": "Shaker proteico",
-      "descrizione": "Shaker con misurino incluso.",
+      "nome": "Shaker proteico",
+      "descrizione_breve": "Shaker con misurino incluso.",
       "prezzo": "9.99",
-      "data_pubblicazione": "2024-07-18T15:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 48,
+          "immagine": "/prodotti/immagini/shaker_proteico.jpg"
+        }
+      ],
       "tag": ["fitness", "accessori", "cucina"]
     },
     {
       "id": 49,
-      "titolo": "Cintura per idratazione",
-      "descrizione": "Cintura con borracce per running.",
+      "nome": "Cintura per idratazione",
+      "descrizione_breve": "Cintura con borracce per running.",
       "prezzo": "24.99",
-      "data_pubblicazione": "2024-07-19T16:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 49,
+          "immagine": "/prodotti/immagini/cintura_per_idratazione.jpg"
+        }
+      ],
       "tag": ["running", "accessori", "outdoor"]
     },
     {
       "id": 50,
-      "titolo": "Orologio impermeabile",
-      "descrizione": "Orologio sportivo resistente all'acqua.",
+      "nome": "Orologio impermeabile",
+      "descrizione_breve": "Orologio sportivo resistente all'acqua.",
       "prezzo": "34.99",
-      "data_pubblicazione": "2024-07-20T17:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 50,
+          "immagine": "/prodotti/immagini/orologio_impermeabile.jpg"
+        }
+      ],
       "tag": ["tecnologia", "accessori", "outdoor"]
     },
     {
       "id": 51,
-      "titolo": "Mascherina sportiva",
-      "descrizione": "Mascherina traspirante per allenamenti.",
+      "nome": "Mascherina sportiva",
+      "descrizione_breve": "Mascherina traspirante per allenamenti.",
       "prezzo": "12.99",
-      "data_pubblicazione": "2024-07-21T18:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 51,
+          "immagine": "/prodotti/immagini/mascherina_sportiva.jpg"
+        }
+      ],
       "tag": ["accessori", "fitness", "outdoor"]
     },
     {
       "id": 52,
-      "titolo": "Paracadute per speed training",
-      "descrizione": "Paracadute per aumentare resistenza nella corsa.",
+      "nome": "Paracadute per speed training",
+      "descrizione_breve": "Paracadute per aumentare resistenza nella corsa.",
       "prezzo": "39.99",
-      "data_pubblicazione": "2024-07-22T19:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 52,
+          "immagine": "/prodotti/immagini/paracadute_per_speed_training.jpg"
+        }
+      ],
       "tag": ["running", "accessori", "outdoor"]
     },
     {
       "id": 53,
-      "titolo": "Manubri regolabili",
-      "descrizione": "Manubri da 5kg a 20kg con sistema rapido.",
+      "nome": "Manubri regolabili",
+      "descrizione_breve": "Manubri da 5kg a 20kg con sistema rapido.",
       "prezzo": "89.99",
-      "data_pubblicazione": "2024-07-23T20:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 53,
+          "immagine": "/prodotti/immagini/manubri_regolabili.jpg"
+        }
+      ],
       "tag": ["fitness", "pesi", "indoor"]
     },
     {
       "id": 54,
-      "titolo": "Scala per agilità",
-      "descrizione": "Scala per allenamento pliometrico.",
+      "nome": "Scala per agilità",
+      "descrizione_breve": "Scala per allenamento pliometrico.",
       "prezzo": "24.99",
-      "data_pubblicazione": "2024-07-24T21:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 54,
+          "immagine": "/prodotti/immagini/scala_per_agilita.jpg"
+        }
+      ],
       "tag": ["fitness", "accessori", "outdoor"]
     },
     {
       "id": 55,
-      "titolo": "Palla da baseball",
-      "descrizione": "Palla ufficiale da baseball.",
+      "nome": "Palla da baseball",
+      "descrizione_breve": "Palla ufficiale da baseball.",
       "prezzo": "14.99",
-      "data_pubblicazione": "2024-07-25T22:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 55,
+          "immagine": "/prodotti/immagini/palla_da_baseball.jpg"
+        }
+      ],
       "tag": ["baseball", "outdoor", "pallone"]
     },
     {
       "id": 56,
-      "titolo": "Guanti da golf",
-      "descrizione": "Guanti in pelle per migliorare la presa.",
+      "nome": "Guanti da golf",
+      "descrizione_breve": "Guanti in pelle per migliorare la presa.",
       "prezzo": "19.99",
-      "data_pubblicazione": "2024-07-26T23:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 56,
+          "immagine": "/prodotti/immagini/guanti_da_golf.jpg"
+        }
+      ],
       "tag": ["golf", "accessori", "outdoor"]
     },
     {
       "id": 57,
-      "titolo": "Tenda da campeggio",
-      "descrizione": "Tenda 2 posti per escursioni.",
+      "nome": "Tenda da campeggio",
+      "descrizione_breve": "Tenda 2 posti per escursioni.",
       "prezzo": "79.99",
-      "data_pubblicazione": "2024-07-27T10:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 57,
+          "immagine": "/prodotti/immagini/tenda_da_campeggio.jpg"
+        }
+      ],
       "tag": ["trekking", "outdoor", "tenda"]
     },
     {
       "id": 58,
-      "titolo": "Sacco a pelo",
-      "descrizione": "Sacco a pelo leggero per temperature fino a 10°C.",
+      "nome": "Sacco a pelo",
+      "descrizione_breve": "Sacco a pelo leggero per temperature fino a 10°C.",
       "prezzo": "49.99",
-      "data_pubblicazione": "2024-07-28T11:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 58,
+          "immagine": "/prodotti/immagini/sacco_a_pelo.jpg"
+        }
+      ],
       "tag": ["trekking", "outdoor", "accessori"]
     },
     {
       "id": 59,
-      "titolo": "Kit pronto soccorso",
-      "descrizione": "Kit compatto per escursioni.",
+      "nome": "Kit pronto soccorso",
+      "descrizione_breve": "Kit compatto per escursioni.",
       "prezzo": "29.99",
-      "data_pubblicazione": "2024-07-29T12:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 59,
+          "immagine": "/prodotti/immagini/kit_pronto_soccorso.jpg"
+        }
+      ],
       "tag": ["trekking", "sicurezza", "accessori"]
     },
     {
       "id": 60,
-      "titolo": "Lampada frontale",
-      "descrizione": "Lampada LED ricaricabile per escursioni notturne.",
+      "nome": "Lampada frontale",
+      "descrizione_breve": "Lampada LED ricaricabile per escursioni notturne.",
       "prezzo": "34.99",
-      "data_pubblicazione": "2024-07-30T13:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 60,
+          "immagine": "/prodotti/immagini/lampada_frontale.jpg"
+        }
+      ],
       "tag": ["trekking", "outdoor", "accessori"]
     },
     {
       "id": 61,
-      "titolo": "Scarponi da trekking",
-      "descrizione": "Scarponi impermeabili per sentieri difficili.",
+      "nome": "Scarponi da trekking",
+      "descrizione_breve": "Scarponi impermeabili per sentieri difficili.",
       "prezzo": "119.99",
-      "data_pubblicazione": "2024-07-31T14:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 61,
+          "immagine": "/prodotti/immagini/scarponi_da_trekking.jpg"
+        }
+      ],
       "tag": ["trekking", "outdoor", "scarpe"]
     },
     {
       "id": 62,
-      "titolo": "Bussola digitale",
-      "descrizione": "Bussola con altimetro e barometro.",
+      "nome": "Bussola digitale",
+      "descrizione_breve": "Bussola con altimetro e barometro.",
       "prezzo": "44.99",
-      "data_pubblicazione": "2024-08-01T15:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 62,
+          "immagine": "/prodotti/immagini/bussola_digitale.jpg"
+        }
+      ],
       "tag": ["trekking", "outdoor", "accessori"]
     },
     {
       "id": 63,
-      "titolo": "Materassino gonfiabile",
-      "descrizione": "Materassino ultra leggero per campeggio.",
+      "nome": "Materassino gonfiabile",
+      "descrizione_breve": "Materassino ultra leggero per campeggio.",
       "prezzo": "39.99",
-      "data_pubblicazione": "2024-08-02T16:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 63,
+          "immagine": "/prodotti/immagini/materassino_gonfiabile.jpg"
+        }
+      ],
       "tag": ["trekking", "outdoor", "accessori"]
     },
     {
       "id": 64,
-      "titolo": "Coltello multiuso",
-      "descrizione": "Coltello con 12 funzioni per escursioni.",
+      "nome": "Coltello multiuso",
+      "descrizione_breve": "Coltello con 12 funzioni per escursioni.",
       "prezzo": "24.99",
-      "data_pubblicazione": "2024-08-03T17:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 64,
+          "immagine": "/prodotti/immagini/coltello_multiuso.jpg"
+        }
+      ],
       "tag": ["trekking", "outdoor", "accessori"]
     },
     {
       "id": 65,
-      "titolo": "Binocolo compatto",
-      "descrizione": "Binocolo 8x25 per osservazioni.",
+      "nome": "Binocolo compatto",
+      "descrizione_breve": "Binocolo 8x25 per osservazioni.",
       "prezzo": "59.99",
-      "data_pubblicazione": "2024-08-04T18:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 65,
+          "immagine": "/prodotti/immagini/binocolo_compatto.jpg"
+        }
+      ],
       "tag": ["trekking", "outdoor", "accessori"]
     },
     {
       "id": 66,
-      "titolo": "Set pesca portatile",
-      "descrizione": "Canna pieghevole e accessori per pesca.",
+      "nome": "Set pesca portatile",
+      "descrizione_breve": "Canna pieghevole e accessori per pesca.",
       "prezzo": "49.99",
-      "data_pubblicazione": "2024-08-05T19:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 66,
+          "immagine": "/prodotti/immagini/set_pesca_portatile.jpg"
+        }
+      ],
       "tag": ["pesca", "outdoor", "set"]
     },
     {
       "id": 67,
-      "titolo": "Kayak gonfiabile",
-      "descrizione": "Kayak per 1 persona, facile da trasportare.",
+      "nome": "Kayak gonfiabile",
+      "descrizione_breve": "Kayak per 1 persona, facile da trasportare.",
       "prezzo": "249.99",
-      "data_pubblicazione": "2024-08-06T20:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 67,
+          "immagine": "/prodotti/immagini/kayak_gonfiabile.jpg"
+        }
+      ],
       "tag": ["kayak", "outdoor", "acqua"]
     },
     {
       "id": 68,
-      "titolo": "Giacca antivento",
-      "descrizione": "Giacca leggera e impermeabile.",
+      "nome": "Giacca antivento",
+      "descrizione_breve": "Giacca leggera e impermeabile.",
       "prezzo": "59.99",
-      "data_pubblicazione": "2024-08-07T21:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 68,
+          "immagine": "/prodotti/immagini/giacca_antivento.jpg"
+        }
+      ],
       "tag": ["abbigliamento", "outdoor", "giacca"]
     },
     {
       "id": 69,
-      "titolo": "Pantaloni impermeabili",
-      "descrizione": "Pantaloni per pioggia e vento.",
+      "nome": "Pantaloni impermeabili",
+      "descrizione_breve": "Pantaloni per pioggia e vento.",
       "prezzo": "45.99",
-      "data_pubblicazione": "2024-08-08T22:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 69,
+          "immagine": "/prodotti/immagini/pantaloni_impermeabili.jpg"
+        }
+      ],
       "tag": ["abbigliamento", "outdoor", "pantaloni"]
     },
     {
       "id": 70,
-      "titolo": "Scarpe da arrampicata",
-      "descrizione": "Scarpe aderenti per arrampicata su roccia.",
+      "nome": "Scarpe da arrampicata",
+      "descrizione_breve": "Scarpe aderenti per arrampicata su roccia.",
       "prezzo": "89.99",
-      "data_pubblicazione": "2024-08-09T23:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 70,
+          "immagine": "/prodotti/immagini/scarpe_da_arrampicata.jpg"
+        }
+      ],
       "tag": ["arrampicata", "outdoor", "scarpe"]
     },
     {
       "id": 71,
-      "titolo": "Imbracatura da arrampicata",
-      "descrizione": "Imbracatura regolabile per adulti.",
+      "nome": "Imbracatura da arrampicata",
+      "descrizione_breve": "Imbracatura regolabile per adulti.",
       "prezzo": "69.99",
-      "data_pubblicazione": "2024-08-10T10:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 71,
+          "immagine": "/prodotti/immagini/imbracatura_da_arrampicata.jpg"
+        }
+      ],
       "tag": ["arrampicata", "outdoor", "sicurezza"]
     },
     {
       "id": 72,
-      "titolo": "Moschettoni da arrampicata",
-      "descrizione": "Set di 5 moschettoni resistenti.",
+      "nome": "Moschettoni da arrampicata",
+      "descrizione_breve": "Set di 5 moschettoni resistenti.",
       "prezzo": "29.99",
-      "data_pubblicazione": "2024-08-11T11:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 72,
+          "immagine": "/prodotti/immagini/moschettoni_da_arrampicata.jpg"
+        }
+      ],
       "tag": ["arrampicata", "outdoor", "accessori"]
     },
     {
       "id": 73,
-      "titolo": "Corda da arrampicata",
-      "descrizione": "Corda dinamica 40m per arrampicata.",
+      "nome": "Corda da arrampicata",
+      "descrizione_breve": "Corda dinamica 40m per arrampicata.",
       "prezzo": "129.99",
-      "data_pubblicazione": "2024-08-12T12:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 73,
+          "immagine": "/prodotti/immagini/corda_da_arrampicata.jpg"
+        }
+      ],
       "tag": ["arrampicata", "outdoor", "sicurezza"]
     },
     {
       "id": 74,
-      "titolo": "Set snorkeling",
-      "descrizione": "Maschera, boccaglio e pinne per snorkeling.",
+      "nome": "Set snorkeling",
+      "descrizione_breve": "Maschera, boccaglio e pinne per snorkeling.",
       "prezzo": "39.99",
-      "data_pubblicazione": "2024-08-13T13:00:00Z",
-      "immagini": null,
+      "immagini": [
+        {
+          "id": 74,
+          "immagine": "/prodotti/immagini/set_snorkeling.jpg"
+        }
+      ],
       "tag": ["snorkeling", "acqua", "accessori"]
     },
     {
-      "id": 75,
-      "titolo": "Muta subacquea",
-      "descrizione": "Muta in neoprene 3mm per immersioni.",
-      "prezzo": "89.99",
-      "data_pubblicazione": "2024-08-14T14:00:00Z",
-      "immagini": null,
-      "tag": ["subacquea", "acqua", "abbigliamento"]
-    },
-    {
-      "id": 76,
-      "titolo": "Pinne subacquee",
-      "descrizione": "Pinne regolabili per immersioni.",
-      "prezzo": "49.99",
-      "data_pubblicazione": "2024-08-15T15:00:00Z",
-      "immagini": null,
-      "tag": ["subacquea", "acqua", "accessori"]
-    },
-    {
-      "id": 77,
-      "titolo": "Borsa termica subacquea",
-      "descrizione": "Borsa per mantenere l'attrezzatura al caldo.",
-      "prezzo": "34.99",
-      "data_pubblicazione": "2024-08-16T16:00:00Z",
-      "immagini": null,
-      "tag": ["subacquea", "acqua", "accessori"]
-    },
-    {
-      "id": 78,
-      "titolo": "Girovita per pesi",
-      "descrizione": "Cintura con pesi per immersioni.",
-      "prezzo": "29.99",
-      "data_pubblicazione": "2024-08-17T17:00:00Z",
-      "immagini": null,
-      "tag": ["subacquea", "acqua", "accessori"]
-    },
-    {
-      "id": 79,
-      "titolo": "Torcia subacquea",
-      "descrizione": "Torcia LED resistente all'acqua fino a 100m.",
-      "prezzo": "59.99",
-      "data_pubblicazione": "2024-08-18T18:00:00Z",
-      "immagini": null,
-      "tag": ["subacquea", "acqua", "accessori"]
-    },
-    {
-      "id": 80,
-      "titolo": "Bussola subacquea",
-      "descrizione": "Bussola resistente all'acqua per immersioni.",
-      "prezzo": "39.99",
-      "data_pubblicazione": "2024-08-19T19:00:00Z",
-      "immagini": null,
-      "tag": ["subacquea", "acqua", "accessori"]
-    },
-    {
-      "id": 81,
-      "titolo": "Tavola da surf",
-      "descrizione": "Tavola da surf in schiuma per principianti.",
-      "prezzo": "199.99",
-      "data_pubblicazione": "2024-08-20T20:00:00Z",
-      "immagini": null,
-      "tag": ["surf", "acqua", "sport"]
-    },
-    {
-      "id": 82,
-      "titolo": "Paddleboard gonfiabile",
-      "descrizione": "Paddleboard con pagaia inclusa.",
-      "prezzo": "349.99",
-      "data_pubblicazione": "2024-08-21T21:00:00Z",
-      "immagini": null,
-      "tag": ["paddleboard", "acqua", "sport"]
-    },
-    {
-      "id": 83,
-      "titolo": "Muta da surf",
-      "descrizione": "Muta in neoprene 2mm per surf.",
-      "prezzo": "79.99",
-      "data_pubblicazione": "2024-08-22T22:00:00Z",
-      "immagini": null,
-      "tag": ["surf", "acqua", "abbigliamento"]
-    },
-    {
-      "id": 84,
-      "titolo": "Casco da kayak",
-      "descrizione": "Casco protettivo per sport acquatici.",
-      "prezzo": "49.99",
-      "data_pubblicazione": "2024-08-23T23:00:00Z",
-      "immagini": null,
-      "tag": ["kayak", "acqua", "sicurezza"]
-    },
-    {
-      "id": 85,
-      "titolo": "Giubbotto di salvataggio",
-      "descrizione": "Giubbotto galleggiante per adulti.",
-      "prezzo": "39.99",
-      "data_pubblicazione": "2024-08-24T10:00:00Z",
-      "immagini": null,
-      "tag": ["acqua", "sicurezza", "accessori"]
-    },
-    {
-      "id": 86,
-      "titolo": "Pagaia da kayak",
-      "descrizione": "Pagaia regolabile in alluminio.",
-      "prezzo": "59.99",
-      "data_pubblicazione": "2024-08-25T11:00:00Z",
-      "immagini": null,
-      "tag": ["kayak", "acqua", "accessori"]
-    },
-    {
-      "id": 87,
-      "titolo": "Borsa impermeabile",
-      "descrizione": "Borsa 20L resistente all'acqua.",
-      "prezzo": "29.99",
-      "data_pubblicazione": "2024-08-26T12:00:00Z",
-      "immagini": null,
-      "tag": ["acqua", "accessori", "borsa"]
-    },
-    {
-      "id": 88,
-      "titolo": "Telo da spiaggia",
-      "descrizione": "Telo grande e resistente all'acqua.",
-      "prezzo": "19.99",
-      "data_pubblicazione": "2024-08-27T13:00:00Z",
-      "immagini": null,
-      "tag": ["spiaggia", "accessori", "outdoor"]
-    },
-    {
-      "id": 89,
-      "titolo": "Ombrellone da spiaggia",
-      "descrizione": "Ombrellone resistente al vento.",
-      "prezzo": "49.99",
-      "data_pubblicazione": "2024-08-28T14:00:00Z",
-      "immagini": null,
-      "tag": ["spiaggia", "outdoor", "accessori"]
-    },
-    {
-      "id": 90,
-      "titolo": "Sedia da spiaggia",
-      "descrizione": "Sedia pieghevole per spiaggia.",
-      "prezzo": "24.99",
-      "data_pubblicazione": "2024-08-29T15:00:00Z",
-      "immagini": null,
-      "tag": ["spiaggia", "outdoor", "accessori"]
-    },
-    {
-      "id": 91,
-      "titolo": "Cooler portatile",
-      "descrizione": "Cooler 15L per picnic e spiaggia.",
-      "prezzo": "34.99",
-      "data_pubblicazione": "2024-08-30T16:00:00Z",
-      "immagini": null,
-      "tag": ["spiaggia", "outdoor", "accessori"]
-    },
-    {
-      "id": 92,
-      "titolo": "Set beach tennis",
-      "descrizione": "Racchette e palline per beach tennis.",
-      "prezzo": "29.99",
-      "data_pubblicazione": "2024-08-31T17:00:00Z",
-      "immagini": null,
-      "tag": ["beach tennis", "spiaggia", "outdoor"]
-    },
-    {
-      "id": 93,
-      "titolo": "Palla da waterpolo",
-      "descrizione": "Palla ufficiale per waterpolo.",
-      "prezzo": "24.99",
-      "data_pubblicazione": "2024-09-01T18:00:00Z",
-      "immagini": null,
-      "tag": ["waterpolo", "acqua", "pallone"]
-    },
-    {
-      "id": 94,
-      "titolo": "Costume da bagno sportivo",
-      "descrizione": "Costume per nuoto agonistico.",
-      "prezzo": "39.99",
-      "data_pubblicazione": "2024-09-02T19:00:00Z",
-      "immagini": null,
-      "tag": ["nuoto", "acqua", "abbigliamento"]
-    },
-    {
-      "id": 95,
-      "titolo": "Tappeto da palestra in gomma",
-      "descrizione": "Tappeto antiscivolo per pesi.",
-      "prezzo": "44.99",
-      "data_pubblicazione": "2024-09-03T20:00:00Z",
-      "immagini": null,
-      "tag": ["fitness", "indoor", "tappeto"]
-    },
-    {
-      "id": 96,
-      "titolo": "Barra per trazioni",
-      "descrizione": "Barra da montare in porta.",
-      "prezzo": "29.99",
-      "data_pubblicazione": "2024-09-04T21:00:00Z",
-      "immagini": null,
-      "tag": ["fitness", "indoor", "accessori"]
-    },
-    {
-      "id": 97,
-      "titolo": "Anelli da ginnastica",
-      "descrizione": "Anelli regolabili per allenamento.",
-      "prezzo": "39.99",
-      "data_pubblicazione": "2024-09-05T22:00:00Z",
-      "immagini": null,
-      "tag": ["fitness", "indoor", "accessori"]
-    },
-    {
-      "id": 98,
-      "titolo": "Kettlebell 12kg",
-      "descrizione": "Kettlebell in ghisa per allenamento.",
-      "prezzo": "34.99",
-      "data_pubblicazione": "2024-09-06T23:00:00Z",
-      "immagini": null,
-      "tag": ["fitness", "indoor", "pesi"]
-    },
-    {
-      "id": 99,
-      "titolo": "Panca per addominali",
-      "descrizione": "Panca inclinabile per esercizi.",
-      "prezzo": "59.99",
-      "data_pubblicazione": "2024-09-07T10:00:00Z",
-      "immagini": null,
-      "tag": ["fitness", "indoor", "panca"]
-    },
-    {
-      "id": 100,
-      "titolo": "Cavo per esercizi",
-      "descrizione": "Cavo con maniglie per allenamento.",
-      "prezzo": "24.99",
-      "data_pubblicazione": "2024-09-08T11:00:00Z",
-      "immagini": null,
-      "tag": ["fitness", "indoor", "accessori"]
-    }
+    "id": 75,
+    "nome": "Muta subacquea",
+    "descrizione_breve": "Muta in neoprene 3mm per immersioni.",
+    "prezzo": "89.99",
+    "immagini": [
+      {
+        "id": 75,
+        "immagine": "/prodotti/immagini/muta_subacquea.jpg"
+      }
+    ],
+    "tag": ["subacquea", "acqua", "abbigliamento"]
+  },
+  {
+    "id": 76,
+    "nome": "Pinne subacquee",
+    "descrizione_breve": "Pinne regolabili per immersioni.",
+    "prezzo": "49.99",
+    "immagini": [
+      {
+        "id": 76,
+        "immagine": "/prodotti/immagini/pinne_subacquee.jpg"
+      }
+    ],
+    "tag": ["subacquea", "acqua", "accessori"]
+  },
+  {
+    "id": 77,
+    "nome": "Borsa termica subacquea",
+    "descrizione_breve": "Borsa per mantenere l'attrezzatura al caldo.",
+    "prezzo": "34.99",
+    "immagini": [
+      {
+        "id": 77,
+        "immagine": "/prodotti/immagini/borsa_termica_subacquea.jpg"
+      }
+    ],
+    "tag": ["subacquea", "acqua", "accessori"]
+  },
+  {
+    "id": 78,
+    "nome": "Girovita per pesi",
+    "descrizione_breve": "Cintura con pesi per immersioni.",
+    "prezzo": "29.99",
+    "immagini": [
+      {
+        "id": 78,
+        "immagine": "/prodotti/immagini/girovita_per_pesi.jpg"
+      }
+    ],
+    "tag": ["subacquea", "acqua", "accessori"]
+  },
+  {
+    "id": 79,
+    "nome": "Torcia subacquea",
+    "descrizione_breve": "Torcia LED resistente all'acqua fino a 100m.",
+    "prezzo": "59.99",
+    "immagini": [
+      {
+        "id": 79,
+        "immagine": "/prodotti/immagini/torcia_subacquea.jpg"
+      }
+    ],
+    "tag": ["subacquea", "acqua", "accessori"]
+  },
+  {
+    "id": 80,
+    "nome": "Bussola subacquea",
+    "descrizione_breve": "Bussola resistente all'acqua per immersioni.",
+    "prezzo": "39.99",
+    "immagini": [
+      {
+        "id": 80,
+        "immagine": "/prodotti/immagini/bussola_subacquea.jpg"
+      }
+    ],
+    "tag": ["subacquea", "acqua", "accessori"]
+  },
+  {
+    "id": 81,
+    "nome": "Tavola da surf",
+    "descrizione_breve": "Tavola da surf in schiuma per principianti.",
+    "prezzo": "199.99",
+    "immagini": [
+      {
+        "id": 81,
+        "immagine": "/prodotti/immagini/tavola_da_surf.jpg"
+      }
+    ],
+    "tag": ["surf", "acqua", "sport"]
+  },
+  {
+    "id": 82,
+    "nome": "Paddleboard gonfiabile",
+    "descrizione_breve": "Paddleboard con pagaia inclusa.",
+    "prezzo": "349.99",
+    "immagini": [
+      {
+        "id": 82,
+        "immagine": "/prodotti/immagini/paddleboard_gonfiabile.jpg"
+      }
+    ],
+    "tag": ["paddleboard", "acqua", "sport"]
+  },
+  {
+    "id": 83,
+    "nome": "Muta da surf",
+    "descrizione_breve": "Muta in neoprene 2mm per surf.",
+    "prezzo": "79.99",
+    "immagini": [
+      {
+        "id": 83,
+        "immagine": "/prodotti/immagini/muta_da_surf.jpg"
+      }
+    ],
+    "tag": ["surf", "acqua", "abbigliamento"]
+  },
+  {
+    "id": 84,
+    "nome": "Casco da kayak",
+    "descrizione_breve": "Casco protettivo per sport acquatici.",
+    "prezzo": "49.99",
+    "immagini": [
+      {
+        "id": 84,
+        "immagine": "/prodotti/immagini/casco_da_kayak.jpg"
+      }
+    ],
+    "tag": ["kayak", "acqua", "sicurezza"]
+  },
+  {
+    "id": 85,
+    "nome": "Giubbotto di salvataggio",
+    "descrizione_breve": "Giubbotto galleggiante per adulti.",
+    "prezzo": "39.99",
+    "immagini": [
+      {
+        "id": 85,
+        "immagine": "/prodotti/immagini/giubbotto_di_salvataggio.jpg"
+      }
+    ],
+    "tag": ["acqua", "sicurezza", "accessori"]
+  },
+  {
+    "id": 86,
+    "nome": "Pagaia da kayak",
+    "descrizione_breve": "Pagaia regolabile in alluminio.",
+    "prezzo": "59.99",
+    "immagini": [
+      {
+        "id": 86,
+        "immagine": "/prodotti/immagini/pagaia_da_kayak.jpg"
+      }
+    ],
+    "tag": ["kayak", "acqua", "accessori"]
+  },
+  {
+    "id": 87,
+    "nome": "Borsa impermeabile",
+    "descrizione_breve": "Borsa 20L resistente all'acqua.",
+    "prezzo": "29.99",
+    "immagini": [
+      {
+        "id": 87,
+        "immagine": "/prodotti/immagini/borsa_impermeabile.jpg"
+      }
+    ],
+    "tag": ["acqua", "accessori", "borsa"]
+  },
+  {
+    "id": 88,
+    "nome": "Telo da spiaggia",
+    "descrizione_breve": "Telo grande e resistente all'acqua.",
+    "prezzo": "19.99",
+    "immagini": [
+      {
+        "id": 88,
+        "immagine": "/prodotti/immagini/telo_da_spiaggia.jpg"
+      }
+    ],
+    "tag": ["spiaggia", "accessori", "outdoor"]
+  },
+  {
+    "id": 89,
+    "nome": "Ombrellone da spiaggia",
+    "descrizione_breve": "Ombrellone resistente al vento.",
+    "prezzo": "49.99",
+    "immagini": [
+      {
+        "id": 89,
+        "immagine": "/prodotti/immagini/ombrellone_da_spiaggia.jpg"
+      }
+    ],
+    "tag": ["spiaggia", "outdoor", "accessori"]
+  },
+  {
+    "id": 90,
+    "nome": "Sedia da spiaggia",
+    "descrizione_breve": "Sedia pieghevole per spiaggia.",
+    "prezzo": "24.99",
+    "immagini": [
+      {
+        "id": 90,
+        "immagine": "/prodotti/immagini/sedia_da_spiaggia.jpg"
+      }
+    ],
+    "tag": ["spiaggia", "outdoor", "accessori"]
+  },
+  {
+    "id": 91,
+    "nome": "Cooler portatile",
+    "descrizione_breve": "Cooler 15L per picnic e spiaggia.",
+    "prezzo": "34.99",
+    "immagini": [
+      {
+        "id": 91,
+        "immagine": "/prodotti/immagini/cooler_portatile.jpg"
+      }
+    ],
+    "tag": ["spiaggia", "outdoor", "accessori"]
+  },
+  {
+    "id": 92,
+    "nome": "Set beach tennis",
+    "descrizione_breve": "Racchette e palline per beach tennis.",
+    "prezzo": "29.99",
+    "immagini": [
+      {
+        "id": 92,
+        "immagine": "/prodotti/immagini/set_beach_tennis.jpg"
+      }
+    ],
+    "tag": ["beach tennis", "spiaggia", "outdoor"]
+  },
+  {
+    "id": 93,
+    "nome": "Palla da waterpolo",
+    "descrizione_breve": "Palla ufficiale per waterpolo.",
+    "prezzo": "24.99",
+    "immagini": [
+      {
+        "id": 93,
+        "immagine": "/prodotti/immagini/palla_da_waterpolo.jpg"
+      }
+    ],
+    "tag": ["waterpolo", "acqua", "pallone"]
+  },
+  {
+    "id": 94,
+    "nome": "Costume da bagno sportivo",
+    "descrizione_breve": "Costume per nuoto agonistico.",
+    "prezzo": "39.99",
+    "immagini": [
+      {
+        "id": 94,
+        "immagine": "/prodotti/immagini/costume_da_bagno_sportivo.jpg"
+      }
+    ],
+    "tag": ["nuoto", "acqua", "abbigliamento"]
+  },
+  {
+    "id": 95,
+    "nome": "Tappeto da palestra in gomma",
+    "descrizione_breve": "Tappeto antiscivolo per pesi.",
+    "prezzo": "44.99",
+    "immagini": [
+      {
+        "id": 95,
+        "immagine": "/prodotti/immagini/tappeto_da_palestra_in_gomma.jpg"
+      }
+    ],
+    "tag": ["fitness", "indoor", "tappeto"]
+  },
+  {
+    "id": 96,
+    "nome": "Barra per trazioni",
+    "descrizione_breve": "Barra da montare in porta.",
+    "prezzo": "29.99",
+    "immagini": [
+      {
+        "id": 96,
+        "immagine": "/prodotti/immagini/barra_per_trazioni.jpg"
+      }
+    ],
+    "tag": ["fitness", "indoor", "accessori"]
+  },
+  {
+    "id": 97,
+    "nome": "Anelli da ginnastica",
+    "descrizione_breve": "Anelli regolabili per allenamento.",
+    "prezzo": "39.99",
+    "immagini": [
+      {
+        "id": 97,
+        "immagine": "/prodotti/immagini/anelli_da_ginnastica.jpg"
+      }
+    ],
+    "tag": ["fitness", "indoor", "accessori"]
+  },
+  {
+    "id": 98,
+    "nome": "Kettlebell 12kg",
+    "descrizione_breve": "Kettlebell in ghisa per allenamento.",
+    "prezzo": "34.99",
+    "immagini": [
+      {
+        "id": 98,
+        "immagine": "/prodotti/immagini/kettlebell_12kg.jpg"
+      }
+    ],
+    "tag": ["fitness", "indoor", "pesi"]
+  },
+  {
+    "id": 99,
+    "nome": "Panca per addominali",
+    "descrizione_breve": "Panca inclinabile per esercizi.",
+    "prezzo": "59.99",
+    "immagini": [
+      {
+        "id": 99,
+        "immagine": "/prodotti/immagini/panca_per_addominali.jpg"
+      }
+    ],
+    "tag": ["fitness", "indoor", "panca"]
+  },
+  {
+    "id": 100,
+    "nome": "Cavo per esercizi",
+    "descrizione_breve": "Cavo con maniglie per allenamento.",
+    "prezzo": "24.99",
+    "immagini": [
+      {
+        "id": 100,
+        "immagine": "/prodotti/immagini/cavo_per_esercizi.jpg"
+      }
+    ],
+    "tag": ["fitness", "indoor", "accessori"]
+}
+
+  ],
+  "annunci": [
+    {"prodotto_id": 1, "data_pubblicazione": "2024-06-01T09:00:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 2, "data_pubblicazione": "2024-06-01T09:01:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 3, "data_pubblicazione": "2024-06-01T09:02:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 4, "data_pubblicazione": "2024-06-01T09:03:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 5, "data_pubblicazione": "2024-06-01T09:04:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 6, "data_pubblicazione": "2024-06-01T09:05:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 7, "data_pubblicazione": "2024-06-01T09:06:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 8, "data_pubblicazione": "2024-06-01T09:07:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 9, "data_pubblicazione": "2024-06-01T09:08:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 10, "data_pubblicazione": "2024-06-01T09:09:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 11, "data_pubblicazione": "2024-06-01T09:10:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 12, "data_pubblicazione": "2024-06-01T09:11:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 13, "data_pubblicazione": "2024-06-01T09:12:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 14, "data_pubblicazione": "2024-06-01T09:13:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 15, "data_pubblicazione": "2024-06-01T09:14:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 16, "data_pubblicazione": "2024-06-01T09:15:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 17, "data_pubblicazione": "2024-06-01T09:16:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 18, "data_pubblicazione": "2024-06-01T09:17:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 19, "data_pubblicazione": "2024-06-01T09:18:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 20, "data_pubblicazione": "2024-06-01T09:19:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 21, "data_pubblicazione": "2024-06-01T09:20:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 22, "data_pubblicazione": "2024-06-01T09:21:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 23, "data_pubblicazione": "2024-06-01T09:22:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 24, "data_pubblicazione": "2024-06-01T09:23:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 25, "data_pubblicazione": "2024-06-01T09:24:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 26, "data_pubblicazione": "2024-06-01T09:25:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 27, "data_pubblicazione": "2024-06-01T09:26:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 28, "data_pubblicazione": "2024-06-01T09:27:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 29, "data_pubblicazione": "2024-06-01T09:28:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 30, "data_pubblicazione": "2024-06-01T09:29:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 31, "data_pubblicazione": "2024-06-01T09:30:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 32, "data_pubblicazione": "2024-06-01T09:31:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 33, "data_pubblicazione": "2024-06-01T09:32:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 34, "data_pubblicazione": "2024-06-01T09:33:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 35, "data_pubblicazione": "2024-06-01T09:34:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 36, "data_pubblicazione": "2024-06-01T09:35:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 37, "data_pubblicazione": "2024-06-01T09:36:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 38, "data_pubblicazione": "2024-06-01T09:37:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 39, "data_pubblicazione": "2024-06-01T09:38:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 40, "data_pubblicazione": "2024-06-01T09:39:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 41, "data_pubblicazione": "2024-06-01T09:40:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 42, "data_pubblicazione": "2024-06-01T09:41:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 43, "data_pubblicazione": "2024-06-01T09:42:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 44, "data_pubblicazione": "2024-06-01T09:43:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 45, "data_pubblicazione": "2024-06-01T09:44:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 46, "data_pubblicazione": "2024-06-01T09:45:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 47, "data_pubblicazione": "2024-06-01T09:46:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 48, "data_pubblicazione": "2024-06-01T09:47:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 49, "data_pubblicazione": "2024-06-01T09:48:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 50, "data_pubblicazione": "2024-06-01T09:49:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 51, "data_pubblicazione": "2024-06-01T09:50:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 52, "data_pubblicazione": "2024-06-01T09:51:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 53, "data_pubblicazione": "2024-06-01T09:52:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 54, "data_pubblicazione": "2024-06-01T09:53:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 55, "data_pubblicazione": "2024-06-01T09:54:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 56, "data_pubblicazione": "2024-06-01T09:55:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 57, "data_pubblicazione": "2024-06-01T09:56:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 58, "data_pubblicazione": "2024-06-01T09:57:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 59, "data_pubblicazione": "2024-06-01T09:58:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 60, "data_pubblicazione": "2024-06-01T09:59:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 61, "data_pubblicazione": "2024-06-01T10:00:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 62, "data_pubblicazione": "2024-06-01T10:01:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 63, "data_pubblicazione": "2024-06-01T10:02:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 64, "data_pubblicazione": "2024-06-01T10:03:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 65, "data_pubblicazione": "2024-06-01T10:04:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 66, "data_pubblicazione": "2024-06-01T10:05:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 67, "data_pubblicazione": "2024-06-01T10:06:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 68, "data_pubblicazione": "2024-06-01T10:07:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 69, "data_pubblicazione": "2024-06-01T10:08:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 70, "data_pubblicazione": "2024-06-01T10:09:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 71, "data_pubblicazione": "2024-06-01T10:10:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 72, "data_pubblicazione": "2024-06-01T10:11:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 73, "data_pubblicazione": "2024-06-01T10:12:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 74, "data_pubblicazione": "2024-06-01T10:13:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 75, "data_pubblicazione": "2024-06-01T10:14:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 76, "data_pubblicazione": "2024-06-01T10:15:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 77, "data_pubblicazione": "2024-06-01T10:16:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 78, "data_pubblicazione": "2024-06-01T10:17:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 79, "data_pubblicazione": "2024-06-01T10:18:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 80, "data_pubblicazione": "2024-06-01T10:19:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 81, "data_pubblicazione": "2024-06-01T10:20:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 82, "data_pubblicazione": "2024-06-01T10:21:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 83, "data_pubblicazione": "2024-06-01T10:22:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 84, "data_pubblicazione": "2024-06-01T10:23:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 85, "data_pubblicazione": "2024-06-01T10:24:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 86, "data_pubblicazione": "2024-06-01T10:25:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 87, "data_pubblicazione": "2024-06-01T10:26:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 88, "data_pubblicazione": "2024-06-01T10:27:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 89, "data_pubblicazione": "2024-06-01T10:28:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 90, "data_pubblicazione": "2024-06-01T10:29:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 91, "data_pubblicazione": "2024-06-01T10:30:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 92, "data_pubblicazione": "2024-06-01T10:31:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 93, "data_pubblicazione": "2024-06-01T10:32:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 94, "data_pubblicazione": "2024-06-01T10:33:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 95, "data_pubblicazione": "2024-06-01T10:34:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 96, "data_pubblicazione": "2024-06-01T10:35:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 97, "data_pubblicazione": "2024-06-01T10:36:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 98, "data_pubblicazione": "2024-06-01T10:37:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 99, "data_pubblicazione": "2024-06-01T10:38:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 100, "data_pubblicazione": "2024-06-01T10:39:00Z", "qta_magazzino": 10, "is_published": true}
   ],
   "ordini": [
     {
       "utente_username": "Silvia",
-      "annuncio_id": 1,
+      "prodotto_id": 1,
       "quantita": 2,
       "stato": "in attesa",
       "data_ordine": "2024-06-10T09:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 2,
+      "prodotto_id": 2,
       "quantita": 1,
       "stato": "completato",
       "data_ordine": "2024-06-11T10:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 3,
+      "prodotto_id": 3,
       "quantita": 1,
       "stato": "completato",
       "data_ordine": "2024-06-12T11:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 4,
+      "prodotto_id": 4,
       "quantita": 3,
       "stato": "in attesa",
       "data_ordine": "2024-06-13T12:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 5,
+      "prodotto_id": 5,
       "quantita": 2,
       "stato": "completato",
       "data_ordine": "2024-06-14T13:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 6,
+      "prodotto_id": 6,
       "quantita": 1,
       "stato": "completato",
       "data_ordine": "2024-06-15T14:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 7,
+      "prodotto_id": 7,
       "quantita": 1,
       "stato": "in attesa",
       "data_ordine": "2024-06-16T15:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 8,
+      "prodotto_id": 8,
       "quantita": 2,
       "stato": "completato",
       "data_ordine": "2024-06-17T16:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 9,
+      "prodotto_id": 9,
       "quantita": 1,
       "stato": "completato",
       "data_ordine": "2024-06-18T17:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 10,
+      "prodotto_id": 10,
       "quantita": 1,
       "stato": "in attesa",
       "data_ordine": "2024-06-19T18:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 11,
+      "prodotto_id": 11,
       "quantita": 3,
       "stato": "completato",
       "data_ordine": "2024-06-20T19:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 12,
+      "prodotto_id": 12,
       "quantita": 1,
       "stato": "completato",
       "data_ordine": "2024-06-21T20:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 13,
+      "prodotto_id": 13,
       "quantita": 1,
       "stato": "in attesa",
       "data_ordine": "2024-06-22T21:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 14,
+      "prodotto_id": 14,
       "quantita": 2,
       "stato": "completato",
       "data_ordine": "2024-06-23T22:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 15,
+      "prodotto_id": 15,
       "quantita": 1,
       "stato": "completato",
       "data_ordine": "2024-06-24T23:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 16,
+      "prodotto_id": 16,
       "quantita": 1,
       "stato": "in attesa",
       "data_ordine": "2024-06-25T10:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 17,
+      "prodotto_id": 17,
       "quantita": 1,
       "stato": "completato",
       "data_ordine": "2024-06-26T11:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 18,
+      "prodotto_id": 18,
       "quantita": 2,
       "stato": "completato",
       "data_ordine": "2024-06-27T12:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 19,
+      "prodotto_id": 19,
       "quantita": 1,
       "stato": "in attesa",
       "data_ordine": "2024-06-28T13:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 20,
+      "prodotto_id": 20,
       "quantita": 1,
       "stato": "completato",
       "data_ordine": "2024-06-29T14:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 21,
+      "prodotto_id": 21,
       "quantita": 3,
       "stato": "completato",
       "data_ordine": "2024-06-30T15:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 22,
+      "prodotto_id": 22,
       "quantita": 1,
       "stato": "in attesa",
       "data_ordine": "2024-07-01T16:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 23,
+      "prodotto_id": 23,
       "quantita": 1,
       "stato": "completato",
       "data_ordine": "2024-07-02T17:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 24,
+      "prodotto_id": 24,
       "quantita": 2,
       "stato": "completato",
       "data_ordine": "2024-07-03T18:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 25,
+      "prodotto_id": 25,
       "quantita": 1,
       "stato": "in attesa",
       "data_ordine": "2024-07-04T19:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 26,
+      "prodotto_id": 26,
       "quantita": 1,
       "stato": "completato",
       "data_ordine": "2024-07-05T20:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 27,
+      "prodotto_id": 27,
       "quantita": 1,
       "stato": "completato",
       "data_ordine": "2024-07-06T21:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 28,
+      "prodotto_id": 28,
       "quantita": 2,
       "stato": "in attesa",
       "data_ordine": "2024-07-07T22:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 29,
+      "prodotto_id": 29,
       "quantita": 1,
       "stato": "completato",
       "data_ordine": "2024-07-08T23:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 30,
+      "prodotto_id": 30,
       "quantita": 1,
       "stato": "completato",
       "data_ordine": "2024-07-09T10:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 31,
+      "prodotto_id": 31,
       "quantita": 1,
       "stato": "in attesa",
       "data_ordine": "2024-07-10T11:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 32,
+      "prodotto_id": 32,
       "quantita": 1,
       "stato": "completato",
       "data_ordine": "2024-07-11T12:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 33,
+      "prodotto_id": 33,
       "quantita": 3,
       "stato": "completato",
       "data_ordine": "2024-07-12T13:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 34,
+      "prodotto_id": 34,
       "quantita": 1,
       "stato": "in attesa",
       "data_ordine": "2024-07-13T14:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 35,
+      "prodotto_id": 35,
       "quantita": 1,
       "stato": "completato",
       "data_ordine": "2024-07-14T15:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 36,
+      "prodotto_id": 36,
       "quantita": 2,
       "stato": "completato",
       "data_ordine": "2024-07-15T16:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 37,
+      "prodotto_id": 37,
       "quantita": 1,
       "stato": "in attesa",
       "data_ordine": "2024-07-16T17:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 38,
+      "prodotto_id": 38,
       "quantita": 1,
       "stato": "completato",
       "data_ordine": "2024-07-17T18:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 39,
+      "prodotto_id": 39,
       "quantita": 1,
       "stato": "completato",
       "data_ordine": "2024-07-18T19:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 40,
+      "prodotto_id": 40,
       "quantita": 2,
       "stato": "in attesa",
       "data_ordine": "2024-07-19T20:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 41,
+      "prodotto_id": 41,
       "quantita": 1,
       "stato": "completato",
       "data_ordine": "2024-07-20T21:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 42,
+      "prodotto_id": 42,
       "quantita": 1,
       "stato": "completato",
       "data_ordine": "2024-07-21T22:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 43,
+      "prodotto_id": 43,
       "quantita": 1,
       "stato": "in attesa",
       "data_ordine": "2024-07-22T23:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 44,
+      "prodotto_id": 44,
       "quantita": 3,
       "stato": "completato",
       "data_ordine": "2024-07-23T10:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 45,
+      "prodotto_id": 45,
       "quantita": 1,
       "stato": "completato",
       "data_ordine": "2024-07-24T11:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 46,
+      "prodotto_id": 46,
       "quantita": 1,
       "stato": "in attesa",
       "data_ordine": "2024-07-25T12:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 47,
+      "prodotto_id": 47,
       "quantita": 2,
       "stato": "completato",
       "data_ordine": "2024-07-26T13:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 48,
+      "prodotto_id": 48,
       "quantita": 1,
       "stato": "completato",
       "data_ordine": "2024-07-27T14:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 49,
+      "prodotto_id": 49,
       "quantita": 1,
       "stato": "in attesa",
       "data_ordine": "2024-07-28T15:00:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 50,
+      "prodotto_id": 50,
       "quantita": 1,
       "stato": "completato",
       "data_ordine": "2024-07-29T16:00:00Z"
@@ -1271,252 +1759,252 @@
   "creazioni": [
     {
       "utente_username": "Silvia",
-      "annuncio_id": 2,
+      "prodotto_id": 2,
       "data_creazione": "2024-06-02T11:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 3,
+      "prodotto_id": 3,
       "data_creazione": "2024-06-03T12:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 5,
+      "prodotto_id": 5,
       "data_creazione": "2024-06-05T14:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 4,
+      "prodotto_id": 4,
       "data_creazione": "2024-06-04T13:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 1,
+      "prodotto_id": 1,
       "data_creazione": "2024-06-01T10:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 6,
+      "prodotto_id": 6,
       "data_creazione": "2024-06-06T15:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 7,
+      "prodotto_id": 7,
       "data_creazione": "2024-06-07T16:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 8,
+      "prodotto_id": 8,
       "data_creazione": "2024-06-08T17:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 9,
+      "prodotto_id": 9,
       "data_creazione": "2024-06-09T18:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 10,
+      "prodotto_id": 10,
       "data_creazione": "2024-06-10T19:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 11,
+      "prodotto_id": 11,
       "data_creazione": "2024-06-11T20:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 12,
+      "prodotto_id": 12,
       "data_creazione": "2024-06-12T21:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 13,
+      "prodotto_id": 13,
       "data_creazione": "2024-06-13T22:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 14,
+      "prodotto_id": 14,
       "data_creazione": "2024-06-14T23:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 15,
+      "prodotto_id": 15,
       "data_creazione": "2024-06-15T10:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 16,
+      "prodotto_id": 16,
       "data_creazione": "2024-06-16T11:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 17,
+      "prodotto_id": 17,
       "data_creazione": "2024-06-17T12:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 18,
+      "prodotto_id": 18,
       "data_creazione": "2024-06-18T13:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 19,
+      "prodotto_id": 19,
       "data_creazione": "2024-06-19T14:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 20,
+      "prodotto_id": 20,
       "data_creazione": "2024-06-20T15:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 21,
+      "prodotto_id": 21,
       "data_creazione": "2024-06-21T16:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 22,
+      "prodotto_id": 22,
       "data_creazione": "2024-06-22T17:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 23,
+      "prodotto_id": 23,
       "data_creazione": "2024-06-23T18:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 24,
+      "prodotto_id": 24,
       "data_creazione": "2024-06-24T19:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 25,
+      "prodotto_id": 25,
       "data_creazione": "2024-06-25T20:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 26,
+      "prodotto_id": 26,
       "data_creazione": "2024-06-26T21:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 27,
+      "prodotto_id": 27,
       "data_creazione": "2024-06-27T22:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 28,
+      "prodotto_id": 28,
       "data_creazione": "2024-06-28T23:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 29,
+      "prodotto_id": 29,
       "data_creazione": "2024-06-29T10:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 30,
+      "prodotto_id": 30,
       "data_creazione": "2024-06-30T11:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 31,
+      "prodotto_id": 31,
       "data_creazione": "2024-07-01T12:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 32,
+      "prodotto_id": 32,
       "data_creazione": "2024-07-02T13:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 33,
+      "prodotto_id": 33,
       "data_creazione": "2024-07-03T14:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 34,
+      "prodotto_id": 34,
       "data_creazione": "2024-07-04T15:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 35,
+      "prodotto_id": 35,
       "data_creazione": "2024-07-05T16:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 36,
+      "prodotto_id": 36,
       "data_creazione": "2024-07-06T17:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 37,
+      "prodotto_id": 37,
       "data_creazione": "2024-07-07T18:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 38,
+      "prodotto_id": 38,
       "data_creazione": "2024-07-08T19:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 39,
+      "prodotto_id": 39,
       "data_creazione": "2024-07-09T20:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 40,
+      "prodotto_id": 40,
       "data_creazione": "2024-07-10T21:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 41,
+      "prodotto_id": 41,
       "data_creazione": "2024-07-11T22:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 42,
+      "prodotto_id": 42,
       "data_creazione": "2024-07-12T23:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 43,
+      "prodotto_id": 43,
       "data_creazione": "2024-07-13T10:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 44,
+      "prodotto_id": 44,
       "data_creazione": "2024-07-14T11:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 45,
+      "prodotto_id": 45,
       "data_creazione": "2024-07-15T12:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 46,
+      "prodotto_id": 46,
       "data_creazione": "2024-07-16T13:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 47,
+      "prodotto_id": 47,
       "data_creazione": "2024-07-17T14:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 48,
+      "prodotto_id": 48,
       "data_creazione": "2024-07-18T15:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 49,
+      "prodotto_id": 49,
       "data_creazione": "2024-07-19T16:05:00Z"
     },
     {
       "utente_username": "Silvia",
-      "annuncio_id": 50,
+      "prodotto_id": 50,
       "data_creazione": "2024-07-20T17:05:00Z"
     }
   ]
