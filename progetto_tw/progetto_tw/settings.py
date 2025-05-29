@@ -26,9 +26,8 @@ SECRET_KEY = 'django-insecure-^(!33fx!@!@h)-r6(rq70%qk-c$dh64fojzq*$4hzm$s+0+5$c
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
-
+ALLOWED_HOSTS = ["*"]  # Permette tutte le richieste, da modificare in produzione
+CSRF_TRUSTED_ORIGINS = ["https://a272-151-82-169-15.ngrok-free.app",]  # Permette tutte le origini, da modificare in produzione
 # Application definition
 
 INSTALLED_APPS = [
@@ -41,6 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'sylvelius.apps.SylveliusConfig',
     'channels',
+    'paypal.standard.ipn',
+
 ]
 
 MIDDLEWARE = [
@@ -51,6 +52,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'sylvelius.middlewares.AllowPopupCrossOriginMiddleware',
 ]
 
 ROOT_URLCONF = 'progetto_tw.urls'
@@ -137,3 +139,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
+
+# settings.py
+PAYPAL_TEST = True  # Usa l'ambiente sandbox per i test
+xxx='xxx'
+xxx = "xxx"

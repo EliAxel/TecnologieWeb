@@ -24,4 +24,9 @@ urlpatterns = [
     path("check_login_credentials/", views.check_login_credentials, name="check_login_credentials"),
     path('api/immagine/<int:prodotto_id>/', get_immagine_prodotto, name='get_immagine_prodotto'),
     path('api/immagini/<int:prodotto_id>/', get_immagini_prodotto, name='api_immagini'),
+    path('purchase/', views.fake_purchase, name='fake_purchase'),
+    path('payment_done/', views.payment_done, name='payment_done'),
+    path('payment_cancelled/', views.payment_cancelled, name='payment_cancelled'),
+    re_path(r'^paypal/pcc/?$', views.paypal_pcc, name='paypal_webhook'),
+    re_path(r'^paypal/coa/?$', views.paypal_coa, name='paypal_webhook'),
 ]

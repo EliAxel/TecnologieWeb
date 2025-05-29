@@ -1,21 +1,41 @@
-from django.http import JsonResponse
-from django.shortcuts import render, redirect
-from django.views.generic import TemplateView, CreateView
-from .models import Annuncio, Creazione, ImmagineProdotto, Ordine, Tag, Prodotto
-from django.urls import reverse_lazy
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.views import LoginView, LogoutView
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views import View
+# Django core
 from django.contrib.auth import update_session_auth_hash
-from django.core.paginator import Paginator
-from django.shortcuts import render, redirect, get_object_or_404
-import json
-from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
+from django.contrib.auth.views import LoginView, LogoutView
+from django.core.paginator import Paginator
+from django.db.models import Q
+from django.http import HttpResponseBadRequest, HttpResponseServerError, JsonResponse
+from django.shortcuts import (
+    render, 
+    redirect, 
+    get_object_or_404
+)
+from django.urls import reverse, reverse_lazy
+from django.views import View
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from django.views.generic import TemplateView, CreateView
+
+# PayPal integration
+from paypal.standard.forms import PayPalPaymentsForm
+
+# Project specific
+from django.conf import settings
+from .models import (
+    Annuncio,
+    CommentoAnnuncio,
+    Creazione,
+    ImmagineProdotto,
+    Ordine,
+    Tag,
+    Prodotto
+)
+
+# Other
+import json
 
 # Create your views here.
 class HomePageView(TemplateView):
@@ -57,7 +77,7 @@ class LogoutPageView(LogoutView):
     next_page = reverse_lazy('sylvelius:home')
 
 class ProfiloPageView(LoginRequiredMixin, TemplateView):
-    template_name = "sylvelius/profile.html"
+    template_name = "sylvelius/profile/profile.html"
     login_url = reverse_lazy('sylvelius:login')
 
     def get_context_data(self, **kwargs):
@@ -101,7 +121,7 @@ class ProfiloPageView(LoginRequiredMixin, TemplateView):
         return context
 
 class ProfiloEditPageView(LoginRequiredMixin, View):
-    template_name = "sylvelius/profile_edit.html"
+    template_name = "sylvelius/profile/profile_edit.html"
     login_url = reverse_lazy('sylvelius:login')
 
     def get(self, request):
@@ -133,9 +153,8 @@ class ProfiloEditPageView(LoginRequiredMixin, View):
         user.save()
         return redirect('sylvelius:profile')
 
-
 class ProfiloDeletePageView(LoginRequiredMixin, TemplateView):
-    template_name = "sylvelius/profile_delete.html"
+    template_name = "sylvelius/profile/profile_delete.html"
     login_url = reverse_lazy('sylvelius:login')
 
     def get_context_data(self, **kwargs):
@@ -144,17 +163,21 @@ class ProfiloDeletePageView(LoginRequiredMixin, TemplateView):
         return context
 
 class AnnuncioDetailView(TemplateView):
-    template_name = "sylvelius/dettagli_annuncio.html"
+    template_name = "sylvelius/annuncio/dettagli_annuncio.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         annuncio_id = self.kwargs['pk']
         annuncio = get_object_or_404(Annuncio, id=annuncio_id, is_published=True)
+        commenti = CommentoAnnuncio.objects.filter(
+            annuncio=annuncio
+        ).select_related('utente').order_by('-data_pubblicazione')        
         context['annuncio'] = annuncio
+        context['commenti'] = commenti
         return context
     
 class ProfiloOrdiniPageView(LoginRequiredMixin, TemplateView):
-    template_name = "sylvelius/profile_ordini.html"
+    template_name = "sylvelius/profile/profile_ordini.html"
     login_url = reverse_lazy('sylvelius:login')
 
     def get_context_data(self, **kwargs):
@@ -179,7 +202,7 @@ class ProfiloOrdiniPageView(LoginRequiredMixin, TemplateView):
         return context
     
 class ProfiloCreazioniPageView(LoginRequiredMixin, TemplateView):
-    template_name = "sylvelius/profile_creazioni.html"
+    template_name = "sylvelius/profile/profile_creazioni.html"
     login_url = reverse_lazy('sylvelius:login')
 
     def get_context_data(self, **kwargs):
@@ -203,7 +226,7 @@ class ProfiloCreazioniPageView(LoginRequiredMixin, TemplateView):
         return context
 
 class ProfiloCreaCreazionePageView(LoginRequiredMixin, View):
-    template_name = "sylvelius/crea_annuncio.html"
+    template_name = "sylvelius/annuncio/crea_annuncio.html"
     login_url = "sylvelius:login"
 
     def get(self, request):
@@ -306,9 +329,9 @@ class RicercaAnnunciView(TemplateView):
         elif sort_order == "data-asc":
             annunci = annunci.order_by('data_pubblicazione')
         elif sort_order == "prezzo-asc":
-            annunci = annunci.order_by('prezzo')
+            annunci = annunci.order_by('prodotto__prezzo')
         elif sort_order == "prezzo-desc":
-            annunci = annunci.order_by('-prezzo')
+            annunci = annunci.order_by('-prodotto__prezzo')
 
         annunci = annunci.distinct()
 
@@ -392,3 +415,176 @@ def check_login_credentials(request):
             "valid_password": valid_password,
         })
     return JsonResponse({"exists": False, "valid_password": False})
+
+import uuid
+from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponse
+import json
+import logging
+from .models import Ordine, Prodotto
+
+logger = logging.getLogger(__name__)
+
+@require_http_methods(["GET", "POST"])
+def fake_purchase(request):
+    amount = request.POST.get("amount", "0.00")
+    item_name = request.POST.get("item_name", "Prodotto sconosciuto")
+    product_id = request.POST.get("product_id", "")
+    quantity = request.POST.get("quantity", "1")  # Aggiunto quantity
+    invoice_id = str(uuid.uuid4())
+
+    if request.method == 'POST':
+        request.session['pending_order'] = {
+            'product_id': product_id,
+            'amount': amount,
+            'item_name': item_name,
+            'invoice_id': invoice_id,
+            'quantity': quantity  # Aggiunto quantity alla sessione
+        }
+        
+        return render(request, "sylvelius/payment/payment_process.html", {
+            "amount": amount,
+            "item_name": item_name,
+            "product_id": product_id,
+            "invoice_id": invoice_id,
+            "quantity": quantity,  # Aggiunto quantity al context
+            "paypal_client_id": settings.xxx,
+        })
+
+    return render(request, "sylvelius/payment/confirm_purchase.html", {
+        "amount": amount,
+        "item_name": item_name,
+        "quantity": quantity,  # Aggiunto quantity al context
+    })
+
+
+def payment_done(request):
+    pending_order = request.session.get('pending_order')
+    
+    if not pending_order:
+        return HttpResponseBadRequest("Dati dell'ordine non trovati")
+    
+    try:
+        # Creiamo l'ordine con la quantità corretta
+        ordine = Ordine.objects.create(
+            utente=request.user,
+            prodotto=Prodotto.objects.get(id=pending_order['product_id']),
+            quantita=pending_order['quantity'],  # Usiamo la quantità dalla sessione
+            stato='in attesa',
+            invoice_id=pending_order['invoice_id']
+        )
+        
+        del request.session['pending_order']
+        
+        return render(request, 'sylvelius/payment/payment_done.html', {
+            'ordine': ordine
+        })
+        
+    except Exception as e:
+        logger.error(f"Errore nella creazione dell'ordine: {e}")
+        return HttpResponseServerError("Errore nel processamento dell'ordine")
+
+def payment_cancelled(request):    
+    return render(request, 'sylvelius/payment/payment_cancelled.html')
+
+@csrf_exempt
+def paypal_pcc(request):
+    if request.method != 'POST':
+        return HttpResponse(status=400)
+
+    try:
+        payload = json.loads(request.body)
+        event_type = payload.get('event_type')
+        resource = payload.get('resource', {})
+
+        if event_type == 'PAYMENT.CAPTURE.COMPLETED':
+            invoice = resource.get('invoice_id')
+            product_id_str = resource.get('custom_id')
+
+            if not invoice or not product_id_str:
+                print(invoice, product_id_str)
+                logger.error("invoice_id o product_id mancanti nel payload")
+                return HttpResponse(status=400)
+
+            try:
+                product_id = int(product_id_str)
+            except ValueError:
+                logger.error(f"product_id non è un numero valido: {product_id_str}")
+                return HttpResponse(status=400)
+
+            try:
+                prodotto = Prodotto.objects.get(id=product_id)
+            except Prodotto.DoesNotExist:
+                logger.error(f"Prodotto non trovato con ID: {product_id}")
+                return HttpResponse(status=404)
+
+            # Cerchiamo l'ordine completato
+            ordine = Ordine.objects.filter(invoice_id=invoice, prodotto=prodotto).first()
+
+            if ordine:
+                # Aggiorniamo i dettagli di spedizione
+                ordine.stato = 'completato'
+                ordine.save()
+            else:
+                logger.warning(f"Nessun ordine trovato per invoice_id {invoice} e prodotto {prodotto}")
+                return HttpResponse(status=404)
+
+        return HttpResponse(status=200)
+
+    except Exception as e:
+        logger.exception(f"Errore nel webhook PayPal: {e}")
+        return HttpResponse(status=500)
+    
+@csrf_exempt
+def paypal_coa(request):
+    if request.method != 'POST':
+        return HttpResponse(status=400)
+
+    try:
+        payload = json.loads(request.body)
+        event_type = payload.get('event_type')
+        resource = payload.get('resource', {})
+
+        if event_type == 'CHECKOUT.ORDER.APPROVED':
+            purchase_units = resource.get('purchase_units', [])
+            if not purchase_units:
+                logger.error("purchase_units mancanti nel CHECKOUT.ORDER.COMPLETED")
+                return HttpResponse(status=400)
+
+            pu = purchase_units[0]  # prendi il primo purchase unit
+            invoice = pu.get('invoice_id')
+            product_id_str = pu.get('custom_id')
+
+            if not invoice or not product_id_str:
+                logger.error(f"invoice_id o product_id mancanti nel purchase_unit: invoice={invoice}, product_id={product_id_str}")
+                return HttpResponse(status=400)
+
+            try:
+                product_id = int(product_id_str)
+            except ValueError:
+                logger.error(f"product_id non è un numero valido: {product_id_str}")
+                return HttpResponse(status=400)
+
+            try:
+                prodotto = Prodotto.objects.get(id=product_id)
+            except Prodotto.DoesNotExist:
+                logger.error(f"Prodotto non trovato con ID: {product_id}")
+                return HttpResponse(status=404)
+
+            ordine = Ordine.objects.filter(invoice_id=invoice, prodotto=prodotto).first()
+
+            if ordine:
+                shipping = pu.get('shipping', {})
+                address = shipping.get('address', {})
+                ordine.luogo_consegna = address
+                ordine.save()
+            else:
+                logger.warning(f"Nessun ordine trovato per invoice_id {invoice} e prodotto {prodotto}")
+                return HttpResponse(status=404)
+
+        return HttpResponse(status=200)
+
+    except Exception as e:
+        logger.exception(f"Errore nel webhook PayPal: {e}")
+        return HttpResponse(status=500)

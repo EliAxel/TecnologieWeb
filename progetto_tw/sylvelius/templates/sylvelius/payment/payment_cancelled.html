@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Pagamento Annullato - Sylvelius{% endblock %}
+
+{% block middle %}
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            <h2 class="text-warning">Pagamento Annullato</h2>
+            <p class="lead">Hai annullato il pagamento</p>
+            <a href="{% url 'sylvelius:home' %}" class="btn btn-primary mt-3">Torna alla Home</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block sign_in_sign_up %}
+    {% include "_btn_toprightbuttons.html" %}
+{% endblock %}

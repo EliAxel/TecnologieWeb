@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% load static %}
+{% block sign_in_sign_up %}
+    {% include "_btn_toprightbuttons.html" %}
+{% endblock %}
+{% block title %}{{ annuncio.prodotto.nome }}{% endblock %}
+
+{% block middle %}
+<div class="container mt-5 mb-5">
+    <div class="row">
+        <!-- Colonna Sinistra: Testo -->
+        <div class="col-md-6">
+            <h2>{{ annuncio.prodotto.nome }}</h2>
+            <p class="text-muted">
+                Pubblicato il {{ annuncio.data_pubblicazione|date:"d/m/Y H:i" }} da {{ annuncio.creazioni.first.utente.username }}
+            </p>
+
+            {% if annuncio.prodotto.descrizione_breve %}
+                <p class="lead">{{ annuncio.prodotto.descrizione_breve }}</p>
+            {% endif %}
+            <div class="text-warning me-3">
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-half"></i>
+            </div>
+            <p class="text-muted mb-4">Rating medio: 4,4 stelle</p>
+            {% if annuncio.prodotto.descrizione %}
+                <p>{{ annuncio.prodotto.descrizione }}</p>
+            {% endif %}
+
+            <h4 class="text-primary mt-4">€ <span id="unit-price">{{ annuncio.prodotto.prezzo }}</span> 
+                <small class="text-muted">/unità</small>
+            </h4>
+            <h5 id="total-price-container" style="display: none;">Totale: <span id="total-price" class="text-success">{{ annuncio.prodotto.prezzo }}</span> €</h5>
+            <p class="text-muted">Disponibilità: {{ annuncio.qta_magazzino }} unità</p>
+
+            <!-- Selezione quantità -->
+            <div class="form-group mt-3 mb-3">
+                <label for="quantity-select">Quantità:</label>
+                <select class="form-control w-auto d-inline-block ml-2" id="quantity-select" name="quantity">
+                    {% with ''|center:annuncio.qta_magazzino as range %}
+                    {% for i in range %}
+                        <option value="{{ forloop.counter }}">{{ forloop.counter }}</option>
+                    {% endfor %}
+                    {% endwith %}
+                </select>
+            </div>
+
+            <!-- Azioni -->
+            <div class="mt-4 mb-4">
+                <button class="btn btn-success d-inline-block">Aggiungi al carrello</button>
+                <form action="{% url 'sylvelius:fake_purchase' %}" method="post" class="d-inline-block" id="purchase-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="amount" value="{{ annuncio.prodotto.prezzo }}" id="amount-input">
+                    <input type="hidden" name="item_name" value="{{ annuncio.prodotto.nome }}">
+                    <input type="hidden" name="product_id" value="{{ annuncio.prodotto.id }}">
+                    <input type="hidden" name="quantity" value="1" id="quantity-input">
+                    <button type="submit" class="btn btn-primary">Acquista ora</button>
+                </form>
+            </div>
+
+            <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const quantitySelect = document.getElementById('quantity-select');
+                const quantityInput = document.getElementById('quantity-input');
+                const amountInput = document.getElementById('amount-input');
+                const unitPriceElement = document.getElementById('unit-price');
+                const totalPriceElement = document.getElementById('total-price');
+                const totalPriceContainer = document.getElementById('total-price-container');
+                
+                const originalPrice = parseFloat("{{ annuncio.prodotto.prezzo }}");
+                unitPriceElement.textContent = originalPrice.toFixed(2);
+                totalPriceElement.textContent = originalPrice.toFixed(2);
+                
+                function updatePrices() {
+                    const quantity = parseInt(quantitySelect.value);
+                    const totalPrice = originalPrice * quantity;
+                    
+                    quantityInput.value = quantity;
+                    amountInput.value = totalPrice.toFixed(2);
+                    totalPriceElement.textContent = totalPrice.toFixed(2);
+                    
+                    // Mostra/nascondi il totale in base alla quantità
+                    if (quantity === 1) {
+                        totalPriceContainer.style.display = 'none';
+                    } else {
+                        totalPriceContainer.style.display = 'block';
+                    }
+                }
+                
+                quantitySelect.addEventListener('change', updatePrices);
+                updatePrices(); // Inizializza al caricamento
+            });
+            </script>
+        </div>
+
+        <!-- Colonna Destra: Carosello -->
+        <div class="col-md-6">
+            {% if annuncio.prodotto.immagini.all %}
+                <div id="caroselloProdotto" class="carousel slide" data-ride="carousel" data-interval="false">
+                    <div class="carousel-inner">
+                        {% for immagine in annuncio.prodotto.immagini.all %}
+                            <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                <img
+                                    data-index="{{ forloop.counter0 }}"
+                                    data-prodotto-id="{{ annuncio.prodotto.id }}"
+                                    class="d-block w-100 rounded shadow immagine-carosello"
+                                    src="{% static 'img/default_loading.png' %}"
+                                    alt="Immagine prodotto"
+                                >
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Pulsanti di navigazione personalizzati -->
+                    {% if annuncio.prodotto.immagini.count > 1 %}
+                        <a class="carousel-control-prev" href="#caroselloProdotto" role="button" data-slide="prev">
+                            <span class="carousel-control-prev-icon bg-dark rounded-circle p-3" aria-hidden="true"></span>
+                            <span class="sr-only">Precedente</span>
+                        </a>
+                        <a class="carousel-control-next" href="#caroselloProdotto" role="button" data-slide="next">
+                            <span class="carousel-control-next-icon bg-dark rounded-circle p-3" aria-hidden="true"></span>
+                            <span class="sr-only">Successivo</span>
+                        </a>
+                    {% endif %}
+                </div>
+            {% else %}
+                <img src="{% static 'img/default_product.png' %}" class="img-fluid rounded shadow" alt="Immagine prodotto">
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Commenti -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <h4 class="mb-4">💬 Commenti degli utenti</h4>
+
+            {% for commento in commenti %}
+                <div class="card mb-3 shadow-sm">
+                    <div class="card-body d-flex">
+                        <div class="text-center me-3" style="min-width: 80px;">
+                            <img src="{% static 'img/default_user.png' %}" class="rounded-circle" width="50" height="50" alt="Avatar">
+                        </div>
+                        <div class="text-start w-100 text-left">
+                            <div class="d-flex align-items-center mb-1 flex-wrap">
+                                <h6 class="mb-0 font-weight-bold mr-3">{{ commento.utente.username }}</h6>
+                                <div class="text-warning me-3 mr-3">
+                                    {% for i in "12345"|slice:":5" %}
+                                        {% if forloop.counter <= commento.rating %}
+                                            <i class="bi bi-star-fill"></i>
+                                        {% else %}
+                                            <i class="bi bi-star"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                                <small class="text-muted">{{ commento.data_pubblicazione|date:"d/m/Y" }}</small>
+                            </div>
+                            <p class="mb-0">{{ commento.testo }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-muted">Nessun commento per questo annuncio.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'js/imgs_loader.js' %}"></script>
+{% endblock %}

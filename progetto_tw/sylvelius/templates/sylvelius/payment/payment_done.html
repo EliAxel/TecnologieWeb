@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Pagamento Completato - Sylvelius{% endblock %}
+
+{% block middle %}
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            <h2 class="text-success">Pagamento Completato con Successo!</h2>
+            <p class="lead">Grazie per il tuo acquisto su Sylvelius.</p>
+            <p>Il tuo ordine è stato elaborato.</p>
+            <a href="{% url 'sylvelius:home' %}" class="btn btn-primary mt-3">Torna alla Home</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block sign_in_sign_up %}
+    {% include "_btn_toprightbuttons.html" %}
+{% endblock %}

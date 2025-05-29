@@ -2007,5 +2007,28 @@
       "prodotto_id": 50,
       "data_creazione": "2024-07-20T17:05:00Z"
     }
+  ],
+  "commenti": [
+    {
+      "annuncio_id": "100",
+      "utente_username": "Silvia",
+      "testo": "Ottimo prodotto!",
+      "data_commento": "2024-06-01T10:10:00Z",
+      "rating": 5
+    },
+    {
+      "annuncio_id": "99",
+      "utente_username": "EliAxel",
+      "testo": "Schifezza totale!",
+      "data_commento": "2024-05-01T10:10:00Z",
+      "rating": 0
+    },
+    {
+      "annuncio_id": "99",
+      "utente_username": "Silvia",
+      "testo": "Bravo, ottimo prodotto!",
+      "data_commento": "2024-04-01T10:10:00Z",
+      "rating": 3
+    }
   ]
 }

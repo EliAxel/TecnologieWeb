@@ -2,7 +2,7 @@ import json
 import os
 import django
 from django.contrib.auth.models import User
-from sylvelius.models import Annuncio, ImmagineProdotto, Ordine, Creazione, Tag, Prodotto
+from sylvelius.models import Annuncio, CommentoAnnuncio, ImmagineProdotto, Ordine, Creazione, Tag, Prodotto
 
 # Imposta le variabili d'ambiente per Django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'progetto_tw.settings')
@@ -41,14 +41,14 @@ def init_db():
 
         # Gestione delle immagini
         immagini = prodotto_data.get('immagini', []) or []
-        prodotto.immagini.all().delete()
         for img in immagini:
-            ImmagineProdotto.objects.create(
+            ImmagineProdotto.objects.get_or_create(
                 prodotto=prodotto,
                 immagine=img['immagine']
             )
 
     # Importa Annunci
+    i = 1
     for annuncio_data in dati.get('annunci', []):
         try:
             prodotto = Prodotto.objects.get(id=annuncio_data['prodotto_id'])
@@ -56,6 +56,7 @@ def init_db():
             continue
 
         Annuncio.objects.update_or_create(
+            id=i,
             prodotto=prodotto,
             defaults={
                 'data_pubblicazione': annuncio_data.get('data_pubblicazione'),
@@ -63,6 +64,7 @@ def init_db():
                 'is_published': annuncio_data.get('is_published', True)
             }
         )
+        i += 1
 
     # Importa Ordini
     for ordine_data in dati.get('ordini', []):
@@ -79,7 +81,6 @@ def init_db():
         Ordine.objects.update_or_create(
             utente=utente,
             prodotto=prodotto,
-            data_ordine=ordine_data.get('data_ordine'),
             defaults={
                 'quantita': ordine_data['quantita'],
                 'stato': ordine_data['stato'],
@@ -106,5 +107,22 @@ def init_db():
             annuncio=annuncio,
             defaults={
                 'data_creazione': creazione_data.get('data_creazione')
+            }
+        )
+    
+    for commenti_data in dati.get('commenti', []):
+        try:
+            annuncio = Annuncio.objects.get(id=commenti_data['annuncio_id'])
+            utente = User.objects.get(username=commenti_data['utente_username'])
+        except (Annuncio.DoesNotExist, User.DoesNotExist):
+            continue
+
+        commento, created = CommentoAnnuncio.objects.update_or_create(
+            annuncio=annuncio,
+            utente=utente,
+            defaults={
+                'testo': commenti_data['testo'],
+                'rating': commenti_data['rating'],
+                'data_pubblicazione': commenti_data.get('data_commento')
             }
         )
