@@ -15,7 +15,7 @@
                             <th>Quantità</th>
                             <th>Prezzo cad.</th>
                             <th>Totale</th>
-                            <th>Stato</th>
+                            <th>Stato spedizione</th>
                             <th>Data ordine</th>
                             <th>Azioni</th>
                         </tr>
@@ -26,10 +26,10 @@
                             <td>
                                 {% if ordine.prodotto.annunci.is_published %}
                                     <a href="{% url 'sylvelius:dettagli_annuncio' ordine.prodotto.annunci.id %}">
-                                        {{ ordine.prodotto.nome }}
+                                        {{ ordine.prodotto.nome|truncatechars:50 }}
                                     </a>
                                 {% else %}
-                                    {{ ordine.prodotto.nome }}
+                                    {{ ordine.prodotto.nome|truncatechars:50 }}
                                 {% endif %}
                             </td>
                             <td>
@@ -44,10 +44,10 @@
                             <td>{{ ordine.quantita }}</td>
                             <td>{{ ordine.prodotto.prezzo }} €</td>
                             <td>{{ ordine.totale }} €</td>
-                            <td>{{ ordine.stato|capfirst }}</td>
+                            <td>{{ ordine.stato_consegna|capfirst }}</td>
                             <td>{{ ordine.data_ordine|date:"d/m/Y H:i" }}</td>
                             <td>
-                                {% if ordine.stato != "completato" %}
+                                {% if ordine.stato_consegna != "spedito" %}
                                     <a {#href="{% url 'sylvelius:annulla_ordine' ordine.id %}"#} class="btn btn-danger btn-sm">Annulla</a>
                                 {% endif %}
                             </td>

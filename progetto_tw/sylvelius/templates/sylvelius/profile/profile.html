@@ -35,7 +35,7 @@
                                 <p class="card-text">Quantità: {{ ordine.quantita }}</p>
                                 <p class="card-text">{{ ordine.data_ordine|date:"d/m/Y" }}</p>
                                 <p class="card-text">Totale: {{ ordine.totale }} €</p>
-                                <p class="card-text">Stato: {{ ordine.stato }}</p>
+                                <p class="card-text">Stato: {{ ordine.stato_consegna }}</p>
                             </div>
                         </div>
                     {% endfor %}

@@ -1,7 +1,7 @@
 <div class="col-12 d-flex justify-content-center mt-4" style="margin-bottom: 15px;">
     <form method="get" class="me-2">
         {% for key, value in request.GET.items %}
-            {% if key != "page" %}
+            {% if key != "page" and key != "auth" %}
                 <input type="hidden" name="{{ key }}" value="{{ value }}">
             {% endif %}
         {% endfor %}

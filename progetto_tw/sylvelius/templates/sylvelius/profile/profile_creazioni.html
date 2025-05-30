@@ -23,10 +23,10 @@
                             <td>
                                 {% if creazione.annuncio.is_published %}
                                     <a href="{% url 'sylvelius:dettagli_annuncio' creazione.annuncio.id %}">
-                                        {{ creazione.annuncio.prodotto.nome }}
+                                        {{ creazione.annuncio.prodotto.nome|truncatechars:50 }}
                                     </a>
                                 {% else %}
-                                    {{ creazione.annuncio.prodotto.nome }}
+                                    {{ creazione.annuncio.prodotto.nome|truncatechars:50 }}
                                 {% endif %}
                             </td>
                             <td>

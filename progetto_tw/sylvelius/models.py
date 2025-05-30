@@ -13,10 +13,11 @@ class Tag(models.Model):
         super().save(*args, **kwargs)
 
 class Prodotto(models.Model):
-    nome = models.CharField(max_length=255)
-    descrizione_breve = models.CharField(max_length=255, blank=True, null=True)
-    descrizione = models.TextField(blank=True, null=True)
+    nome = models.CharField(max_length=100)
+    descrizione_breve = models.CharField(max_length=255)
+    descrizione = models.TextField(max_length=3000, blank=True, null=True)
     prezzo = models.DecimalField(max_digits=10, decimal_places=2)
+    condizione = models.CharField(max_length=20, choices=[('nuovo', 'Nuovo'), ('usato', 'Usato')], default='nuovo')
     tags = models.ManyToManyField(Tag, related_name='prodotti', blank=True)
 
 class ImmagineProdotto(models.Model):
@@ -34,6 +35,17 @@ class Annuncio(models.Model):
 
     def __str__(self):
         return self.prodotto.nome
+    
+    @property
+    def rating_medio(self):
+        commenti = self.commenti.all() # type: ignore
+        if not commenti:
+            return -1
+        return sum(commento.rating for commento in commenti) / len(commenti)
+    
+    @property
+    def rating_count(self):
+        return self.commenti.count() # type: ignore
 
 class CommentoAnnuncio(models.Model):
     annuncio = models.ForeignKey(Annuncio, on_delete=models.CASCADE, related_name='commenti')
@@ -53,13 +65,12 @@ class Ordine(models.Model):
     utente = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='ordini')
     prodotto = models.ForeignKey(Prodotto, on_delete=models.CASCADE, related_name='ordini')
     quantita = models.PositiveIntegerField()
-    stato = models.CharField(max_length=20, choices=[('in attesa', 'In attesa'), ('completato', 'Completato')], default='in attesa')
     data_ordine = models.DateTimeField(auto_now_add=True)
     luogo_consegna = models.JSONField(null=True, blank=True)
     stato_consegna = models.CharField(max_length=20, choices=[
-        ('da_spedire', 'Da spedire'),
+        ('da spedire', 'Da spedire'),
         ('spedito', 'Spedito')
-    ], default='da_spedire')
+    ], default='da spedire')
 
     def __str__(self):
         return self.utente.username + " - " + self.prodotto.nome
@@ -76,3 +87,9 @@ class Creazione(models.Model):
 
     def __str__(self):
         return self.utente.username + " - " + self.annuncio.prodotto.nome
+    
+class Invoice(models.Model):
+    invoice_id = models.CharField(max_length=255, unique=True)
+    user_id = models.IntegerField()
+    quantita = models.PositiveIntegerField()
+    prodotto_id = models.IntegerField()

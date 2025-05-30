@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='ordine',
             name='stato_consegna',
-            field=models.CharField(choices=[('da_spedire', 'Da spedire'), ('spedito', 'Spedito')], default='da_spedire', max_length=20),
+            field=models.CharField(choices=[('da spedire', 'Da spedire'), ('spedito', 'Spedito')], default='da spedire', max_length=20),
         ),
         migrations.AlterField(
             model_name='ordine',

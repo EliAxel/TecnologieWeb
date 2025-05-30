@@ -3,13 +3,19 @@
 {% block title %}Crea Annuncio{% endblock %}
 
 {% block middle %}
+{% if notok == '1' %}
+<div class="alert alert-danger" role="alert">
+    Si è verificato un errore durante la creazione dell'annuncio. Per favore, riprova.
+</div>
+{% endif %}
+{% block sign_in_sign_up %}{% endblock %}
 <div class="container mt-5 mb-5" style="max-width: 700px;">
     <div class="card shadow">
         <div class="card-header text-white" style="background-color: #6f42c1;">
             <h4 class="mb-0">Crea un nuovo annuncio</h4>
         </div>
         <div class="card-body">
-            <form method="post" enctype="multipart/form-data" novalidate>
+            <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="form-group">
                     <label for="id_nome">Titolo</label>
@@ -18,12 +24,12 @@
 
                 <div class="form-group">
                     <label for="id_descrizione_breve">Descrizione Breve</label>
-                    <input type="text" class="form-control" id="id_descrizione_breve" name="descrizione_breve" maxlength="255" placeholder="Una breve descrizione (opzionale)">
+                    <input type="text" class="form-control" id="id_descrizione_breve" name="descrizione_breve" required maxlength="255" placeholder="Una breve descrizione">
                 </div>
 
                 <div class="form-group">
                     <label for="id_descrizione">Descrizione</label>
-                    <textarea class="form-control" id="id_descrizione" name="descrizione" rows="4" required placeholder="Descrivi il tuo annuncio"></textarea>
+                    <textarea class="form-control" id="id_descrizione" name="descrizione" rows="4" maxlength="3000" placeholder="Descrivi il tuo annuncio (opzionale)"></textarea>
                 </div>
 
                 <div class="form-group">
@@ -33,13 +39,21 @@
 
                 <div class="form-group">
                     <label for="id_qta_magazzino">Quantità in Magazzino</label>
-                    <input type="number" class="form-control" id="id_qta_magazzino" name="qta_magazzino" min="0" value="1">
+                    <input type="number" class="form-control" id="id_qta_magazzino" required name="qta_magazzino" min="1" value="1">
+                </div>
+
+                <div class="form-group">
+                    <label for="id_condizione">Condizione</label>
+                    <select class="form-control" id="id_condizione" name="condizione" required>
+                        <option value="nuovo" selected>Nuovo</option>
+                        <option value="usato">Usato</option>
+                    </select>
                 </div>
 
                 <div class="form-group">
                     <label for="id_tags_input">Categorie</label>
                     <div class="input-group">
-                        <input type="text" class="form-control" id="id_tags_input" placeholder="Scrivi un tag..." autocomplete="off">
+                        <input type="text" class="form-control" id="id_tags_input" maxlength="50" placeholder="Scrivi un tag... (opzionale)" autocomplete="off">
                         <div id="id_tags_suggestions" class="list-group position-absolute w-100" style="top: 100%; left: 0; display: none; max-height: 200px; overflow-y: auto; z-index: 1200;"></div>
                     </div>
                     <div id="id_tags_selected" class="mt-2" style="min-height: 38px;"></div>
@@ -59,9 +73,8 @@
     </div>
 </div>
 
-<script src="{% static 'js/suggestions.js' %}"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     setupSuggestions({
         inputId: 'id_tags_input',
         suggestionsId: 'id_tags_suggestions',
@@ -69,6 +82,104 @@ document.addEventListener('DOMContentLoaded', function() {
         containerId: 'id_tags_selected',
         hiddenInputId: 'id_tags_hidden',
         isMulti: true
+    });
+
+    const form = document.querySelector('form');
+    const fields = {
+        nome: document.getElementById('id_nome'),
+        descrizione_breve: document.getElementById('id_descrizione_breve'),
+        descrizione: document.getElementById('id_descrizione'),
+        prezzo: document.getElementById('id_prezzo'),
+        qta_magazzino: document.getElementById('id_qta_magazzino'),
+        condizione: document.getElementById('id_condizione'),
+        immagini: document.getElementById('id_immagini')
+    };
+
+    function showError(input, message) {
+        input.classList.add('is-invalid');
+        let error = input.nextElementSibling;
+        if (!error || !error.classList.contains('invalid-feedback')) {
+            error = document.createElement('div');
+            error.className = 'invalid-feedback';
+            input.parentNode.appendChild(error);
+        }
+        error.textContent = message;
+    }
+
+    function clearError(input) {
+        input.classList.remove('is-invalid');
+        let error = input.nextElementSibling;
+        if (error && error.classList.contains('invalid-feedback')) {
+            error.remove();
+        }
+    }
+
+    function validateField(field, input) {
+        const value = input.value.trim();
+        switch (field) {
+            case 'nome':
+                if (!value) return 'Il titolo è obbligatorio.';
+                break;
+            case 'descrizione_breve':
+                if (!value) return 'La descrizione breve è obbligatoria.';
+                break;
+            case 'prezzo':
+                if (!value) return 'Il prezzo è obbligatorio.';
+                const prezzo = parseFloat(value);
+                if (isNaN(prezzo) || prezzo <= 0) return 'Il prezzo deve essere un numero positivo.';
+                break;
+            case 'qta_magazzino':
+                const qta = parseInt(value);
+                if (isNaN(qta) || qta < 0) return 'La quantità deve essere un numero intero positivo.';
+                break;
+            case 'condizione':
+                if (!value || (value !== 'nuovo' && value !== 'usato')) return 'Seleziona la condizione.';
+                break;
+            case 'immagini':
+                for (let file of input.files) {
+                    if (!file.type.startsWith('image/')) {
+                        return 'Puoi caricare solo file immagine.';
+                    }
+                }
+                break;
+        }
+        return null;
+    }
+
+    Object.entries(fields).forEach(([name, input]) => {
+        input.addEventListener('input', () => {
+            const error = validateField(name, input);
+            if (error) showError(input, error);
+            else clearError(input);
+        });
+    });
+
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        let isValid = true;
+
+        Object.entries(fields).forEach(([name, input]) => {
+            const error = validateField(name, input);
+            if (error) {
+                showError(input, error);
+                isValid = false;
+            } else {
+                clearError(input);
+            }
+        });
+
+        if (isValid) {
+            form.submit();
+        }
+    });
+});
+
+// Blocca invio su alcuni campi
+['id_prezzo', 'id_descrizione_breve', 'id_qta_magazzino', 'id_nome', 'id_tags_input'].forEach(id => {
+    document.getElementById(id).addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+        }
     });
 });
 </script>

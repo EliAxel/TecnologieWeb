@@ -9,13 +9,13 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-
+from dotenv import load_dotenv
 from pathlib import Path
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+load_dotenv(BASE_DIR / ".env")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-^(!33fx!@!@h)-r6(rq70%qk-c$dh64fojzq*$4hzm$s+0+5$c
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]  # Permette tutte le richieste, da modificare in produzione
-CSRF_TRUSTED_ORIGINS = ["https://a272-151-82-169-15.ngrok-free.app",]  # Permette tutte le origini, da modificare in produzione
+CSRF_TRUSTED_ORIGINS = ["https://legal-malamute-steady.ngrok-free.app",]  # Permette tutte le origini, da modificare in produzione
 # Application definition
 
 INSTALLED_APPS = [
@@ -40,8 +40,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'sylvelius.apps.SylveliusConfig',
     'channels',
-    'paypal.standard.ipn',
-
 ]
 
 MIDDLEWARE = [
@@ -56,6 +54,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'progetto_tw.urls'
+LOGIN_URL = "/login/?auth=notok"
 
 TEMPLATES = [
     {
@@ -142,5 +141,7 @@ MEDIA_URL = '/media/'
 
 # settings.py
 PAYPAL_TEST = True  # Usa l'ambiente sandbox per i test
-xxx='xxx'
-xxx = "xxx"
+xxx= os.getenv('xxx')
+xxx= os.getenv('xxx')
+PAYPAL_PCC_ID = os.getenv('PAYPAL_PCC_ID')
+PAYPAL_COA_ID = os.getenv('PAYPAL_COA_ID')

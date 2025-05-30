@@ -2,7 +2,7 @@ import json
 import os
 import django
 from django.contrib.auth.models import User
-from sylvelius.models import Annuncio, CommentoAnnuncio, ImmagineProdotto, Ordine, Creazione, Tag, Prodotto
+from sylvelius.models import Annuncio, CommentoAnnuncio, ImmagineProdotto, Ordine, Creazione, Tag, Prodotto, Invoice
 
 # Imposta le variabili d'ambiente per Django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'progetto_tw.settings')
@@ -13,9 +13,10 @@ def delete_db():
     Creazione.objects.all().delete()
     Ordine.objects.all().delete()
     Annuncio.objects.all().delete()
+    CommentoAnnuncio.objects.all().delete()
     Prodotto.objects.all().delete()
     Tag.objects.all().delete()
-
+    Invoice.objects.all().delete()
 
 def init_db():
     with open('static/json/dati.json', 'r', encoding='utf-8') as file:
@@ -83,7 +84,7 @@ def init_db():
             prodotto=prodotto,
             defaults={
                 'quantita': ordine_data['quantita'],
-                'stato': ordine_data['stato'],
+                'stato_consegna': ordine_data['stato_consegna'],
             }
         )
 

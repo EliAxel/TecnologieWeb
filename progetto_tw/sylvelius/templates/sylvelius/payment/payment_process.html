@@ -19,7 +19,9 @@
                         <img src="{% static 'img/paypal_logo.png' %}" alt="PayPal" width="20" class="me-3 mr-2">
                         <strong>PayPal</strong>
                     </div>
-                    <div id="paypal-button-container" class="text-end w-50"></div>
+                    <span id="paypal-loading-text">Caricamento...</span>
+                    <div id="paypal-button-container" class="text-end w-50" style="display: none;">
+                    </div>
                 </div>
             </div>
             <!-- ... resto del template ... -->
@@ -52,13 +54,17 @@
 <script src="https://www.paypal.com/sdk/js?client-id={{ paypal_client_id }}&currency=EUR"></script>
 <script>
     paypal.Buttons({
+    onInit: function (data, actions) {
+        // Nascondi la scritta “Caricamento...”
+        document.getElementById('paypal-loading-text').style.display = 'none';
+        document.getElementById('paypal-button-container').style.display = 'block';
+    },
     createOrder: function(data, actions) {
         return actions.order.create({
             purchase_units: [{
                 amount: {
                     value: '{{ amount }}'
                 },
-                custom_id: '{{ product_id }}',
                 invoice_id: '{{ invoice_id }}'
             }],
             application_context: {

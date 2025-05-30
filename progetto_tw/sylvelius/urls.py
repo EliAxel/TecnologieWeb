@@ -13,7 +13,7 @@ urlpatterns = [
     path("accounts/profile/edit/", views.ProfiloEditPageView.as_view(), name="profile_edit"),
     path("accounts/profile/delete/", views.ProfiloDeletePageView.as_view(), name="profile_delete"),
     path("annuncio/<int:pk>/", views.AnnuncioDetailView.as_view(), name="dettagli_annuncio"),
-    path("account/profile/ordini/", views.ProfiloOrdiniPageView.as_view(), name="profile_ordini"),
+    path("accounts/profile/ordini/", views.ProfiloOrdiniPageView.as_view(), name="profile_ordini"),
     path("account/profile/creazioni/", views.ProfiloCreazioniPageView.as_view(), name="profile_creazioni"),
     path("account/profile/creazioni/crea/", views.ProfiloCreaCreazionePageView.as_view(), name="crea_annuncio"),
     path("account/profile/creazioni/nascondi/<int:id>/", views.toggle_pubblicazione , name="nascondi_annuncio"),
@@ -27,6 +27,6 @@ urlpatterns = [
     path('purchase/', views.fake_purchase, name='fake_purchase'),
     path('payment_done/', views.payment_done, name='payment_done'),
     path('payment_cancelled/', views.payment_cancelled, name='payment_cancelled'),
-    re_path(r'^paypal/pcc/?$', views.paypal_pcc, name='paypal_webhook'),
-    re_path(r'^paypal/coa/?$', views.paypal_coa, name='paypal_webhook'),
+    path('paypal/pcc/', views.paypal_pcc, name='paypal_webhook'),
+    path('paypal/coa/', views.paypal_coa, name='paypal_webhook'),
 ]

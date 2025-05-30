@@ -11,23 +11,40 @@
         <!-- Colonna Sinistra: Testo -->
         <div class="col-md-6">
             <h2>{{ annuncio.prodotto.nome }}</h2>
-            <p class="text-muted">
-                Pubblicato il {{ annuncio.data_pubblicazione|date:"d/m/Y H:i" }} da {{ annuncio.creazioni.first.utente.username }}
+            <p class="text-muted mb-1">
+                Pubblicato il {{ annuncio.data_pubblicazione|date:"d/m/Y" }} da {{ annuncio.creazioni.first.utente.username }}
             </p>
+            <span class="text-muted mb-4">
+                Condizione: 
+            </span>
+            {% if annuncio.prodotto.condizione == 'nuovo' %}
+                <span class="badge bg-success text-white">Nuovo</span>
+            {% elif annuncio.prodotto.condizione == 'usato' %}
+                <span class="badge bg-warning text-dark">Usato</span>
+            {% else %}
+                <span class="badge bg-secondary text-white">Non specificato</span>
+            {% endif %}
 
             {% if annuncio.prodotto.descrizione_breve %}
                 <p class="lead">{{ annuncio.prodotto.descrizione_breve }}</p>
             {% endif %}
-            <div class="text-warning me-3">
-                <i class="bi bi-star-fill"></i>
-                <i class="bi bi-star-fill"></i>
-                <i class="bi bi-star-fill"></i>
-                <i class="bi bi-star-fill"></i>
-                <i class="bi bi-star-half"></i>
-            </div>
-            <p class="text-muted mb-4">Rating medio: 4,4 stelle</p>
-            {% if annuncio.prodotto.descrizione %}
-                <p>{{ annuncio.prodotto.descrizione }}</p>
+            {% if annuncio.rating_medio == -1 %}
+                <div>Nessuna recensione</div>
+            {% else %}
+                {% if annuncio.prodotto.descrizione_breve %}
+                <div class="text-warning me-3">
+                    {% for i in "12345" %}
+                        {% if forloop.counter <= annuncio.rating_medio %}
+                            <i class="bi bi-star-fill"></i>
+                        {% elif forloop.counter == annuncio.rating_medio|add:"1" and annuncio.rating_medio|floatformat:1|slice:"-1" != "0" %}
+                            <i class="bi bi-star-half"></i>
+                        {% else %}
+                            <i class="bi bi-star"></i>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <p class="text-muted mb-4">Rating medio: {{ annuncio.rating_medio|floatformat:1 }} stelle (Voti: {{annuncio.rating_count}})</p>
+                {% endif %}
             {% endif %}
 
             <h4 class="text-primary mt-4">€ <span id="unit-price">{{ annuncio.prodotto.prezzo }}</span> 
@@ -57,6 +74,7 @@
                     <input type="hidden" name="item_name" value="{{ annuncio.prodotto.nome }}">
                     <input type="hidden" name="product_id" value="{{ annuncio.prodotto.id }}">
                     <input type="hidden" name="quantity" value="1" id="quantity-input">
+                    <input type="hidden" name="user_id" value="{{ request.user.id }}">
                     <button type="submit" class="btn btn-primary">Acquista ora</button>
                 </form>
             </div>
@@ -135,7 +153,18 @@
     <!-- Commenti -->
     <div class="row mt-5">
         <div class="col-12">
-            <h4 class="mb-4">💬 Commenti degli utenti</h4>
+            {% if annuncio.prodotto.descrizione %}
+                <p>{{ annuncio.prodotto.descrizione }}</p>
+            {% endif %}
+            <div>Categorie:</div>
+            {% if annuncio.prodotto.tags.count > 1 %}
+                {% for tag in annuncio.prodotto.tags.all %}
+                    <span class="badge bg-primary text-white">{{ tag.nome }}</span>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted">Nessuna categoria specificata.</p>
+            {% endif %}
+            <h4 class="mb-4 mt-2">💬 Commenti degli utenti</h4>
 
             {% for commento in commenti %}
                 <div class="card mb-3 shadow-sm">

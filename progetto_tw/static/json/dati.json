@@ -1409,350 +1409,350 @@
       "utente_username": "Silvia",
       "prodotto_id": 1,
       "quantita": 2,
-      "stato": "in attesa",
+      "stato_consegna": "da spedire",
       "data_ordine": "2024-06-10T09:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 2,
       "quantita": 1,
-      "stato": "completato",
+      "stato_consegna": "spedito",
       "data_ordine": "2024-06-11T10:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 3,
       "quantita": 1,
-      "stato": "completato",
+      "stato_consegna": "spedito",
       "data_ordine": "2024-06-12T11:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 4,
       "quantita": 3,
-      "stato": "in attesa",
+      "stato_consegna": "da spedire",
       "data_ordine": "2024-06-13T12:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 5,
       "quantita": 2,
-      "stato": "completato",
+      "stato_consegna": "spedito",
       "data_ordine": "2024-06-14T13:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 6,
       "quantita": 1,
-      "stato": "completato",
+      "stato_consegna": "spedito",
       "data_ordine": "2024-06-15T14:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 7,
       "quantita": 1,
-      "stato": "in attesa",
+      "stato_consegna": "da spedire",
       "data_ordine": "2024-06-16T15:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 8,
       "quantita": 2,
-      "stato": "completato",
+      "stato_consegna": "spedito",
       "data_ordine": "2024-06-17T16:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 9,
       "quantita": 1,
-      "stato": "completato",
+      "stato_consegna": "spedito",
       "data_ordine": "2024-06-18T17:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 10,
       "quantita": 1,
-      "stato": "in attesa",
+      "stato_consegna": "da spedire",
       "data_ordine": "2024-06-19T18:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 11,
       "quantita": 3,
-      "stato": "completato",
+      "stato_consegna": "spedito",
       "data_ordine": "2024-06-20T19:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 12,
       "quantita": 1,
-      "stato": "completato",
+      "stato_consegna": "spedito",
       "data_ordine": "2024-06-21T20:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 13,
       "quantita": 1,
-      "stato": "in attesa",
+      "stato_consegna": "da spedire",
       "data_ordine": "2024-06-22T21:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 14,
       "quantita": 2,
-      "stato": "completato",
+      "stato_consegna": "spedito",
       "data_ordine": "2024-06-23T22:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 15,
       "quantita": 1,
-      "stato": "completato",
+      "stato_consegna": "spedito",
       "data_ordine": "2024-06-24T23:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 16,
       "quantita": 1,
-      "stato": "in attesa",
+      "stato_consegna": "da spedire",
       "data_ordine": "2024-06-25T10:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 17,
       "quantita": 1,
-      "stato": "completato",
+      "stato_consegna": "spedito",
       "data_ordine": "2024-06-26T11:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 18,
       "quantita": 2,
-      "stato": "completato",
+      "stato_consegna": "spedito",
       "data_ordine": "2024-06-27T12:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 19,
       "quantita": 1,
-      "stato": "in attesa",
+      "stato_consegna": "da spedire",
       "data_ordine": "2024-06-28T13:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 20,
       "quantita": 1,
-      "stato": "completato",
+      "stato_consegna": "spedito",
       "data_ordine": "2024-06-29T14:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 21,
       "quantita": 3,
-      "stato": "completato",
+      "stato_consegna": "spedito",
       "data_ordine": "2024-06-30T15:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 22,
       "quantita": 1,
-      "stato": "in attesa",
+      "stato_consegna": "da spedire",
       "data_ordine": "2024-07-01T16:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 23,
       "quantita": 1,
-      "stato": "completato",
+      "stato_consegna": "spedito",
       "data_ordine": "2024-07-02T17:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 24,
       "quantita": 2,
-      "stato": "completato",
+      "stato_consegna": "spedito",
       "data_ordine": "2024-07-03T18:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 25,
       "quantita": 1,
-      "stato": "in attesa",
+      "stato_consegna": "da spedire",
       "data_ordine": "2024-07-04T19:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 26,
       "quantita": 1,
-      "stato": "completato",
+      "stato_consegna": "spedito",
       "data_ordine": "2024-07-05T20:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 27,
       "quantita": 1,
-      "stato": "completato",
+      "stato_consegna": "spedito",
       "data_ordine": "2024-07-06T21:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 28,
       "quantita": 2,
-      "stato": "in attesa",
+      "stato_consegna": "da spedire",
       "data_ordine": "2024-07-07T22:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 29,
       "quantita": 1,
-      "stato": "completato",
+      "stato_consegna": "spedito",
       "data_ordine": "2024-07-08T23:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 30,
       "quantita": 1,
-      "stato": "completato",
+      "stato_consegna": "spedito",
       "data_ordine": "2024-07-09T10:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 31,
       "quantita": 1,
-      "stato": "in attesa",
+      "stato_consegna": "da spedire",
       "data_ordine": "2024-07-10T11:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 32,
       "quantita": 1,
-      "stato": "completato",
+      "stato_consegna": "spedito",
       "data_ordine": "2024-07-11T12:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 33,
       "quantita": 3,
-      "stato": "completato",
+      "stato_consegna": "spedito",
       "data_ordine": "2024-07-12T13:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 34,
       "quantita": 1,
-      "stato": "in attesa",
+      "stato_consegna": "da spedire",
       "data_ordine": "2024-07-13T14:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 35,
       "quantita": 1,
-      "stato": "completato",
+      "stato_consegna": "spedito",
       "data_ordine": "2024-07-14T15:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 36,
       "quantita": 2,
-      "stato": "completato",
+      "stato_consegna": "spedito",
       "data_ordine": "2024-07-15T16:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 37,
       "quantita": 1,
-      "stato": "in attesa",
+      "stato_consegna": "da spedire",
       "data_ordine": "2024-07-16T17:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 38,
       "quantita": 1,
-      "stato": "completato",
+      "stato_consegna": "spedito",
       "data_ordine": "2024-07-17T18:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 39,
       "quantita": 1,
-      "stato": "completato",
+      "stato_consegna": "spedito",
       "data_ordine": "2024-07-18T19:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 40,
       "quantita": 2,
-      "stato": "in attesa",
+      "stato_consegna": "da spedire",
       "data_ordine": "2024-07-19T20:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 41,
       "quantita": 1,
-      "stato": "completato",
+      "stato_consegna": "spedito",
       "data_ordine": "2024-07-20T21:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 42,
       "quantita": 1,
-      "stato": "completato",
+      "stato_consegna": "spedito",
       "data_ordine": "2024-07-21T22:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 43,
       "quantita": 1,
-      "stato": "in attesa",
+      "stato_consegna": "da spedire",
       "data_ordine": "2024-07-22T23:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 44,
       "quantita": 3,
-      "stato": "completato",
+      "stato_consegna": "spedito",
       "data_ordine": "2024-07-23T10:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 45,
       "quantita": 1,
-      "stato": "completato",
+      "stato_consegna": "spedito",
       "data_ordine": "2024-07-24T11:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 46,
       "quantita": 1,
-      "stato": "in attesa",
+      "stato_consegna": "da spedire",
       "data_ordine": "2024-07-25T12:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 47,
       "quantita": 2,
-      "stato": "completato",
+      "stato_consegna": "spedito",
       "data_ordine": "2024-07-26T13:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 48,
       "quantita": 1,
-      "stato": "completato",
+      "stato_consegna": "spedito",
       "data_ordine": "2024-07-27T14:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 49,
       "quantita": 1,
-      "stato": "in attesa",
+      "stato_consegna": "da spedire",
       "data_ordine": "2024-07-28T15:00:00Z"
     },
     {
       "utente_username": "Silvia",
       "prodotto_id": 50,
       "quantita": 1,
-      "stato": "completato",
+      "stato_consegna": "spedito",
       "data_ordine": "2024-07-29T16:00:00Z"
     }
   ],
