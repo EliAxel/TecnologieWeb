@@ -1,0 +1,13 @@
+<div class="text-warning me-3">
+    {% for i in "12345" %}
+        {% if forloop.counter < annuncio.rating_medio %}
+            <i class="bi bi-star-fill"></i>
+        {% elif forloop.counter == annuncio.rating_medio %}
+            <i class="bi bi-star-fill"></i>
+        {% elif forloop.counter|add:"-1" < annuncio.rating_medio and annuncio.rating_medio < forloop.counter %}
+            <i class="bi bi-star-half"></i>
+        {% else %}
+            <i class="bi bi-star"></i>
+        {% endif %}
+    {% endfor %}
+</div>

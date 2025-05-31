@@ -14,6 +14,8 @@ from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.views.generic import TemplateView, CreateView
+from django.db.models import Avg
+from django.db.models.functions import Floor
 from django.shortcuts import (
     render, 
     redirect, 
@@ -181,11 +183,34 @@ class AnnuncioDetailView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        user = self.request.user
         annuncio_id = self.kwargs['pk']
         annuncio = get_object_or_404(Annuncio, id=annuncio_id, is_published=True)
         commenti = CommentoAnnuncio.objects.filter(
             annuncio=annuncio
-        ).select_related('utente').order_by('-data_pubblicazione')        
+        ).select_related('utente').order_by('-data_pubblicazione')
+
+        ha_acquistato = False
+        if user.is_authenticated:
+            ha_acquistato = Ordine.objects.filter(
+                utente=user,
+                prodotto=annuncio.prodotto,
+                stato_consegna='consegnato'
+            ).exists()
+        non_ha_commentato = True
+        if user.is_authenticated:
+            non_ha_commentato = not CommentoAnnuncio.objects.filter(
+                annuncio=annuncio,
+                utente=user
+            ).exists()
+
+        context['get_commento'] = CommentoAnnuncio.objects.filter(
+            annuncio=annuncio,
+            utente=user
+        ).first() if user.is_authenticated else None
+
+        context['non_ha_commentato'] = non_ha_commentato
+        context['ha_acquistato'] = ha_acquistato
         context['annuncio'] = annuncio
         context['commenti'] = commenti
         return context
@@ -332,9 +357,8 @@ class RicercaAnnunciView(TemplateView):
         prezzo_min = self.request.GET.get('prezzo_min')
         prezzo_max = self.request.GET.get('prezzo_max')
         sort_order = self.request.GET.get('sort', 'data-desc')
-        condizione = self.request.GET.get('condition', 'cond-new')
-        if condizione not in ['cond-new', 'cond-used']:
-            condizione = 'cond-new'
+        condizione = self.request.GET.get('condition')
+        rating = self.request.GET.get('search_by_rating')
 
         annunci = Annuncio.objects.filter(is_published=True)
 
@@ -350,10 +374,42 @@ class RicercaAnnunciView(TemplateView):
             if tag_list:
                 for tag in tag_list:
                     annunci = annunci.filter(prodotto__tags__nome=tag)
+        
+
         if condizione == 'cond-new':
             annunci = annunci.filter(prodotto__condizione='nuovo')
         elif condizione == 'cond-used':
             annunci = annunci.filter(prodotto__condizione='usato')
+        elif condizione == 'all':
+            pass
+            
+        if rating:
+            try:
+                rating_value = int(rating)
+                if 0 <= rating_value <= 5:
+                    # Supponiamo che 'rating_value' sia il valore dell'intervallo desiderato (da 0 a 4)
+                    annunci = Annuncio.objects.annotate(
+                        rating_medio_calc=Avg('commenti__rating'),
+                        rating_range=Floor(Avg('commenti__rating'))
+                    ).filter(
+                        rating_range=rating_value
+                    ).exclude(
+                        rating_medio_calc__isnull=True
+                    )
+
+                else:
+                    raise ValueError("Rating fuori range")
+            except (ValueError, TypeError):
+                if rating == 'all':
+                    pass
+                elif rating == 'none':
+                    # Se 'none', escludi gli annunci con commenti
+                    annunci = annunci.exclude(commenti__isnull=False)
+                elif rating == 'starred':
+                    annunci = annunci.exclude(commenti__isnull=True)
+                else:
+                    # Se il rating non è valido, non filtrare
+                    pass
 
         if prezzo_min:
             try:
@@ -458,6 +514,68 @@ def check_login_credentials(request):
             "valid_password": valid_password,
         })
     return JsonResponse({"exists": False, "valid_password": False})
+
+@require_POST
+@login_required
+def aggiungi_commento(request, annuncio_id):
+    annuncio = get_object_or_404(Annuncio, id=annuncio_id, is_published=True)
+    utente = request.user
+
+    testo = request.POST.get('testo', '').strip()
+    rating = request.POST.get('rating')
+
+    # Validazione
+    if not testo or not rating.isdigit() or int(rating) < 0 or int(rating) > 5 or len(testo) > 1000:
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({"status": "error", "message": "Dati non validi"}, status=400)
+        return redirect(reverse('sylvelius:dettagli_annuncio', args=[annuncio_id]) + '?comment=notok')
+
+    # Salva il commento
+    commento = CommentoAnnuncio.objects.create(
+        annuncio=annuncio,
+        utente=utente,
+        testo=testo,
+        rating=int(rating)
+    )
+    commento.save()
+
+    # Risposta JSON se è una chiamata AJAX
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({"status": "success"})
+
+    # Altrimenti redirect classico
+    return redirect(reverse('sylvelius:dettagli_annuncio', args=[annuncio_id]))
+
+@login_required
+def modifica_commento(request, commento_id):
+    commento = get_object_or_404(CommentoAnnuncio, id=commento_id, utente=request.user)
+
+    if request.method == "POST":
+        testo = request.POST.get('testo', '').strip()
+        rating = request.POST.get('rating')
+
+        # Validazione
+        if not testo or not rating.isdigit() or int(rating) < 0 or int(rating) > 5 or len(testo) > 1000:
+            return JsonResponse({"status": "error", "message": "Dati non validi"}, status=400)
+
+        # Aggiorna il commento
+        commento.testo = testo
+        commento.rating = int(rating)
+        commento.save()
+
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({"status": "success"})
+
+    return render(request, "sylvelius/annuncio/modifica_commento.html", {"commento": commento})
+
+@login_required
+def elimina_commento(request, commento_id):
+    if request.method == "DELETE":
+        commento = get_object_or_404(CommentoAnnuncio, id=commento_id, utente=request.user)
+        commento.delete()
+        return JsonResponse({"status": "success"})
+    else:
+        return HttpResponseBadRequest("Metodo non consentito")
 
 @login_required
 @require_POST

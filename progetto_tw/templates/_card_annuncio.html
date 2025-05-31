@@ -1,0 +1,38 @@
+{% load static %}
+{% for annuncio in annunci %}
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <a href="{% url 'sylvelius:dettagli_annuncio' annuncio.id %}" class="text-decoration-none text-dark">
+                <img
+                    data-prodotto-id="{{ annuncio.prodotto.id }}"
+                    class="card-img-top immagine-asincrona"
+                    alt="{{ annuncio.prodotto.nome }}"
+                    src="{% static 'img/default_loading.png' %}"
+                >
+            </a>
+            <div class="card-body">
+                <h5 class="card-title">
+                    <a href="{% url 'sylvelius:dettagli_annuncio' annuncio.id %}" class="text-decoration-none text-dark">
+                        <strong>{{ annuncio.prodotto.nome }}</strong>
+                    </a>
+                </h5>
+                <p class="card-text">{{ annuncio.prodotto.descrizione_breve|truncatewords:15 }}</p>
+                <div class="mb-2">
+                    {% for tag in annuncio.prodotto.tags.all|slice:":3" %}
+                        <span class="badge rounded-pill me-1" style="background-color: #6f42c1; color: #fff;">{{ tag.nome }}</span>
+                    {% endfor %}
+                </div>
+                {% if annuncio.rating_medio == -1 %}
+                    <div class="text-muted">Nessuna recensione</div>
+                {% else %}
+                    <div class="d-inline-flex align-items-center">
+                        
+                        {% include "_txt_stars_medie.html" %}
+                        <span class="me-2 ml-1">{{ annuncio.rating_medio|floatformat:1 }}</span> 
+                    </div>
+                {% endif %}
+                <p class="card-text">Prezzo: {{ annuncio.prodotto.prezzo }} €</p>
+            </div>
+        </div>
+    </div>
+{% endfor %}

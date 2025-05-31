@@ -1,0 +1,266 @@
+{% load static %}
+{% if excluded != commento %}
+    <div class="card mb-3 shadow-sm" id="comment-card-{{ commento.id }}">
+        <div class="card-body d-flex">
+            <div class="text-center me-3" style="min-width: 80px;">
+                <img src="{% static 'img/default_user.png' %}" class="rounded-circle" width="50" height="50" alt="Avatar">
+            </div>
+            <div class="text-start w-100 text-left" style="overflow-wrap: break-word;">
+                <div class="d-flex align-items-center mb-1 flex-wrap">
+                    <h6 class="mb-0 font-weight-bold mr-3">{{ commento.utente.username }}</h6>
+                    <div class="text-warning me-3 mr-3">
+                        {% for i in "12345"|slice:":5" %}
+                            {% if forloop.counter <= commento.rating %}
+                                <i class="bi bi-star-fill"></i>
+                            {% else %}
+                                <i class="bi bi-star"></i>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <small class="text-muted">{{ commento.data_pubblicazione|date:"d/m/Y" }}</small>
+                    {% if commento.utente == request.user %}
+                        <small id="modifica-commento-{{ commento.id }}" data-comment-id="{{ commento.id }}" class="ml-2 text-muted" style="cursor: pointer;">Modifica</small>
+                        <small id="cancella-commento-{{ commento.id }}" data-comment-id="{{ commento.id }}" class="ml-2 text-danger" style="cursor: pointer;">Elimina</small>
+                        <script>
+                            document.addEventListener("DOMContentLoaded", function() {
+                                // Selettori multipli se ci sono più commenti
+                                document.querySelectorAll("#modifica-commento-{{ commento.id }}").forEach(function(modificaBtn) {
+                                modificaBtn.addEventListener("click", function() {
+                                    const commentId = this.getAttribute("data-comment-id");
+
+                                    // Nascondi la card del commento
+                                    const commentCard = document.getElementById(`comment-card-${commentId}`);
+                                    if (commentCard) {
+                                    commentCard.style.display = "none";
+                                    }
+
+                                    // Mostra la card del form di modifica
+                                    const commentFormContainer = document.getElementById(`comment-form-container-${commentId}`);
+                                    if (commentFormContainer) {
+                                    commentFormContainer.style.display = "block";
+                                    }
+                                });
+                                });
+                            });
+                        </script>
+                        <script>
+                            document.getElementById("cancella-commento-{{ commento.id }}").addEventListener("click", function() {
+                            const confirmSubmit = confirm("Sei sicuro di voler eliminare questo commento?");
+                            const commentText = document.getElementById('comment-text-{{ commento.id }}')
+                            if (!confirmSubmit) {
+                                // L'utente ha annullato
+                                return;
+                            }
+                            const commentId = this.getAttribute("data-comment-id");
+                            fetch(`/elimina_commento/${commentId}/`, {
+                                method: "DELETE",
+                                headers: {
+                                "X-CSRFToken": "{{ csrf_token }}",
+                                },
+                            })
+                            .then(response => {
+                                if (response.ok) {
+                                commentText.value = '';
+                                location.reload();
+                                }
+                            });
+                            });
+                        </script>
+                    {% endif %}
+                </div>
+                <p class="mb-0" style="word-break: break-word;">{{ commento.testo }}</p>
+            </div>
+        </div>
+    </div>
+    <div id="comment-form-container-{{ commento.id }}" style="display: none;">
+<div class="card mb-3 shadow-sm">
+    <div class="card-body d-flex">
+        <div class="text-center me-3" style="min-width: 80px;">
+            <img src="{% static 'img/default_user.png' %}" class="rounded-circle" width="50" height="50" alt="Avatar">
+        </div>
+        <div class="text-start w-100">
+            <div class="d-flex align-items-center mb-1 flex-wrap">
+                <strong>{{ request.user.username }}</strong>
+            </div>
+            <form method="post" action={% url "sylvelius:modifica_commento" commento.id %} id="edit-comment-form-{{ commento.id }}">
+                {% csrf_token %}
+                <div class="mb-2">
+                    <textarea name="testo" class="form-control" rows="3" required maxlength="1000" placeholder="Scrivi il tuo commento..." id="comment-text-{{ commento.id }}"></textarea>
+                </div>
+                <div class="d-flex align-items-center">
+                    <div class="me-2">
+                        <label class="me-2 mb-0">Valutazione:</label>
+                        <div id="star-rating-edit-{{ commento.id }}" class="d-inline-block align-middle">
+                            <!-- Icona di divieto per 0 stelle -->
+                            <i class="bi bi-slash-circle text-muted me-1" data-value="0" style="cursor: pointer; font-size: 1.2rem;"></i>
+                            <!-- Stelle 1-5 -->
+                            {% for i in "12345" %}
+                                <i class="bi bi-star text-muted" data-value="{{ forloop.counter }}" style="cursor: pointer; font-size: 1.2rem;"></i>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="rating" id="rating-edit-{{ commento.id }}" value="-1">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm ms-auto ml-2">Pubblica</button>
+                    <div id="comment-error-edit-{{ commento.id }}" class="ms-2 text-danger ml-2" style="display: none; font-size: 0.9rem;"></div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+    const stars = document.querySelectorAll('#star-rating-edit-{{ commento.id }} .bi-star');
+    const banIcon = document.querySelector('#star-rating-edit-{{ commento.id }} .bi-slash-circle');
+    const ratingInput = document.getElementById('rating-edit-{{ commento.id }}');
+    const commentForm = document.getElementById('edit-comment-form-{{ commento.id }}');
+    const commentText = document.getElementById('comment-text-{{ commento.id }}');
+    const commentError = document.getElementById('comment-error-edit-{{ commento.id }}');
+    const initialText = "{{ commento.testo|escapejs }}";
+    const initialRating = {{ commento.rating }};
+
+    // Imposta il testo iniziale del commento
+    commentText.value = initialText;
+    // Imposta il rating iniziale
+    ratingInput.value = initialRating;
+    // Colora le stelle in base al rating iniziale
+
+    stars.forEach(star => {
+        const value = parseInt(star.getAttribute('data-value'));
+        if (value <= initialRating) {
+            star.classList.remove('text-muted', 'bi-star');
+            star.classList.add('text-warning', 'bi-star-fill');
+        }
+    });
+    // Colora l'icona di divieto se il rating è 0
+    if (initialRating === 0) {
+        banIcon.classList.remove('text-muted');
+        banIcon.classList.add('text-danger');
+    } else {
+        banIcon.classList.remove('text-danger');
+        banIcon.classList.add('text-muted');
+    }
+
+    // Click sulle stelle
+    stars.forEach(star => {
+        star.addEventListener('click', function() {
+        const value = parseInt(this.getAttribute('data-value'));
+        ratingInput.value = value;
+
+        // Reset di tutte le stelle
+        stars.forEach(s => {
+            s.classList.remove('text-warning', 'bi-star-fill');
+            s.classList.add('text-muted', 'bi-star');
+        });
+
+        // Colora fino alla stella selezionata
+        for (let i = 0; i < value; i++) {
+            stars[i].classList.remove('text-muted', 'bi-star');
+            stars[i].classList.add('text-warning', 'bi-star-fill');
+        }
+
+        // Reset icona di divieto
+        banIcon.classList.remove('text-danger');
+        banIcon.classList.add('text-muted');
+        });
+    });
+
+    // Click sull'icona di divieto
+    banIcon.addEventListener('click', function() {
+        ratingInput.value = 0;
+
+        // Reset di tutte le stelle
+        stars.forEach(star => {
+        star.classList.remove('text-warning', 'bi-star-fill');
+        star.classList.add('bi-star', 'text-muted');
+        });
+
+        // Evidenzia icona di divieto
+        this.classList.remove('text-muted');
+        this.classList.add('text-danger');
+    });
+
+    // ✏️ Reset dell'errore quando si inizia a scrivere
+    commentText.addEventListener('input', function() {
+        commentError.style.display = 'none';
+    });
+
+    // ✨ CLICK stelle o divieto → nascondi errore
+    [...stars, banIcon].forEach(el => {
+        el.addEventListener('click', function() {
+        commentError.style.display = 'none';
+        });
+    });
+
+    // 📤 AJAX submit con validazione integrata
+    commentForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        const text = commentText.value.trim();
+        const rating = parseInt(ratingInput.value);
+
+        // Validazione client-side
+        if (text === '' && rating < 0) {
+        commentError.textContent = 'Inserisci un commento e seleziona una valutazione.';
+        commentError.style.display = 'block';
+        return;
+        } else if (text === '') {
+        commentError.textContent = 'Inserisci un commento.';
+        commentError.style.display = 'block';
+        return;
+        } else if (rating < 0) {
+        commentError.textContent = 'Seleziona una valutazione.';
+        commentError.style.display = 'block';
+        return;
+        }
+
+        // Se tutto ok, invia con fetch AJAX
+        const formData = new FormData(commentForm);
+
+        fetch(commentForm.action, {
+        method: "POST",
+        body: formData,
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}",
+            "X-Requested-With": "XMLHttpRequest"
+        },
+        credentials: "same-origin"
+        })
+        .then(response => {
+        if (!response.ok) {
+            throw new Error("Errore nell'invio del commento!");
+        }
+        return response.json();
+        })
+        .then(data => {
+        if (data.status === "success") {
+            commentText.value = '';
+            ratingInput.value = -1;
+            stars.forEach(star => {
+                star.classList.remove('text-warning', 'bi-star-fill');
+                star.classList.add('text-muted', 'bi-star');
+            });
+            banIcon.classList.remove('text-danger');
+            banIcon.classList.add('text-muted');
+            location.reload();
+        } else {
+            commentError.textContent = data.message || "Errore sconosciuto!";
+            commentError.style.display = 'block';
+        }
+        })
+        .catch(error => {
+        commentError.textContent = error.message;
+        commentError.style.display = 'block';
+        });
+    });
+    });
+</script>
+<style>
+    .text-warning {
+        color: #ffc107 !important; /* Colore giallo per le stelle selezionate */
+    }
+    .text-danger {
+        color: #dc3545 !important; /* Colore rosso per l'icona di divieto selezionata */
+    }
+</style>
+
+    </div>
+{% endif %}

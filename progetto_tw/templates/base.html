@@ -63,6 +63,7 @@
                 <div class="form-group col-md-3">
                     <label for="condition-type">Condizione</label>
                     <select class="form-control" id="condition-type">
+                        <option value="all">Tutte</option>
                         <option value="cond-new">Nuovo</option>
                         <option value="cond-used">Usato</option>
                     </select>
@@ -82,6 +83,20 @@
                         <option value="data-asc">Data (meno recenti)</option>
                         <option value="prezzo-asc">Prezzo crescente</option>
                         <option value="prezzo-desc">Prezzo decrescente</option>
+                    </select>
+                </div>
+                <div class="form-group col-md-3">
+                    <label for="search_by_rating">Stelle</label>
+                    <select class="form-control" id="search_by_rating">
+                        <option value="all">Tutti i tipi</option>
+                        <option value="starred">Solo con recensioni</option>
+                        <option value="none">Nessuna recensione</option>
+                        <option value="0">0-1 Stelle</option>
+                        <option value="1">1-2 Stella</option>
+                        <option value="2">2-3 Stelle</option>
+                        <option value="3">3-4 Stelle</option>
+                        <option value="4">4-5 Stelle</option>
+                        <option value="5">5 Stelle</option>
                     </select>
                 </div>
             </form>

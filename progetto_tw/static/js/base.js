@@ -79,6 +79,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let priceMax = document.getElementById('price-max').value.trim();
         let sortOrder = document.getElementById('sort-order').value;
         let conditions = document.getElementById('condition-type').value;
+        let rating = document.getElementById('search_by_rating').value;
 
         // Crea un oggetto URLSearchParams con la query principale
         let params = new URLSearchParams();
@@ -101,6 +102,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         if (conditions) {
             params.set('condition', conditions);
+        }
+        if (rating) {
+            params.set('search_by_rating', rating);
         }
 
         // Modifica l'URL di ricerca

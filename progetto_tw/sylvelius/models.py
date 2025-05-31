@@ -14,7 +14,7 @@ class Tag(models.Model):
 
 class Prodotto(models.Model):
     nome = models.CharField(max_length=100)
-    descrizione_breve = models.CharField(max_length=255)
+    descrizione_breve = models.CharField(max_length=255, null=True, blank=True)
     descrizione = models.TextField(max_length=3000, blank=True, null=True)
     prezzo = models.DecimalField(max_digits=10, decimal_places=2)
     condizione = models.CharField(max_length=20, choices=[('nuovo', 'Nuovo'), ('usato', 'Usato')], default='nuovo')
@@ -50,7 +50,7 @@ class Annuncio(models.Model):
 class CommentoAnnuncio(models.Model):
     annuncio = models.ForeignKey(Annuncio, on_delete=models.CASCADE, related_name='commenti')
     utente = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='commenti_annunci')
-    testo = models.TextField()
+    testo = models.TextField(max_length=1000, blank=True, null=True)
     rating = models.IntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(5)],
         help_text="Valutazione da 0 a 5"
@@ -69,7 +69,10 @@ class Ordine(models.Model):
     luogo_consegna = models.JSONField(null=True, blank=True)
     stato_consegna = models.CharField(max_length=20, choices=[
         ('da spedire', 'Da spedire'),
-        ('spedito', 'Spedito')
+        ('spedito', 'Spedito'),
+        ('in transito', 'In transito'),
+        ('consegnato', 'Consegnato'),
+        ('annullato', 'Annullato')
     ], default='da spedire')
 
     def __str__(self):

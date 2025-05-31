@@ -6,6 +6,11 @@
 {% block title %}{{ annuncio.prodotto.nome }}{% endblock %}
 
 {% block middle %}
+{% if request.GET.comment == "notok" %}
+    <div class="alert alert-danger" role="alert">
+        Errore nella gestione dei commenti
+    </div>
+{% endif %}
 <div class="container mt-5 mb-5">
     <div class="row">
         <!-- Colonna Sinistra: Testo -->
@@ -32,31 +37,21 @@
                 <div>Nessuna recensione</div>
             {% else %}
                 {% if annuncio.prodotto.descrizione_breve %}
-                <div class="text-warning me-3">
-                    {% for i in "12345" %}
-                        {% if forloop.counter <= annuncio.rating_medio %}
-                            <i class="bi bi-star-fill"></i>
-                        {% elif forloop.counter == annuncio.rating_medio|add:"1" and annuncio.rating_medio|floatformat:1|slice:"-1" != "0" %}
-                            <i class="bi bi-star-half"></i>
-                        {% else %}
-                            <i class="bi bi-star"></i>
-                        {% endif %}
-                    {% endfor %}
-                </div>
-                <p class="text-muted mb-4">Rating medio: {{ annuncio.rating_medio|floatformat:1 }} stelle (Voti: {{annuncio.rating_count}})</p>
+                    {% include "_txt_stars_medie.html" %}
+                    <p class="text-muted mb-4">Rating medio: {{ annuncio.rating_medio|floatformat:1 }} stelle (Voti: {{annuncio.rating_count}})</p>
                 {% endif %}
             {% endif %}
 
-            <h4 class="text-primary mt-4">€ <span id="unit-price">{{ annuncio.prodotto.prezzo }}</span> 
+            <h4 class="text-primary mt-4">€ <span id="unit-price-{{ annuncio.id }}">{{ annuncio.prodotto.prezzo }}</span> 
                 <small class="text-muted">/unità</small>
             </h4>
-            <h5 id="total-price-container" style="display: none;">Totale: <span id="total-price" class="text-success">{{ annuncio.prodotto.prezzo }}</span> €</h5>
+            <h5 id="total-price-container-{{ annuncio.id }}" style="display: none;">Totale: <span id="total-price-{{ annuncio.id }}" class="text-success">{{ annuncio.prodotto.prezzo }}</span> €</h5>
             <p class="text-muted">Disponibilità: {{ annuncio.qta_magazzino }} unità</p>
 
             <!-- Selezione quantità -->
             <div class="form-group mt-3 mb-3">
-                <label for="quantity-select">Quantità:</label>
-                <select class="form-control w-auto d-inline-block ml-2" id="quantity-select" name="quantity">
+                <label for="quantity-select-{{ annuncio.id }}">Quantità:</label>
+                <select class="form-control w-auto d-inline-block ml-2" id="quantity-select-{{ annuncio.id }}" name="quantity">
                     {% with ''|center:annuncio.qta_magazzino as range %}
                     {% for i in range %}
                         <option value="{{ forloop.counter }}">{{ forloop.counter }}</option>
@@ -68,56 +63,56 @@
             <!-- Azioni -->
             <div class="mt-4 mb-4">
                 <button class="btn btn-success d-inline-block">Aggiungi al carrello</button>
-                <form action="{% url 'sylvelius:fake_purchase' %}" method="post" class="d-inline-block" id="purchase-form">
+                <form action="{% url 'sylvelius:fake_purchase' %}" method="post" class="d-inline-block" id="purchase-form-{{ annuncio.id }}">
                     {% csrf_token %}
-                    <input type="hidden" name="amount" value="{{ annuncio.prodotto.prezzo }}" id="amount-input">
+                    <input type="hidden" name="amount" value="{{ annuncio.prodotto.prezzo }}" id="amount-input-{{ annuncio.id }}">
                     <input type="hidden" name="item_name" value="{{ annuncio.prodotto.nome }}">
                     <input type="hidden" name="product_id" value="{{ annuncio.prodotto.id }}">
-                    <input type="hidden" name="quantity" value="1" id="quantity-input">
+                    <input type="hidden" name="quantity" value="1" id="quantity-input-{{ annuncio.id }}">
                     <input type="hidden" name="user_id" value="{{ request.user.id }}">
                     <button type="submit" class="btn btn-primary">Acquista ora</button>
                 </form>
             </div>
 
             <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const quantitySelect = document.getElementById('quantity-select');
-                const quantityInput = document.getElementById('quantity-input');
-                const amountInput = document.getElementById('amount-input');
-                const unitPriceElement = document.getElementById('unit-price');
-                const totalPriceElement = document.getElementById('total-price');
-                const totalPriceContainer = document.getElementById('total-price-container');
-                
-                const originalPrice = parseFloat("{{ annuncio.prodotto.prezzo }}");
-                unitPriceElement.textContent = originalPrice.toFixed(2);
-                totalPriceElement.textContent = originalPrice.toFixed(2);
-                
-                function updatePrices() {
-                    const quantity = parseInt(quantitySelect.value);
-                    const totalPrice = originalPrice * quantity;
+                document.addEventListener('DOMContentLoaded', function() {
+                    const quantitySelect = document.getElementById('quantity-select-{{ annuncio.id }}');
+                    const quantityInput = document.getElementById('quantity-input-{{ annuncio.id }}');
+                    const amountInput = document.getElementById('amount-input-{{ annuncio.id }}');
+                    const unitPriceElement = document.getElementById('unit-price-{{ annuncio.id }}');
+                    const totalPriceElement = document.getElementById('total-price-{{ annuncio.id }}');
+                    const totalPriceContainer = document.getElementById('total-price-container-{{ annuncio.id }}');
                     
-                    quantityInput.value = quantity;
-                    amountInput.value = totalPrice.toFixed(2);
-                    totalPriceElement.textContent = totalPrice.toFixed(2);
+                    const originalPrice = parseFloat("{{ annuncio.prodotto.prezzo }}");
+                    unitPriceElement.textContent = originalPrice.toFixed(2);
+                    totalPriceElement.textContent = originalPrice.toFixed(2);
                     
-                    // Mostra/nascondi il totale in base alla quantità
-                    if (quantity === 1) {
-                        totalPriceContainer.style.display = 'none';
-                    } else {
-                        totalPriceContainer.style.display = 'block';
+                    function updatePrices() {
+                        const quantity = parseInt(quantitySelect.value);
+                        const totalPrice = originalPrice * quantity;
+                        
+                        quantityInput.value = quantity;
+                        amountInput.value = totalPrice.toFixed(2);
+                        totalPriceElement.textContent = totalPrice.toFixed(2);
+                        
+                        // Mostra/nascondi il totale in base alla quantità
+                        if (quantity === 1) {
+                            totalPriceContainer.style.display = 'none';
+                        } else {
+                            totalPriceContainer.style.display = 'block';
+                        }
                     }
-                }
-                
-                quantitySelect.addEventListener('change', updatePrices);
-                updatePrices(); // Inizializza al caricamento
-            });
+                    
+                    quantitySelect.addEventListener('change', updatePrices);
+                    updatePrices(); // Inizializza al caricamento
+                });
             </script>
         </div>
 
         <!-- Colonna Destra: Carosello -->
         <div class="col-md-6">
             {% if annuncio.prodotto.immagini.all %}
-                <div id="caroselloProdotto" class="carousel slide" data-ride="carousel" data-interval="false">
+                <div id="caroselloProdotto-{{ annuncio.id }}" class="carousel slide" data-ride="carousel" data-interval="false">
                     <div class="carousel-inner">
                         {% for immagine in annuncio.prodotto.immagini.all %}
                             <div class="carousel-item {% if forloop.first %}active{% endif %}">
@@ -134,11 +129,11 @@
 
                     <!-- Pulsanti di navigazione personalizzati -->
                     {% if annuncio.prodotto.immagini.count > 1 %}
-                        <a class="carousel-control-prev" href="#caroselloProdotto" role="button" data-slide="prev">
+                        <a class="carousel-control-prev" href="#caroselloProdotto-{{ annuncio.id }}" role="button" data-slide="prev">
                             <span class="carousel-control-prev-icon bg-dark rounded-circle p-3" aria-hidden="true"></span>
                             <span class="sr-only">Precedente</span>
                         </a>
-                        <a class="carousel-control-next" href="#caroselloProdotto" role="button" data-slide="next">
+                        <a class="carousel-control-next" href="#caroselloProdotto-{{ annuncio.id }}" role="button" data-slide="next">
                             <span class="carousel-control-next-icon bg-dark rounded-circle p-3" aria-hidden="true"></span>
                             <span class="sr-only">Successivo</span>
                         </a>
@@ -155,6 +150,8 @@
         <div class="col-12">
             {% if annuncio.prodotto.descrizione %}
                 <p>{{ annuncio.prodotto.descrizione }}</p>
+            {% else %}
+                <h2 class="text-muted mb-5">Nessuna descrizione</h2>
             {% endif %}
             <div>Categorie:</div>
             {% if annuncio.prodotto.tags.count > 1 %}
@@ -164,33 +161,19 @@
             {% else %}
                 <p class="text-muted">Nessuna categoria specificata.</p>
             {% endif %}
-            <h4 class="mb-4 mt-2">💬 Commenti degli utenti</h4>
+            <h4 class="mb-4 mt-2">💬 Commenti degli utenti 💬</h4>
+            
+            <!--- Form per l'inserimento di un nuovo commento -->
+            {% if ha_acquistato and non_ha_commentato %}
+                {% url 'sylvelius:aggiungi_commento' annuncio.id as create_url%}
+                {% include "_card_nuovo_commento.html" with direction=create_url %}
+            {% elif not non_ha_commentato %}
+                {% include "_card_commento.html" with commento=get_commento %}
+            {% endif %}
 
             {% for commento in commenti %}
-                <div class="card mb-3 shadow-sm">
-                    <div class="card-body d-flex">
-                        <div class="text-center me-3" style="min-width: 80px;">
-                            <img src="{% static 'img/default_user.png' %}" class="rounded-circle" width="50" height="50" alt="Avatar">
-                        </div>
-                        <div class="text-start w-100 text-left">
-                            <div class="d-flex align-items-center mb-1 flex-wrap">
-                                <h6 class="mb-0 font-weight-bold mr-3">{{ commento.utente.username }}</h6>
-                                <div class="text-warning me-3 mr-3">
-                                    {% for i in "12345"|slice:":5" %}
-                                        {% if forloop.counter <= commento.rating %}
-                                            <i class="bi bi-star-fill"></i>
-                                        {% else %}
-                                            <i class="bi bi-star"></i>
-                                        {% endif %}
-                                    {% endfor %}
-                                </div>
-                                <small class="text-muted">{{ commento.data_pubblicazione|date:"d/m/Y" }}</small>
-                            </div>
-                            <p class="mb-0">{{ commento.testo }}</p>
-                        </div>
-                    </div>
-                </div>
-                {% empty %}
+                {% include "_card_commento.html" with excluded=get_commento %}
+            {% empty %}
                 <p class="text-muted">Nessun commento per questo annuncio.</p>
             {% endfor %}
         </div>
