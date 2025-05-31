@@ -55,6 +55,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'progetto_tw.urls'
 LOGIN_URL = "/login/?auth=notok"
+LOGIN_REDIRECT_URL = '/account/profilo/'
 
 TEMPLATES = [
     {

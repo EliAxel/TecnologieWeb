@@ -81,17 +81,15 @@ class RegistrazionePageView(CreateView):
 
 class LoginPageView(LoginView):
     template_name = "sylvelius/login.html"
-    def form_invalid(self, form):
-        return HttpResponseRedirect(reverse('sylvelius:login') + '?auth=notok')
+
+class LogoutPageView(LogoutView):
+    next_page = reverse_lazy('sylvelius:home')
 
 class CustomLoginRequiredMixin(LoginRequiredMixin):
     def get_login_url(self):
         login_url = super().get_login_url()
-        return f"{resolve_url(login_url)}?auth=notok"
-
-class LogoutPageView(CustomLoginRequiredMixin, LogoutView):
-    next_page = reverse_lazy('sylvelius:home')
-
+        return f"{resolve_url(login_url)}?auth=error"
+    
 class ProfiloPageView(CustomLoginRequiredMixin, TemplateView):
     template_name = "sylvelius/profile/profile.html"
     login_url = reverse_lazy('sylvelius:login')
@@ -475,18 +473,17 @@ def delete_pubblicazione(request, id):
     page = request.POST.get('page', 1)
     return redirect(f'{reverse_lazy("sylvelius:profile_creazioni")}?page={page}')
 
-@login_required
-@require_POST
-def check_old_password(request):
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        old_password = data.get('old_password', '')
 
-        if request.user.check_password(old_password):
-            return JsonResponse({'valid': True})
-        else:
-            return JsonResponse({'valid': False})
-    return JsonResponse({'valid': False}, status=400)
+@require_POST
+@login_required
+def check_old_password(request):
+    data = json.loads(request.body)
+    old_password = data.get('old_password', '')
+
+    if request.user.check_password(old_password):
+        return JsonResponse({'valid': True})
+    else:
+        return JsonResponse({'valid': False})
 
 @require_POST
 def check_username_exists(request):
@@ -497,23 +494,21 @@ def check_username_exists(request):
 
 @require_POST
 def check_login_credentials(request):
-    if request.method == "POST":
-        data = json.loads(request.body)
-        username = data.get("username")
-        password = data.get("password")
-        try:
-            user = User.objects.get(username=username)
-            exists = True
-            valid_password = user.check_password(password)
-        except User.DoesNotExist:
-            exists = False
-            valid_password = False
+    data = json.loads(request.body)
+    username = data.get("username")
+    password = data.get("password")
+    try:
+        user = User.objects.get(username=username)
+        exists = True
+        valid_password = user.check_password(password)
+    except User.DoesNotExist:
+        exists = False
+        valid_password = False
 
-        return JsonResponse({
-            "exists": exists,
-            "valid_password": valid_password,
-        })
-    return JsonResponse({"exists": False, "valid_password": False})
+    return JsonResponse({
+        "exists": exists,
+        "valid_password": valid_password,
+    })
 
 @require_POST
 @login_required
@@ -577,8 +572,8 @@ def elimina_commento(request, commento_id):
     else:
         return HttpResponseBadRequest("Metodo non consentito")
 
-@login_required
 @require_POST
+@login_required
 def fake_purchase(request):    
     amount = request.POST.get("amount", "0.00")
     item_name = request.POST.get("item_name", "Prodotto sconosciuto")
@@ -664,10 +659,8 @@ def verify_paypal_webhook(request,body):
     return verification_status == "SUCCESS"
 
 @csrf_exempt
-def paypal_pcc(request):
-    if request.method != 'POST':
-        return HttpResponse(status=400)
-    
+@require_POST
+def paypal_pcc(request):    
     body = request.body
 
     if not verify_paypal_webhook(request,body):
@@ -717,10 +710,8 @@ def paypal_pcc(request):
         return HttpResponse(status=500)
     
 @csrf_exempt
-def paypal_coa(request):
-    if request.method != 'POST':
-        return HttpResponse(status=400)
-    
+@require_POST
+def paypal_coa(request):    
     body = request.body
 
     if not verify_paypal_webhook(request,body):
