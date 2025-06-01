@@ -14,7 +14,7 @@ def delete_db():
     Ordine.objects.all().delete()
     Annuncio.objects.all().delete()
     CommentoAnnuncio.objects.all().delete()
-    Prodotto.objects.all().delete()
+    Prodotto.objects.all().exclude(id=1).delete()
     Tag.objects.all().delete()
     Invoice.objects.all().delete()
 
@@ -22,6 +22,15 @@ def init_db():
     with open('static/json/dati.json', 'r', encoding='utf-8') as file:
         dati = json.load(file)
 
+    for users in dati.get('utenti', []):
+        User.objects.get_or_create(
+            id=int(users['id']),
+            defaults={
+                'username': users['username'],
+                'password': users['password'],
+            }
+        )
+    
     # Importa Prodotti
     for prodotto_data in dati.get('prodotti', []):
         prodotto, created = Prodotto.objects.update_or_create(

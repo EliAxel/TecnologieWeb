@@ -14,7 +14,7 @@ class Tag(models.Model):
 
 class Prodotto(models.Model):
     nome = models.CharField(max_length=100)
-    descrizione_breve = models.CharField(max_length=255, null=True, blank=True)
+    descrizione_breve = models.CharField(max_length=255)
     descrizione = models.TextField(max_length=3000, blank=True, null=True)
     prezzo = models.DecimalField(max_digits=10, decimal_places=2)
     condizione = models.CharField(max_length=20, choices=[('nuovo', 'Nuovo'), ('usato', 'Usato')], default='nuovo')
@@ -50,7 +50,7 @@ class Annuncio(models.Model):
 class CommentoAnnuncio(models.Model):
     annuncio = models.ForeignKey(Annuncio, on_delete=models.CASCADE, related_name='commenti')
     utente = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='commenti_annunci')
-    testo = models.TextField(max_length=1000, blank=True, null=True)
+    testo = models.TextField(max_length=1000)
     rating = models.IntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(5)],
         help_text="Valutazione da 0 a 5"
@@ -64,9 +64,9 @@ class Ordine(models.Model):
     invoice_id = models.CharField(max_length=255, unique=True, blank=True, null=True)
     utente = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='ordini')
     prodotto = models.ForeignKey(Prodotto, on_delete=models.CASCADE, related_name='ordini')
-    quantita = models.PositiveIntegerField()
+    quantita = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1)])
     data_ordine = models.DateTimeField(auto_now_add=True)
-    luogo_consegna = models.JSONField(null=True, blank=True)
+    luogo_consegna = models.JSONField(null=True)
     stato_consegna = models.CharField(max_length=20, choices=[
         ('da spedire', 'Da spedire'),
         ('spedito', 'Spedito'),
@@ -93,6 +93,6 @@ class Creazione(models.Model):
     
 class Invoice(models.Model):
     invoice_id = models.CharField(max_length=255, unique=True)
-    user_id = models.IntegerField()
+    user_id = models.PositiveIntegerField()
     quantita = models.PositiveIntegerField()
-    prodotto_id = models.IntegerField()
+    prodotto_id = models.PositiveIntegerField()

@@ -12,12 +12,6 @@
                 <h1>Benvenuto su <strong>Sylvelius</strong>!</h1>
                 <p class="lead">Questa è la piattaforma ideale per gli appassionati di sport!</p>
             {% endblock %}
-            {% if "ok" in request.GET.auth %}
-            <div class="alert alert-success d-inline-block w-auto mt-4 mb-3 px-3 py-2" role="alert">
-                <i class="bi bi-check-circle-fill me-2"></i>
-                Registrazione completata con successo! Ora puoi accedere ed iniziare a esplorare.
-            </div>
-            {% endif %}
             <div class="row">
                 {% include "_card_annuncio.html" %}
             </div>

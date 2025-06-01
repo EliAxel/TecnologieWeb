@@ -1,5 +1,4 @@
 # Django core
-from PIL import Image
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
@@ -41,6 +40,7 @@ import json
 import uuid
 import requests
 from requests.auth import HTTPBasicAuth
+from PIL import Image
 
 # Create your views here.
 class HomePageView(TemplateView):
@@ -77,7 +77,7 @@ class RegistrazionePageView(CreateView):
         return HttpResponseRedirect(reverse('sylvelius:register') + '?auth=notok')
     
     def get_success_url(self):
-        return reverse('sylvelius:home') + '?auth=ok'
+        return reverse('sylvelius:login') + '?reg=ok'
 
 class LoginPageView(LoginView):
     template_name = "sylvelius/login.html"
@@ -451,28 +451,26 @@ class RicercaAnnunciView(TemplateView):
 
         return context
 
+@require_POST
 @login_required
 def toggle_pubblicazione(request, id):
     # Trova la creazione dell'utente (che contiene l'annuncio)
     creazione = get_object_or_404(Creazione, annuncio__id=id, utente=request.user)
     annuncio = creazione.annuncio
-    if request.method == "POST":
-        annuncio.is_published = not annuncio.is_published
-        annuncio.save()
+    annuncio.is_published = not annuncio.is_published
+    annuncio.save()
     page = request.GET.get('page', 1)
-    return redirect(f'{reverse_lazy("sylvelius:profile_creazioni")}?page={page}')
+    return redirect(f'{reverse("sylvelius:profile_creazioni")}?page={page}')
 
+@require_POST
 @login_required
 def delete_pubblicazione(request, id):
     creazione = get_object_or_404(Creazione, id=id, utente=request.user)
     annuncio = creazione.annuncio
-    
-    if request.method == "POST":
-        annuncio.delete()
+    annuncio.delete()
     
     page = request.POST.get('page', 1)
-    return redirect(f'{reverse_lazy("sylvelius:profile_creazioni")}?page={page}')
-
+    return redirect(f'{reverse("sylvelius:profile_creazioni")}?page={page}')
 
 @require_POST
 @login_required
@@ -541,37 +539,35 @@ def aggiungi_commento(request, annuncio_id):
     # Altrimenti redirect classico
     return redirect(reverse('sylvelius:dettagli_annuncio', args=[annuncio_id]))
 
+@require_POST
 @login_required
 def modifica_commento(request, commento_id):
     commento = get_object_or_404(CommentoAnnuncio, id=commento_id, utente=request.user)
 
-    if request.method == "POST":
-        testo = request.POST.get('testo', '').strip()
-        rating = request.POST.get('rating')
+    testo = request.POST.get('testo', '').strip()
+    rating = request.POST.get('rating')
 
-        # Validazione
-        if not testo or not rating.isdigit() or int(rating) < 0 or int(rating) > 5 or len(testo) > 1000:
-            return JsonResponse({"status": "error", "message": "Dati non validi"}, status=400)
+    # Validazione
+    if not testo or not rating.isdigit() or int(rating) < 0 or int(rating) > 5 or len(testo) > 1000:
+        return JsonResponse({"status": "error", "message": "Dati non validi"}, status=400)
 
-        # Aggiorna il commento
-        commento.testo = testo
-        commento.rating = int(rating)
-        commento.save()
+    # Aggiorna il commento
+    commento.testo = testo
+    commento.rating = int(rating)
+    commento.save()
 
-        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-            return JsonResponse({"status": "success"})
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({"status": "success"})
 
     return render(request, "sylvelius/annuncio/modifica_commento.html", {"commento": commento})
 
+@require_POST
 @login_required
 def elimina_commento(request, commento_id):
-    if request.method == "DELETE":
-        commento = get_object_or_404(CommentoAnnuncio, id=commento_id, utente=request.user)
-        commento.delete()
-        return JsonResponse({"status": "success"})
-    else:
-        return HttpResponseBadRequest("Metodo non consentito")
-
+    commento = get_object_or_404(CommentoAnnuncio, id=commento_id, utente=request.user)
+    commento.delete()
+    return JsonResponse({"status": "success"})
+    
 @require_POST
 @login_required
 def fake_purchase(request):    
@@ -605,7 +601,7 @@ def payment_done(request):
 
 def payment_cancelled(request):
     return render(request, 'sylvelius/payment/payment_cancelled.html')
-
+# non callable
 def get_paypal_access_token():
     xxx = settings.xxx
     xxx = settings.xxx
@@ -619,7 +615,7 @@ def get_paypal_access_token():
 
     response.raise_for_status()
     return response.json()["access_token"]
-
+# non callable
 def verify_paypal_webhook(request,body):
     PAYPAL_API_BASE = "https://api-m.sandbox.paypal.com" 
     access_token = get_paypal_access_token()

@@ -1,11 +1,25 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
 from django.urls import reverse
+import uuid
+from manage import main
+from .models import (
+    Ordine,
+    Prodotto,
+    Creazione,
+    Annuncio,
+    CommentoAnnuncio,
+    Invoice,
+    Tag,
+    ImmagineProdotto
+)
 
-# Create your tests here.
 class AnonUrlsTestCase(TestCase):
+
     def test_home_page(self):
         response = self.client.get('/')
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get('')
         self.assertEqual(response.status_code, 200)
     
     def test_signup_page(self):
@@ -91,6 +105,10 @@ class LoggedUrlsTestCase(TestCase):
         self.user = User.objects.create_user(username='testuser', password='Testpass0')
         self.client.login(username='testuser', password='Testpass0')
 
+    def test_logout_page(self):
+        response = self.client.get('/logout/')
+        self.assertEqual(response.status_code, 405)
+
     def test_profilo_page(self):
         response = self.client.get('/account/profilo/')
         self.assertEqual(response.status_code, 200)
@@ -102,3 +120,176 @@ class LoggedUrlsTestCase(TestCase):
     def test_profilo_delete_page(self):
         response = self.client.get('/account/profilo/elimina/')
         self.assertEqual(response.status_code, 200)
+
+    def test_profilo_ordini_page(self):
+        response = self.client.get('/account/profilo/ordini/')
+        self.assertEqual(response.status_code, 200)
+    
+    def test_profilo_creazioni_page(self):
+        response = self.client.get('/account/profilo/creazioni/')
+        self.assertEqual(response.status_code, 200)
+    
+    def test_profilo_creazioni_crea_page(self):
+        response = self.client.get('/account/profilo/creazioni/crea/')
+        self.assertEqual(response.status_code, 200)
+
+class UrlsTestCaseWithData(TestCase):
+    def setUp(self):
+        # Crea i tag
+        tag1 = Tag.objects.create(nome='Tag01')
+        tag2 = Tag.objects.create(nome='Tag02')
+        user = User.objects.create_user(username='testuser', password='Testpass0')
+        # Crea il prodotto SENZA i tag
+        prodotto = Prodotto.objects.create(
+            id=102,
+            nome="Prodotto di Test",
+            descrizione_breve="Breve descrizione del prodotto di test",
+            descrizione="Descrizione dettagliata del prodotto di test",
+            prezzo=100.00,
+            condizione="nuovo"
+        )
+        prodotto.immagini.add( # type: ignore
+            ImmagineProdotto.objects.create(
+                prodotto=prodotto,
+                immagine='prodotti/immagini/test_image.jpg'
+            )
+        )
+        # Aggiungi i tag al prodotto
+        prodotto.tags.add(tag1, tag2)
+
+        annuncio=Annuncio.objects.create(
+            prodotto=prodotto,
+            qta_magazzino=10,
+            is_published=True
+        )
+
+        Creazione.objects.create(
+            utente=user,
+            annuncio=annuncio,
+        )
+    
+    def test_account_profilo_creazioni_nascondi_1(self):
+        response = self.client.get('/account/profilo/creazioni/nascondi/1/')
+        self.assertEqual(response.status_code, 405)
+    
+    def test_account_profilo_creazioni_elimina_1(self):
+        response = self.client.get('/account/profilo/creazioni/elimina/1/')
+        self.assertEqual(response.status_code, 405)
+    
+    def test_annuncio_1(self):
+        response = self.client.get('/annuncio/1/')
+        self.assertEqual(response.status_code, 200)
+    
+    def test_aggiungi_commento_1(self):
+        response = self.client.get('/aggiungi_commento/1/')
+        self.assertEqual(response.status_code, 405)
+
+    def test_modifica_commento_1(self):
+        response = self.client.get('/modifica_commento/1/')
+        self.assertEqual(response.status_code, 405)
+
+    def test_elimina_commento_1(self):
+        response = self.client.get('/elimina_commento/1/')
+        self.assertEqual(response.status_code, 405)
+    
+    def test_api_immagine(self):
+        response = self.client.get('/api/immagine/102/')
+        self.assertEqual(response.status_code, 200)
+
+        data = response.json()
+        self.assertIn('url', data)
+        self.assertEqual(data['url'],"/media/prodotti/immagini/test_image.jpg")
+        response = self.client.get('/api/immagine/1/')
+        self.assertEqual(response.status_code, 200)
+
+        data = response.json()
+        self.assertIn('url', data)
+        self.assertEqual(data['url'],"/static/img/default_product.png")
+    
+    def test_api_immagini(self):
+        response = self.client.get('/api/immagini/102/')
+        self.assertEqual(response.status_code, 200)
+
+        data = response.json()
+        self.assertIn('urls', data)
+        self.assertEqual(data['urls'][0],"/media/prodotti/immagini/test_image.jpg")
+
+        response = self.client.get('/api/immagini/1/')
+        self.assertEqual(response.status_code, 200)
+
+        data = response.json()
+        self.assertIn('urls', data)
+        self.assertEqual(data['urls'][0],"/static/img/default_product.png")
+
+class ModuleTesting(TestCase):
+    def setUp(self):
+        # Crea i tag
+        tag1 = Tag.objects.create(nome='Tag01')
+        tag2 = Tag.objects.create(nome='Tag02')
+        self.user = User.objects.create_user(username='testuser', password='Testpass0')
+        # Crea il prodotto SENZA i tag
+        prodotto = Prodotto.objects.create(
+            id=102,
+            nome="Prodotto di Test",
+            descrizione_breve="Breve descrizione del prodotto di test",
+            descrizione="Descrizione dettagliata del prodotto di test",
+            prezzo=100.00,
+            condizione="nuovo"
+        )
+
+        prodotto.immagini.add( # type: ignore
+            ImmagineProdotto.objects.create(
+                prodotto=prodotto,
+                immagine='prodotti/immagini/test_image.jpg'
+            )
+        )
+        # Aggiungi i tag al prodotto
+        prodotto.tags.add(tag1, tag2)
+
+        annuncio=Annuncio.objects.create(
+            id=102,
+            prodotto=prodotto,
+            qta_magazzino=10,
+            is_published=True
+        )
+
+        CommentoAnnuncio.objects.create(
+            id = 102,
+            annuncio = Annuncio.objects.get(id=102),
+            utente = self.user,
+            testo = "Bello",
+            rating = 4
+        )
+
+        Creazione.objects.create(
+            id=102,
+            utente=self.user,
+            annuncio=annuncio,
+        )
+
+        invoice=Invoice.objects.create(
+            invoice_id=uuid.uuid4(),
+            user_id=self.user.id, #type: ignore
+            quantita=3,
+            prodotto_id=102
+        )
+
+        Ordine.objects.create(
+            id=102,
+            invoice_id = invoice.invoice_id,
+            utente = User.objects.get(id=invoice.user_id), 
+            prodotto = Prodotto.objects.get(id=invoice.prodotto_id),
+            quantita = invoice.quantita,
+            stato_consegna = "consegnato"
+        )
+        
+    def test_to_string(self):
+        self.assertEqual(Tag.objects.get(nome="tag01").__str__(),"tag01")
+        self.assertEqual(Prodotto.objects.get(id=102).immagini.first().__str__(),"Immagine di Prodotto di Test") #type: ignore
+        self.assertEqual(Annuncio.objects.get(id=102).__str__(),"Prodotto di Test")
+        self.assertEqual(CommentoAnnuncio.objects.get(id=102).__str__(),"testuser su Prodotto di Test - 4/5")
+        self.assertEqual(Annuncio.objects.get(id=102).rating_medio,4)
+        self.assertEqual(Annuncio.objects.get(id=102).rating_count,1)
+        self.assertEqual(Creazione.objects.get(id=102).__str__(),"testuser - Prodotto di Test")
+        self.assertEqual(Ordine.objects.get(id=102).__str__(),"testuser - Prodotto di Test")
+        self.assertEqual(Ordine.objects.get(id=102).totale,300.00)
