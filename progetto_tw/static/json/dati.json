@@ -1,13 +1,42 @@
 {
+  "utenti": [
+  {
+    "id": 2,
+    "username": "Silvia",
+    "password": "Sylvi001"
+  },
+  {
+    "id": 3,
+    "username": "EliAxel",
+    "password": "Eliama01"
+  }
+  ],
   "prodotti": [
     {
       "id": 1,
-      "nome": "Pallone da calcio",
-      "descrizione_breve": "Pallone ufficiale misura 5.",
-      "prezzo": "19.99",
+      "nome": "Nome",
+      "descrizione_breve": "descrizione_breve",
+      "descrizione": "descrizione",
+      "prezzo": "12.34",
+      "condizione": "nuovo",
       "immagini": [
         {
           "id": 1,
+          "immagine": null
+        }
+      ],
+      "tag": []
+    },
+    {
+      "id": 101,
+      "nome": "Pallone da calcio",
+      "descrizione_breve": "Pallone ufficiale misura 5.",
+      "descrizione": "Pallone da calcio resistente e pensato per le partite ufficiali",
+      "prezzo": "19.99",
+      "condizione": "usato",
+      "immagini": [
+        {
+          "id": 101,
           "immagine": "/prodotti/immagini/pallone_da_calcio.jpg"
         }
       ],
@@ -1303,7 +1332,7 @@
 
   ],
   "annunci": [
-    {"prodotto_id": 1, "data_pubblicazione": "2024-06-01T09:00:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 101, "data_pubblicazione": "2024-06-01T09:00:00Z", "qta_magazzino": 10, "is_published": true},
     {"prodotto_id": 2, "data_pubblicazione": "2024-06-01T09:01:00Z", "qta_magazzino": 10, "is_published": true},
     {"prodotto_id": 3, "data_pubblicazione": "2024-06-01T09:02:00Z", "qta_magazzino": 10, "is_published": true},
     {"prodotto_id": 4, "data_pubblicazione": "2024-06-01T09:03:00Z", "qta_magazzino": 10, "is_published": true},
@@ -1402,12 +1431,27 @@
     {"prodotto_id": 97, "data_pubblicazione": "2024-06-01T10:36:00Z", "qta_magazzino": 10, "is_published": true},
     {"prodotto_id": 98, "data_pubblicazione": "2024-06-01T10:37:00Z", "qta_magazzino": 10, "is_published": true},
     {"prodotto_id": 99, "data_pubblicazione": "2024-06-01T10:38:00Z", "qta_magazzino": 10, "is_published": true},
+    {"prodotto_id": 1000, "data_pubblicazione": "2024-06-01T10:38:00Z", "qta_magazzino": 10, "is_published": true},
     {"prodotto_id": 100, "data_pubblicazione": "2024-06-01T10:39:00Z", "qta_magazzino": 10, "is_published": true}
   ],
   "ordini": [
     {
       "utente_username": "Silvia",
-      "prodotto_id": 1,
+      "prodotto_id": 101,
+      "quantita": 2,
+      "stato_consegna": "da spedire",
+      "data_ordine": "2024-06-10T09:00:00Z"
+    },
+    {
+      "utente_username": "errore",
+      "prodotto_id": 105,
+      "quantita": 2,
+      "stato_consegna": "da spedire",
+      "data_ordine": "2024-06-10T09:00:00Z"
+    },
+    {
+      "utente_username": "Silvia",
+      "prodotto_id": 109,
       "quantita": 2,
       "stato_consegna": "da spedire",
       "data_ordine": "2024-06-10T09:00:00Z"
@@ -1784,6 +1828,21 @@
       "data_creazione": "2024-06-02T11:05:00Z"
     },
     {
+      "utente_username": "errore",
+      "prodotto_id": 2,
+      "data_creazione": "2024-06-02T11:05:00Z"
+    },
+    {
+      "utente_username": "Silvia",
+      "prodotto_id": 109,
+      "data_creazione": "2024-06-02T11:05:00Z"
+    },
+    {
+      "utente_username": "Silvia",
+      "prodotto_id": 1,
+      "data_creazione": "2024-06-02T11:05:00Z"
+    },
+    {
       "utente_username": "Silvia",
       "prodotto_id": 3,
       "data_creazione": "2024-06-03T12:05:00Z"
@@ -1800,7 +1859,7 @@
     },
     {
       "utente_username": "Silvia",
-      "prodotto_id": 1,
+      "prodotto_id": 101,
       "data_creazione": "2024-06-01T10:05:00Z"
     },
     {
@@ -2033,6 +2092,20 @@
     {
       "annuncio_id": "100",
       "utente_username": "Silvia",
+      "testo": "Ottimo prodotto!",
+      "data_commento": "2024-06-01T10:10:00Z",
+      "rating": 5
+    },
+    {
+      "annuncio_id": "109",
+      "utente_username": "Silvia",
+      "testo": "Ottimo prodotto!",
+      "data_commento": "2024-06-01T10:10:00Z",
+      "rating": 5
+    },
+    {
+      "annuncio_id": "100",
+      "utente_username": "errore",
       "testo": "Ottimo prodotto!",
       "data_commento": "2024-06-01T10:10:00Z",
       "rating": 5

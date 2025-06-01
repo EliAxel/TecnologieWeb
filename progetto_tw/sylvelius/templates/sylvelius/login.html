@@ -35,6 +35,12 @@
     Il login è richiesto per compiere questa azione.
 </div>
 {% endif %}
+{% if "ok" in request.GET.reg %}
+<div class="alert alert-success d-inline-block w-auto mt-4 mb-3 px-3 py-2" role="alert">
+    <i class="bi bi-check-circle-fill me-2"></i>
+    Registrazione completata con successo! Ora puoi accedere ed iniziare a esplorare.
+</div>
+{% endif %}
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

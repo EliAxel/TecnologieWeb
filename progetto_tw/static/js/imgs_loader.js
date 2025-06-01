@@ -7,8 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(response => response.json())
             .then(data => {
                 immagini.forEach((img, index) => {
-                    if (data.immagini[index]) {
-                        img.src = data.immagini[index];
+                    if (data.urls[index]) {
+                        img.src = data.urls[index];
                     }
                 });
             })

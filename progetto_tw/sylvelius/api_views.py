@@ -14,12 +14,10 @@ async def get_immagini_prodotto(request, prodotto_id):
     immagini = await sync_to_async(list)(
         ImmagineProdotto.objects.filter(prodotto_id=prodotto_id).order_by('id')
     )
-
-    # Verifica se ci sono immagini
-    if not immagini:
-        raise Http404("Nessuna immagine trovata")
-
+    
     # Costruisci la lista degli URL
-    immagini_urls = [img.immagine.url for img in immagini]
-
-    return JsonResponse({'immagini': immagini_urls})
+    immagini_urls = [img.immagine.url for img in immagini if img.immagine]
+    if not immagini_urls:
+        immagini_urls = ['/static/img/default_product.png']
+        
+    return JsonResponse({'urls': immagini_urls})
