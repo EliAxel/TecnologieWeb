@@ -1,7 +1,8 @@
 # Django core
+from django.conf import settings
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm, PasswordChangeForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.contrib.auth.views import LoginView, LogoutView
@@ -11,7 +12,7 @@ from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse, reverse_lazy
 from django.views import View
 from django.views.decorators.http import require_POST
-from django.views.generic import TemplateView, CreateView
+from django.views.generic import TemplateView, CreateView, UpdateView
 from django.db.models import Avg
 from django.db.models.functions import Floor
 from django.shortcuts import (
@@ -20,9 +21,8 @@ from django.shortcuts import (
     get_object_or_404,
     resolve_url
 )
-
 # Project specific
-from django.conf import settings
+from .forms import CustomUserCreationForm
 from .models import (
     Annuncio,
     CommentoAnnuncio,
@@ -32,7 +32,6 @@ from .models import (
     Tag,
     Prodotto
 )
-
 # Other
 import json
 from PIL import Image
@@ -66,13 +65,14 @@ class HomePageView(TemplateView):
         return context
 
 class RegistrazionePageView(CreateView):
-    form_class = UserCreationForm
+    form_class = CustomUserCreationForm
     template_name = "sylvelius/register.html"
+
     def form_invalid(self, form):
         return HttpResponseRedirect(reverse('sylvelius:register') + '?auth=notok')
     
     def get_success_url(self):
-        return reverse('sylvelius:login') + '?reg=ok'
+            return reverse('sylvelius:login') + '?reg=ok'
 
 class LoginPageView(LoginView):
     template_name = "sylvelius/login.html"
@@ -134,33 +134,37 @@ class ProfiloEditPageView(CustomLoginRequiredMixin, View):
     login_url = reverse_lazy('sylvelius:login')
 
     def get(self, request):
-        return render(request, self.template_name, {'user': request.user})
-
+        return render(request, self.template_name)
+    
     def post(self, request):
-        user = request.user
-        username = request.POST.get('username', user.username)
-        old_password = request.POST.get('old_password')
-        new_password1 = request.POST.get('new_password1')
-        new_password2 = request.POST.get('new_password2')
+        username = request.POST.get('username').strip()
+        old_password = request.POST.get('old_password').strip()
+        new_password1 = request.POST.get('new_password1').strip()
+        new_password2 = request.POST.get('new_password2').strip()
 
-        # Verifica la vecchia password
-        if not user.check_password(old_password):
-            return render(request, self.template_name, {'user': user})
+        if len(username) > 32:
+            return render(request, self.template_name, {'usr': 'bad'})
+        if len(new_password1) > 32:
+            return render(request, self.template_name, {'pwd': 'bad'})
+        password_change_form_valid = True
+        if new_password1 and new_password2:
+            password_change_form=PasswordChangeForm(data={
+                'old_password': old_password,
+                'new_password1': new_password1,
+                'new_password2': new_password2
+            },user=request.user)
+            password_change_form_valid = password_change_form.is_valid()
+            if password_change_form_valid: password_change_form.save()
 
-        # Aggiorna username se cambiato
-        if username and username != user.username:
-            user.username = username
+        if username != request.user.username:
+            request.user.username = username
+            request.user.save()
 
-        # Gestione cambio password
-        if new_password1 or new_password2:
-            if new_password1 != new_password2:
-                return render(request, self.template_name, {'user': user})
-            if new_password1:
-                user.set_password(new_password1)
-                update_session_auth_hash(request, user)
-
-        user.save()
-        return redirect('sylvelius:profile')
+        if password_change_form_valid:
+            update_session_auth_hash(request, request.user)
+            return redirect('sylvelius:profile')
+        else:
+            return render(request, self.template_name, {'pwd': 'bad'})
 
 class ProfiloDeletePageView(CustomLoginRequiredMixin, TemplateView):
     template_name = "sylvelius/profile/profile_delete.html"
@@ -267,9 +271,9 @@ class ProfiloCreaCreazionePageView(CustomLoginRequiredMixin, View):
     def post(self, request):
         error = {'notok': '1'}
 
-        nome = request.POST.get('nome')
+        nome = request.POST.get('nome').strip()
         descrizione = request.POST.get('descrizione', '')
-        descrizione_breve = request.POST.get('descrizione_breve')
+        descrizione_breve = request.POST.get('descrizione_breve').strip()
         prezzo = request.POST.get('prezzo')
         tag_string = request.POST.get('tags', '')  # è una stringa unica!
         immagini = request.FILES.getlist('immagini')
@@ -280,7 +284,7 @@ class ProfiloCreaCreazionePageView(CustomLoginRequiredMixin, View):
             return render(request, self.template_name, error)
 
         # Validazione base
-        if not nome.strip('') or not descrizione_breve.strip('') or not prezzo:
+        if not nome or not descrizione_breve or not prezzo:
             return render(request, self.template_name, error)
         
         if len(nome) > 100 or len(descrizione_breve) > 255 or len(descrizione) > 3000:

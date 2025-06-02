@@ -5,6 +5,16 @@
     {% include "_btn_toprightbuttons.html" %}
 {% endblock %}
 {% block middle %}
+{% if usr == "bad" %}
+<div class="alert alert-danger" role="alert">
+    Si è verificato un errore con la modifica dell'username. Per favore, riprova.
+</div>
+{% endif %}
+{% if pwd == "bad" %}
+<div class="alert alert-danger" role="alert">
+    Si è verificato un errore con la modifica della password. Per favore, riprova.
+</div>
+{% endif %}
 <div class="container mt-5 mb-5" style="max-width: 500px;">
     <div class="card shadow">
         <div class="card-header text-white" style="background-color: #6f42c1;">
@@ -15,23 +25,23 @@
                 {% csrf_token %}
                 <div class="form-group">
                     <label for="id_username">Username</label>
-                    <input type="text" class="form-control" id="id_username" name="username" value="{{ user.username }}" required>
-                    <div class="invalid-feedback" id="username-invalid-feedback">Inserisci un username valido.</div>
+                    <input type="text" class="form-control" id="id_username" maxlength="32" name="username" value="{{ user.username }}" required>
+                    <div id="username-error" class="invalid-feedback" style="display:none;"></div>
                 </div>
                 <div class="form-group">
                     <label for="id_old_password">Vecchia Password</label>
-                    <input type="password" class="form-control" id="id_old_password" name="old_password" required>
-                    <div class="invalid-feedback">Inserisci la vecchia password.</div>
+                    <input type="password" class="form-control" id="id_old_password" maxlength="32" name="old_password" required>
+                    <div id="old-password-error" class="invalid-feedback" style="display:none;"></div>
                 </div>
                 <div class="form-group">
                     <label for="id_new_password1">Nuova Password</label>
-                    <input type="password" class="form-control" id="id_new_password1" name="new_password1" placeholder="Lascia vuoto per non cambiare">
-                    <div class="invalid-feedback">La nuova password non è valida.</div>
+                    <input type="password" class="form-control" id="id_new_password1" maxlength="32" name="new_password1" placeholder="Lascia vuoto per non cambiare">
+                    <div id="password1-error" class="invalid-feedback" style="display:none;"></div>
                 </div>
                 <div class="form-group">
                     <label for="id_new_password2">Ripeti Nuova Password</label>
-                    <input type="password" class="form-control" id="id_new_password2" name="new_password2" placeholder="Ripeti la nuova password">
-                    <div class="invalid-feedback">Le password non coincidono.</div>
+                    <input type="password" class="form-control" id="id_new_password2" maxlength="32" name="new_password2" placeholder="Ripeti la nuova password">
+                    <div id="password2-error" class="invalid-feedback" style="display:none;"></div>
                 </div>
                 <button type="submit" class="btn btn-primary btn-block">Salva Modifiche</button>
             </form>
@@ -43,104 +53,139 @@
     </div>
 </div>
 <script>
-document.getElementById('profileEditForm').addEventListener('submit', function(event) {
-    let form = event.target;
-    let valid = true;
-
-    // Username
-    let username = form.username;
-    let usernameFeedback = document.getElementById('username-invalid-feedback');
-    if (!username.value.trim()) {
-        username.classList.add('is-invalid');
-        usernameFeedback.textContent = "Inserisci un username valido.";
-        valid = false;
-    } else {
-        username.classList.remove('is-invalid');
-    }
-
-    // Old password
-    let oldPassword = form.old_password;
-    if (!oldPassword.value.trim()) {
-        oldPassword.classList.add('is-invalid');
-        valid = false;
-    } else {
-        oldPassword.classList.remove('is-invalid');
-    }
-
-    // New password (optional)
-    let newPassword1 = form.new_password1;
-    let newPassword2 = form.new_password2;
-    if (newPassword1.value || newPassword2.value) {
-        if (newPassword1.value.length < 6) {
-            newPassword1.classList.add('is-invalid');
-            valid = false;
-        } else {
-            newPassword1.classList.remove('is-invalid');
-        }
-        if (newPassword1.value !== newPassword2.value) {
-            newPassword2.classList.add('is-invalid');
-            valid = false;
-        } else {
-            newPassword2.classList.remove('is-invalid');
-        }
-    } else {
-        newPassword1.classList.remove('is-invalid');
-        newPassword2.classList.remove('is-invalid');
-    }
-
-    if (!valid) {
-        event.preventDefault();
-        event.stopPropagation();
-        return;
-    }
-
-    // 🚀 Controlla se l'username esiste già tramite AJAX
-    event.preventDefault();
-
-    fetch("{% url 'sylvelius:check_username_exists' %}", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": "{{ csrf_token }}",
-        },
-        body: JSON.stringify({ username: username.value.trim() })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.exists && username.value.trim() !== "{{ user.username }}") {
-            username.classList.add('is-invalid');
-            usernameFeedback.textContent = "Questo username è già in uso.";
-            return;
-        } else {
-            username.classList.remove('is-invalid');
-            usernameFeedback.textContent = "Inserisci un username valido.";
-        }
-
-        // Ora controlla la vecchia password con AJAX
-        fetch("{% url 'sylvelius:check_old_password' %}", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": "{{ csrf_token }}",
-            },
-            body: JSON.stringify({ old_password: oldPassword.value })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.valid) {
-                form.submit();
+document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("profileEditForm");
+    const usernameInput = document.getElementById("id_username");
+    const oldPasswordInput = document.getElementById("id_old_password");
+    const password1Input = document.getElementById("id_new_password1");
+    const password2Input = document.getElementById("id_new_password2");
+    const usernameError = document.getElementById('username-error');
+    const oldPasswordError = document.getElementById('old-password-error');
+    const passwordError2 = document.getElementById('password2-error');
+    const usernameOld = "{{ user.username }}".trim();
+    // Username check (AJAX, POST)
+        usernameInput.addEventListener('blur', function() {
+            const username = usernameInput.value.trim();
+            if(username !== usernameOld){
+                if (username.length !== 0){
+                    usernameError.textContent = "";
+                    usernameError.style.display = "none";
+                    usernameInput.classList.remove("is-invalid");
+                    fetch("{% url 'sylvelius:check_username_exists' %}", {
+                        method: "POST",
+                        headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": "{{ csrf_token }}"
+                        },
+                        body: JSON.stringify({username: username})
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.exists) {
+                        usernameError.textContent = "Username già esistente.";
+                        usernameError.style.display = "block";
+                        usernameInput.classList.add("is-invalid");
+                        } else {
+                        usernameError.textContent = "";
+                        usernameError.style.display = "none";
+                        usernameInput.classList.remove("is-invalid");
+                        }
+                    });
+                } else {
+                    usernameError.textContent = "L'username non può essere vuoto.";
+                    usernameError.style.display = "block";
+                    usernameInput.classList.add("is-invalid");
+                }
             } else {
-                oldPassword.classList.add('is-invalid');
+            usernameError.textContent = "";
+            usernameError.style.display = "none";
+            usernameInput.classList.remove("is-invalid");
             }
-        })
-        .catch(() => {
-            alert("Errore di connessione. Riprova.");
         });
-    })
-    .catch(() => {
-        alert("Errore di connessione. Riprova.");
+
+        // Password check
+        function validatePasswords() {
+            const pw1 = password1Input.value;
+            const pw2 = password2Input.value;
+            let errorMsg = "";
+            // Password security: at least 8 chars, one uppercase, one lowercase, one number
+            const strongPw = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+            if (!strongPw.test(pw1)) {
+                errorMsg = "La password deve contenere almeno 8 caratteri, una maiuscola, una minuscola e un numero.";
+            } else if (pw1 !== pw2) {
+                errorMsg = "Le password non combaciano.";
+            }
+
+            if (errorMsg) {
+                passwordError2.textContent = errorMsg;
+                passwordError2.style.display = "block";
+                password1Input.classList.add("is-invalid");
+                return false;
+            } else {
+                passwordError2.textContent = "";
+                passwordError2.style.display = "none";
+                password1Input.classList.remove("is-invalid");
+                return true;
+            }
+        }
+
+        password1Input.addEventListener('input', validatePasswords);
+        password2Input.addEventListener('input', validatePasswords);
+        oldPasswordInput.addEventListener('input', function () {
+            oldPasswordError.textContent = "";
+            oldPasswordError.style.display = "none";
+            oldPasswordInput.classList.remove("is-invalid");
+        });
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (!usernameInput.classList.contains("is-invalid") && (password1Input.value === "" && password2Input.value === "" || validatePasswords())) {
+                const passwordOld = oldPasswordInput.value.trim();
+                if(passwordOld){
+                    fetch("{% url 'sylvelius:check_login_credentials' %}", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRFToken": "{{ csrf_token }}",
+                        },
+                        body: JSON.stringify({username: usernameOld, password: passwordOld})
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (!data.exists) {
+                            usernameError.textContent = "Username non esistente.";
+                            usernameError.style.display = "block";
+                            usernameInput.classList.add("is-invalid");
+                        } else {
+                            usernameError.textContent = "";
+                            usernameError.style.display = "none";
+                            usernameInput.classList.remove("is-invalid");
+                        }
+
+                        if (!data.valid_password) {
+                            oldPasswordError.textContent = "Password non corretta.";
+                            oldPasswordError.style.display = "block";
+                            oldPasswordInput.classList.add("is-invalid");
+                        } else {
+                            oldPasswordError.textContent = "";
+                            oldPasswordError.style.display = "none";
+                            oldPasswordInput.classList.remove("is-invalid");
+                        }
+
+                        // Se tutto è valido, invia il form normalmente
+                        if (data.exists && data.valid_password) {
+                            form.submit();
+                        }
+                    });
+                } else {
+                    oldPasswordError.textContent = "Password non corretta.";
+                    oldPasswordError.style.display = "block";
+                    oldPasswordInput.classList.add("is-invalid");
+                }
+            }
+        });
     });
-});
 </script>
+
 
 {% endblock %}
