@@ -2,7 +2,8 @@ import json
 import os
 import django
 from django.contrib.auth.models import User
-from sylvelius.models import Annuncio, CommentoAnnuncio, ImmagineProdotto, Ordine, Creazione, Tag, Prodotto, Invoice
+from sylvelius.models import Annuncio, CommentoAnnuncio, ImmagineProdotto, Ordine, Creazione, Tag, Prodotto
+from purchase.models import Invoice
 
 # Imposta le variabili d'ambiente per Django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'progetto_tw.settings')

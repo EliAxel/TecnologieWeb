@@ -63,7 +63,7 @@
             <!-- Azioni -->
             <div class="mt-4 mb-4">
                 <button class="btn btn-success d-inline-block">Aggiungi al carrello</button>
-                <form action="{% url 'sylvelius:fake_purchase' %}" method="post" class="d-inline-block" id="purchase-form-{{ annuncio.id }}">
+                <form action="{% url 'purchase:fake_purchase' %}" method="post" class="d-inline-block" id="purchase-form-{{ annuncio.id }}">
                     {% csrf_token %}
                     <input type="hidden" name="amount" value="{{ annuncio.prodotto.prezzo }}" id="amount-input-{{ annuncio.id }}">
                     <input type="hidden" name="item_name" value="{{ annuncio.prodotto.nome }}">

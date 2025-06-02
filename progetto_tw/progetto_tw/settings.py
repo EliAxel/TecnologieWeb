@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'sylvelius.apps.SylveliusConfig',
+    'purchase.apps.PurchaseConfig',
     'channels',
 ]
 

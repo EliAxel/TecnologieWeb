@@ -29,10 +29,4 @@ urlpatterns = [
     # async
     path('api/immagine/<int:prodotto_id>/', get_immagine_prodotto),
     path('api/immagini/<int:prodotto_id>/', get_immagini_prodotto),
-    # da spostare
-    path('pagamento/', views.fake_purchase, name='fake_purchase'),
-    path('pagamento_ok/', views.payment_done, name='payment_done'),
-    path('pagamento_nonok/', views.payment_cancelled, name='payment_cancelled'),
-    path('paypal/pcc/', views.paypal_pcc, name='paypal_webhook'),
-    path('paypal/coa/', views.paypal_coa, name='paypal_webhook'),
 ]

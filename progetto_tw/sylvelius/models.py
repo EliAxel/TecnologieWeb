@@ -90,9 +90,3 @@ class Creazione(models.Model):
 
     def __str__(self):
         return self.utente.username + " - " + self.annuncio.prodotto.nome
-    
-class Invoice(models.Model):
-    invoice_id = models.CharField(max_length=255, unique=True)
-    user_id = models.PositiveIntegerField()
-    quantita = models.PositiveIntegerField()
-    prodotto_id = models.PositiveIntegerField()

@@ -2,19 +2,18 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 from django.urls import reverse
 import uuid
-from manage import main
 from .models import (
     Ordine,
     Prodotto,
     Creazione,
     Annuncio,
     CommentoAnnuncio,
-    Invoice,
     Tag,
     ImmagineProdotto
 )
+from purchase.models import Invoice
 
-class AnonUrlsTestCase(TestCase):
+class AnonUrls(TestCase):
 
     def test_home_page(self):
         response = self.client.get('/')
@@ -100,7 +99,7 @@ class AnonUrlsTestCase(TestCase):
         response = self.client.get('/paypal/coa/')
         self.assertEqual(response.status_code, 405)
 
-class LoggedUrlsTestCase(TestCase):
+class LoggedUrls(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='testuser', password='Testpass0')
         self.client.login(username='testuser', password='Testpass0')
@@ -133,7 +132,7 @@ class LoggedUrlsTestCase(TestCase):
         response = self.client.get('/account/profilo/creazioni/crea/')
         self.assertEqual(response.status_code, 200)
 
-class UrlsTestCaseWithData(TestCase):
+class UrlsWithData(TestCase):
     def setUp(self):
         # Crea i tag
         tag1 = Tag.objects.create(nome='Tag01')
@@ -221,7 +220,7 @@ class UrlsTestCaseWithData(TestCase):
         self.assertIn('urls', data)
         self.assertEqual(data['urls'][0],"/static/img/default_product.png")
 
-class ModuleTesting(TestCase):
+class ModelsTestingStringsCoverage(TestCase):
     def setUp(self):
         # Crea i tag
         tag1 = Tag.objects.create(nome='Tag01')
