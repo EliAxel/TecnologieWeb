@@ -1,5 +1,6 @@
 {% extends "sylvelius/home.html" %}
 {% load static %}
+{% load humanize %}
 {% block main_header %}{% endblock %}
 {% block middle %}
 <div class="container mt-5 mb-5">
@@ -26,10 +27,10 @@
                             <td>
                                 {% if ordine.prodotto.annunci.is_published %}
                                     <a href="{% url 'sylvelius:dettagli_annuncio' ordine.prodotto.annunci.id %}">
-                                        {{ ordine.prodotto.nome|truncatechars:50 }}
+                                        {{ ordine.prodotto.nome|truncatechars:MAX_TRUNCATED_CARDS_CHARS }}
                                     </a>
                                 {% else %}
-                                    {{ ordine.prodotto.nome|truncatechars:50 }}
+                                    {{ ordine.prodotto.nome|truncatechars:MAX_TRUNCATED_CARDS_CHARS }}
                                 {% endif %}
                             </td>
                             <td>
@@ -42,7 +43,7 @@
                             >
                             </td>
                             <td>{{ ordine.quantita }}</td>
-                            <td>{{ ordine.prodotto.prezzo }} €</td>
+                            <td>{{ ordine.prodotto.prezzo|intcomma }} €</td>
                             <td>{{ ordine.totale }} €</td>
                             <td>{{ ordine.stato_consegna|capfirst }}</td>
                             <td>{{ ordine.data_ordine|date:"d/m/Y H:i" }}</td>

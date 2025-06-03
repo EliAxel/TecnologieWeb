@@ -18,8 +18,60 @@
 
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
 
+    <script>
+        const MAX_UNAME_CHARS = {{ MAX_UNAME_CHARS }};
+        const MAX_PWD_CHARS = {{ MAX_PWD_CHARS }};
+        const MIN_PWD_CHARS = {{ MIN_PWD_CHARS }};
+
+        const MAX_TAGS_CHARS = {{ MAX_TAGS_CHARS }};
+        const MAX_TAGS_N_PER_PROD = {{ MAX_TAGS_N_PER_PROD }};
+
+        const MAX_PROD_NOME_CHARS = {{ MAX_PROD_NOME_CHARS }};
+        const MAX_PROD_DESC_BR_CHARS = {{ MAX_PROD_DESC_BR_CHARS }};
+        const MAX_PROD_DESC_CHARS = {{ MAX_PROD_DESC_CHARS }};
+        const MIN_PROD_PREZZO_VALUE = {{ MIN_PROD_PREZZO_VALUE }};
+        const MAX_PROD_PREZZO_DIGITS_DECIMAL_1 = {{ MAX_PROD_PREZZO_DIGITS_DECIMAL.1 }};
+        const MAX_PROD_PREZZO_VALUE = {{ MAX_PROD_PREZZO_VALUE }};
+        const PROD_CONDIZIONE_CHOICES = {{ PROD_CONDIZIONE_CHOICES }};
+
+        const MIN_ANNU_QTA_MAGAZZINO_VALUE = {{ MIN_ANNU_QTA_MAGAZZINO_VALUE }};
+        const MAX_ANNU_QTA_MAGAZZINO_VALUE = {{ MAX_ANNU_QTA_MAGAZZINO_VALUE }};
+
+        const MAX_COMMNT_TESTO_CHARS = {{ MAX_COMMNT_TESTO_CHARS }};
+        const MIN_COMMNT_RATING_VALUE = {{ MIN_COMMNT_RATING_VALUE }};
+        const MAX_COMMNT_RATING_VALUE = {{ MAX_COMMNT_RATING_VALUE }};
+        const INVALID_COMMNT_RATING_VALUE = {{ INVALID_COMMNT_RATING_VALUE }};
+        const RANGE_COMMNT_RATING_STRING = "{{ RANGE_COMMNT_RATING_STRING }}";
+
+        const MAX_ORDN_INVOICE_CHARS = {{ MAX_ORDN_INVOICE_CHARS }};
+        const MIN_ORDN_QUANTITA_VALUE = {{ MIN_ORDN_QUANTITA_VALUE }};
+        const ORDN_STATO_CONSEGNA_CHOICES = {{ ORDN_STATO_CONSEGNA_CHOICES }};
+
+        const MAX_PAGINATOR_HOME_VALUE = {{ MAX_PAGINATOR_HOME_VALUE }};
+        const MAX_PAGINATOR_ORDINI_VALUE = {{ MAX_PAGINATOR_ORDINI_VALUE }};
+        const MAX_PAGINATOR_ANNUNCI_VALUE = {{ MAX_PAGINATOR_ANNUNCI_VALUE }};
+        const MAX_PAGINATOR_RICERCA_VALUE = {{ MAX_PAGINATOR_RICERCA_VALUE }};
+
+        const MIN_CREA_ANNUNCIO_QTA_VALUE = {{ MIN_CREA_ANNUNCIO_QTA_VALUE }};
+
+        const ALIQUOTA_IVA_ORD = {{ ALIQUOTA_IVA_ORD }};
+        const ALIQUOTA_IVA_RID = {{ ALIQUOTA_IVA_RID }};
+        const ALIQUOTA_IVA_URID = {{ ALIQUOTA_IVA_URID }};
+        const ALIQUOTA_IVA_ESE = {{ ALIQUOTA_IVA_ESE }};
+
+        const SYLVELIUS_FEES = {{ SYLVELIUS_FEES }};
+
+        const MAX_TRUNCATED_PROFILO_CHARS = {{ MAX_TRUNCATED_PROFILO_CHARS }};
+        const MAX_TRUNCATED_CARDS_CHARS = {{ MAX_TRUNCATED_CARDS_CHARS }};
+
+        const MAX_SLICE_PROFILO_VALUE = {{ MAX_SLICE_PROFILO_VALUE }};
+        const MAX_LIST_CLIENTI_VALUE = {{ MAX_LIST_CLIENTI_VALUE }};
+        const MAX_SLICE_TAGS_PER_CARD = {{ MAX_SLICE_TAGS_PER_CARD }};
+    </script>
     {% block head %}{% endblock %}
+    {% block nav_color %}
     <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #6f42c1;">
+    {% endblock %}
         <div class="container-fluid">
             <!-- Logo (sempre allineato a sinistra) -->
             <a class="navbar-brand text-white d-flex align-items-center mr-auto" href="{% url 'sylvelius:home' %}" style="font-family: 'Copperplate', 'Copperplate Gothic Light', fantasy; font-size: 1.1rem; font-weight: bold;">
@@ -30,7 +82,7 @@
             <div class="ml-auto order-lg-3 d-flex" style="min-width: 150px;">
                 {% block sign_in_sign_up %}{% endblock %}
             </div>
-
+            
             <!-- Barra di ricerca (centrata su desktop, a capo su mobile) -->
             <div class="order-lg-2 col-12 col-lg-6 px-0 mx-auto d-flex justify-content-center position-relative" style="z-index: 1100;">
                 <form id="search-form" class="form-inline d-flex justify-content-center w-100" method="get" style="max-width: 800px; width: 100%;">
@@ -70,11 +122,11 @@
                 </div>
                 <div class="form-group col-md-3">
                     <label for="price-min">Prezzo minimo</label>
-                    <input type="number" class="form-control" id="price-min" placeholder="Min €" min="0" step="1">
+                    <input type="number" class="form-control" id="price-min" placeholder="Min €" min="{{MIN_PROD_PREZZO_VALUE}}" step="1">
                 </div>
                 <div class="form-group col-md-3">
                     <label for="price-max">Prezzo massimo</label>
-                    <input type="number" class="form-control" id="price-max" placeholder="Max €" min="0" step="1">
+                    <input type="number" class="form-control" id="price-max" placeholder="Max €" min="{{MIN_PROD_PREZZO_VALUE}}" step="1">
                 </div>
                 <div class="form-group col-md-3">
                     <label for="sort-order">Ordina per</label>
@@ -109,6 +161,13 @@
     </div>
 
     <!-- Scripts -->
+    <script>
+        // Passa le costanti da Django a JavaScript
+        window.COSTANTI = {
+            MAX_WS_QUERIES: "{{ MAX_WS_QUERIES }}",
+            // Aggiungi altre costanti se necessario
+        };
+    </script>
     <script src="{% static 'js/suggestions.js' %}"></script>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -123,7 +182,9 @@
     });
     </script>
     <script src="{% static 'js/base.js' %}"></script>
+{% block footer_color %}
 <footer class="footer fixed-bottom py-2" style="background-color: #6f42c1; line-height: 1; height: 36px;">
+{% endblock %}
     <center>
         <div class="container text-center p-0 m-0">
             <span class="text-white" style="font-size: 0.95rem;">© 2025 Sylvelius. Tutti i diritti riservati.</span>

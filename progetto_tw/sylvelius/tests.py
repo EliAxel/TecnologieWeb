@@ -5,13 +5,16 @@ import uuid
 from .models import (
     Ordine,
     Prodotto,
-    Creazione,
     Annuncio,
     CommentoAnnuncio,
     Tag,
     ImmagineProdotto
 )
 from purchase.models import Invoice
+
+LAST_PROD_ID=101
+__UNUSED_PROD_ID=1
+__NON_EXISTENT_PROD_ID=1000
 
 class AnonUrls(TestCase):
 
@@ -53,15 +56,15 @@ class AnonUrls(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse('sylvelius:login') + "?auth=error&next=/account/profilo/ordini/") # type: ignore
 
-    def test_annuncio_profilo_creazioni(self):
-        response = self.client.get('/account/profilo/creazioni/')
+    def test_annuncio_profilo_annunci(self):
+        response = self.client.get('/account/profilo/annunci/')
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, reverse('sylvelius:login') + "?auth=error&next=/account/profilo/creazioni/") # type: ignore
+        self.assertEqual(response.url, reverse('sylvelius:login') + "?auth=error&next=/account/profilo/annunci/") # type: ignore
     
-    def test_annuncio_profilo_creazioni_crea(self):
-        response = self.client.get('/account/profilo/creazioni/crea/')
+    def test_annuncio_profilo_annunci_crea(self):
+        response = self.client.get('/account/profilo/annunci/crea/')
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, reverse('sylvelius:login') + "?auth=error&next=/account/profilo/creazioni/crea/") # type: ignore
+        self.assertEqual(response.url, reverse('sylvelius:login') + "?auth=error&next=/account/profilo/annunci/crea/") # type: ignore
     
     def test_ricerca(self):
         response = self.client.get('/ricerca/')
@@ -104,12 +107,12 @@ class LoggedUrls(TestCase):
         response = self.client.get('/account/profilo/ordini/')
         self.assertEqual(response.status_code, 200)
     
-    def test_profilo_creazioni_page(self):
-        response = self.client.get('/account/profilo/creazioni/')
+    def test_profilo_annunci_page(self):
+        response = self.client.get('/account/profilo/annunci/')
         self.assertEqual(response.status_code, 200)
     
-    def test_profilo_creazioni_crea_page(self):
-        response = self.client.get('/account/profilo/creazioni/crea/')
+    def test_profilo_annunci_crea_page(self):
+        response = self.client.get('/account/profilo/annunci/crea/')
         self.assertEqual(response.status_code, 200)
 
 class UrlsWithData(TestCase):
@@ -120,7 +123,7 @@ class UrlsWithData(TestCase):
         user = User.objects.create_user(username='testuser', password='Testpass0')
         # Crea il prodotto SENZA i tag
         prodotto = Prodotto.objects.create(
-            id=102,
+            id=LAST_PROD_ID+1,
             nome="Prodotto di Test",
             descrizione_breve="Breve descrizione del prodotto di test",
             descrizione="Descrizione dettagliata del prodotto di test",
@@ -137,22 +140,18 @@ class UrlsWithData(TestCase):
         prodotto.tags.add(tag1, tag2)
 
         annuncio=Annuncio.objects.create(
+            inserzionista=user,
             prodotto=prodotto,
             qta_magazzino=10,
             is_published=True
         )
-
-        Creazione.objects.create(
-            utente=user,
-            annuncio=annuncio,
-        )
     
-    def test_account_profilo_creazioni_nascondi_1(self):
-        response = self.client.get('/account/profilo/creazioni/nascondi/1/')
+    def test_account_profilo_annunci_nascondi_1(self):
+        response = self.client.get('/account/profilo/annunci/nascondi/1/')
         self.assertEqual(response.status_code, 405)
     
-    def test_account_profilo_creazioni_elimina_1(self):
-        response = self.client.get('/account/profilo/creazioni/elimina/1/')
+    def test_account_profilo_annunci_elimina_1(self):
+        response = self.client.get('/account/profilo/annunci/elimina/1/')
         self.assertEqual(response.status_code, 405)
     
     def test_annuncio_1(self):
@@ -208,7 +207,7 @@ class ModelsTestingStringsCoverage(TestCase):
         self.user = User.objects.create_user(username='testuser', password='Testpass0')
         # Crea il prodotto SENZA i tag
         prodotto = Prodotto.objects.create(
-            id=102,
+            id=LAST_PROD_ID+1,
             nome="Prodotto di Test",
             descrizione_breve="Breve descrizione del prodotto di test",
             descrizione="Descrizione dettagliata del prodotto di test",
@@ -225,37 +224,32 @@ class ModelsTestingStringsCoverage(TestCase):
         # Aggiungi i tag al prodotto
         prodotto.tags.add(tag1, tag2)
 
-        annuncio=Annuncio.objects.create(
-            id=102,
+        Annuncio.objects.create(
+            id=LAST_PROD_ID+1,
+            inserzionista=self.user,
             prodotto=prodotto,
             qta_magazzino=10,
             is_published=True
         )
 
         CommentoAnnuncio.objects.create(
-            id = 102,
-            annuncio = Annuncio.objects.get(id=102),
+            id = LAST_PROD_ID+1,
+            annuncio = Annuncio.objects.get(id=LAST_PROD_ID+1),
             utente = self.user,
             testo = "Bello",
             rating = 4
-        )
-
-        Creazione.objects.create(
-            id=102,
-            utente=self.user,
-            annuncio=annuncio,
         )
 
         invoice=Invoice.objects.create(
             invoice_id=uuid.uuid4(),
             user_id=self.user.id, #type: ignore
             quantita=3,
-            prodotto_id=102
+            prodotto_id=LAST_PROD_ID+1
         )
 
         Ordine.objects.create(
-            id=102,
-            invoice_id = invoice.invoice_id,
+            id=LAST_PROD_ID+1,
+            invoice = invoice.invoice_id,
             utente = User.objects.get(id=invoice.user_id), 
             prodotto = Prodotto.objects.get(id=invoice.prodotto_id),
             quantita = invoice.quantita,
@@ -264,11 +258,10 @@ class ModelsTestingStringsCoverage(TestCase):
         
     def test_to_string(self):
         self.assertEqual(Tag.objects.get(nome="tag01").__str__(),"tag01")
-        self.assertEqual(Prodotto.objects.get(id=102).immagini.first().__str__(),"Immagine di Prodotto di Test") #type: ignore
-        self.assertEqual(Annuncio.objects.get(id=102).__str__(),"Prodotto di Test")
-        self.assertEqual(CommentoAnnuncio.objects.get(id=102).__str__(),"testuser su Prodotto di Test - 4/5")
-        self.assertEqual(Annuncio.objects.get(id=102).rating_medio,4)
-        self.assertEqual(Annuncio.objects.get(id=102).rating_count,1)
-        self.assertEqual(Creazione.objects.get(id=102).__str__(),"testuser - Prodotto di Test")
-        self.assertEqual(Ordine.objects.get(id=102).__str__(),"testuser - Prodotto di Test")
-        self.assertEqual(Ordine.objects.get(id=102).totale,300.00)
+        self.assertEqual(Prodotto.objects.get(id=LAST_PROD_ID+1).immagini.first().__str__(),"Immagine di Prodotto di Test") #type: ignore
+        self.assertEqual(Annuncio.objects.get(id=LAST_PROD_ID+1).__str__(),"Prodotto di Test")
+        self.assertEqual(CommentoAnnuncio.objects.get(id=LAST_PROD_ID+1).__str__(),"testuser su Prodotto di Test - 4/5")
+        self.assertEqual(Annuncio.objects.get(id=LAST_PROD_ID+1).rating_medio,4)
+        self.assertEqual(Annuncio.objects.get(id=LAST_PROD_ID+1).rating_count,1)
+        self.assertEqual(Ordine.objects.get(id=LAST_PROD_ID+1).__str__(),"testuser - Prodotto di Test")
+        self.assertEqual(Ordine.objects.get(id=LAST_PROD_ID+1).totale,300.00)

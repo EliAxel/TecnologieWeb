@@ -1,6 +1,6 @@
 # Django core
 from django.conf import settings
-from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth import update_session_auth_hash, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm, PasswordChangeForm
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -26,11 +26,29 @@ from .forms import CustomUserCreationForm
 from .models import (
     Annuncio,
     CommentoAnnuncio,
-    Creazione,
     ImmagineProdotto,
     Ordine,
     Tag,
     Prodotto
+)
+from progetto_tw.constants import (
+    MAX_UNAME_CHARS,
+    MAX_PWD_CHARS,
+    MAX_TAGS_N_PER_PROD,
+    MAX_PROD_NOME_CHARS,
+    MAX_PROD_DESC_BR_CHARS,
+    MAX_PROD_DESC_CHARS,
+    MIN_PROD_PREZZO_VALUE,
+    MAX_PROD_PREZZO_VALUE,
+    MAX_ANNU_QTA_MAGAZZINO_VALUE,
+    MAX_COMMNT_TESTO_CHARS,
+    MIN_COMMNT_RATING_VALUE,
+    MAX_COMMNT_RATING_VALUE,
+    MAX_PAGINATOR_HOME_VALUE,
+    MAX_PAGINATOR_ORDINI_VALUE,
+    MAX_PAGINATOR_ANNUNCI_VALUE,
+    MAX_PAGINATOR_RICERCA_VALUE,
+    MIN_CREA_ANNUNCIO_QTA_VALUE
 )
 # Other
 import json
@@ -45,7 +63,7 @@ class HomePageView(TemplateView):
 
         annunci = Annuncio.objects.filter(is_published=True).order_by('-data_pubblicazione')
 
-        paginator = Paginator(annunci, 21)
+        paginator = Paginator(annunci, MAX_PAGINATOR_HOME_VALUE)
 
         try:
             page_number = int(self.request.GET.get('page', 1))
@@ -93,19 +111,19 @@ class ProfiloPageView(CustomLoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         utente = self.request.user
         context['user'] = utente
-        context['creazioni'] = Creazione.objects.filter(utente=utente).order_by('-data_creazione')
+        context['annunci'] = Annuncio.objects.filter(inserzionista=utente).order_by('-data_pubblicazione')
         context['ordini'] = Ordine.objects.filter(utente=utente).order_by('-data_ordine')
 
         # Trova tutti gli utenti che hanno fatto ordini su annunci creati dall'utente corrente
         # e per cui almeno un ordine è "in attesa"
-        mie_creazioni = Creazione.objects.filter(utente=utente).values_list('annuncio_id', flat=True)
-        prodotti_mie_creazioni = Annuncio.objects.filter(
-            id__in=mie_creazioni
+        miei_annunci = Annuncio.objects.filter(inserzionista=utente).values_list('id', flat=True)
+        prodotti_miei_annunci = Annuncio.objects.filter(
+            id__in=miei_annunci
         ).values_list('prodotto_id', flat=True)
 
         ordini_clienti = (
             Ordine.objects
-            .filter(prodotto_id__in=prodotti_mie_creazioni, stato_consegna='da spedire')
+            .filter(prodotto_id__in=prodotti_miei_annunci, stato_consegna='da spedire')
             .select_related('utente', 'prodotto')
         )
 
@@ -142,9 +160,9 @@ class ProfiloEditPageView(CustomLoginRequiredMixin, View):
         new_password1 = request.POST.get('new_password1').strip()
         new_password2 = request.POST.get('new_password2').strip()
 
-        if len(username) > 32:
+        if len(username) > MAX_UNAME_CHARS:
             return render(request, self.template_name, {'usr': 'bad'})
-        if len(new_password1) > 32:
+        if len(new_password1) > MAX_PWD_CHARS:
             return render(request, self.template_name, {'pwd': 'bad'})
         password_change_form_valid = True
         if new_password1 and new_password2:
@@ -166,14 +184,38 @@ class ProfiloEditPageView(CustomLoginRequiredMixin, View):
         else:
             return render(request, self.template_name, {'pwd': 'bad'})
 
-class ProfiloDeletePageView(CustomLoginRequiredMixin, TemplateView):
-    template_name = "sylvelius/profile/profile_delete.html"
+class ProfiloDeletePageView(CustomLoginRequiredMixin, View):
     login_url = reverse_lazy('sylvelius:login')
+    template_name = "sylvelius/profile/profile_delete.html"
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['user'] = self.request.user
-        return context
+    def get(self, request):
+        context = {
+            'user': request.user,
+        }
+        return render(request, self.template_name, context)
+    
+    def post(self, request):
+        user = request.user
+        if(Ordine.objects.filter(utente=user,stato_consegna="spedito").exists()):
+            return render(request, self.template_name,{"err":"ship"})
+        if(Ordine.objects.filter(
+            prodotto__annunci__inserzionista=user,
+            stato_consegna='spedito'
+            ).exists()):
+            return render(request, self.template_name,{"err":"shipd"})
+        if(Ordine.objects.filter(utente=user,stato_consegna="da spedire").exists()):
+            return render(request, self.template_name,{"err":"ship"})
+        
+        Ordine.objects.filter(
+            prodotto__annunci__inserzionista=user,
+            stato_consegna='da spedire'
+            ).update(stato_consegna='annullato')
+
+        Annuncio.objects.filter(inserzionista=user).delete()
+        logout(request)  # logout PRIMA di eliminare l'utente per evitare problemi
+        user.delete()    # elimina l'utente
+        # 2. Reindirizza a una pagina di successo (es: home page)
+        return redirect('sylvelius:home')
 
 class AnnuncioDetailView(TemplateView):
     template_name = "sylvelius/annuncio/dettagli_annuncio.html"
@@ -223,7 +265,7 @@ class ProfiloOrdiniPageView(CustomLoginRequiredMixin, TemplateView):
         
         ordini_list = Ordine.objects.filter(utente=utente).order_by('-data_ordine')
         
-        paginator = Paginator(ordini_list, 20)  # 20 ordini per pagina
+        paginator = Paginator(ordini_list, MAX_PAGINATOR_ORDINI_VALUE)  # 20 ordini per pagina
         
         page_number = self.request.GET.get('page')
         page_obj = paginator.get_page(page_number)
@@ -237,8 +279,8 @@ class ProfiloOrdiniPageView(CustomLoginRequiredMixin, TemplateView):
         
         return context
     
-class ProfiloCreazioniPageView(CustomLoginRequiredMixin, TemplateView):
-    template_name = "sylvelius/profile/profile_creazioni.html"
+class ProfiloAnnunciPageView(CustomLoginRequiredMixin, TemplateView):
+    template_name = "sylvelius/profile/profile_annunci.html"
     login_url = reverse_lazy('sylvelius:login')
 
     def get_context_data(self, **kwargs):
@@ -246,14 +288,14 @@ class ProfiloCreazioniPageView(CustomLoginRequiredMixin, TemplateView):
         utente = self.request.user
         context['user'] = utente
         
-        creazioni_list = Creazione.objects.filter(utente=utente).order_by('-data_creazione')
+        annunci_list = Annuncio.objects.filter(inserzionista=utente).order_by('-data_pubblicazione')
         
-        paginator = Paginator(creazioni_list, 20)  # 20 creazioni per pagina
+        paginator = Paginator(annunci_list, MAX_PAGINATOR_ANNUNCI_VALUE)  # 20 creazioni per pagina
         
         page_number = self.request.GET.get('page')
         page_obj = paginator.get_page(page_number)
         
-        context['creazioni'] = page_obj.object_list
+        context['annunci'] = page_obj.object_list
         context['page'] = page_obj.number
         context['has_next'] = page_obj.has_next()
         context['has_previous'] = page_obj.has_previous()
@@ -261,7 +303,7 @@ class ProfiloCreazioniPageView(CustomLoginRequiredMixin, TemplateView):
 
         return context
 
-class ProfiloCreaCreazionePageView(CustomLoginRequiredMixin, View):
+class ProfiloCreaAnnuncioPageView(CustomLoginRequiredMixin, View):
     template_name = "sylvelius/annuncio/crea_annuncio.html"
     login_url = reverse_lazy('sylvelius:login')
 
@@ -277,7 +319,7 @@ class ProfiloCreaCreazionePageView(CustomLoginRequiredMixin, View):
         prezzo = request.POST.get('prezzo')
         tag_string = request.POST.get('tags', '')  # è una stringa unica!
         immagini = request.FILES.getlist('immagini')
-        qta_magazzino = request.POST.get('qta_magazzino', 1)
+        qta_magazzino = request.POST.get('qta_magazzino', MIN_CREA_ANNUNCIO_QTA_VALUE)
         condizione = request.POST.get('condizione', 'nuovo')
 
         if condizione not in ['nuovo', 'usato']:
@@ -287,7 +329,9 @@ class ProfiloCreaCreazionePageView(CustomLoginRequiredMixin, View):
         if not nome or not descrizione_breve or not prezzo:
             return render(request, self.template_name, error)
         
-        if len(nome) > 100 or len(descrizione_breve) > 255 or len(descrizione) > 3000:
+        if (len(nome) > MAX_PROD_NOME_CHARS or
+            len(descrizione_breve) > MAX_PROD_DESC_BR_CHARS or
+            len(descrizione) > MAX_PROD_DESC_CHARS):
             return render(request, self.template_name, error)
         
         try:
@@ -295,14 +339,14 @@ class ProfiloCreaCreazionePageView(CustomLoginRequiredMixin, View):
         except ValueError:
             return render(request, self.template_name, error)
         
-        if prezzo < 0 or prezzo > 1000000:
+        if prezzo < MIN_PROD_PREZZO_VALUE or prezzo > MAX_PROD_PREZZO_VALUE:
             return render(request, self.template_name, error)
         
         try:
             qta_magazzino = int(qta_magazzino)
         except ValueError:
             return render(request, self.template_name, error)
-        if qta_magazzino < 1:
+        if qta_magazzino < MIN_CREA_ANNUNCIO_QTA_VALUE or qta_magazzino > MAX_ANNU_QTA_MAGAZZINO_VALUE:
             return render(request, self.template_name, error)
 
         prodotto=Prodotto.objects.create(
@@ -312,8 +356,9 @@ class ProfiloCreaCreazionePageView(CustomLoginRequiredMixin, View):
                 prezzo=prezzo,
                 condizione=condizione
             )
-        # Creazione dell'annuncio
+        # Creazion dell'annuncio
         annuncio = Annuncio.objects.create(
+            inserzionista=request.user,
             prodotto=prodotto,
             data_pubblicazione=None,
             qta_magazzino=qta_magazzino,
@@ -322,6 +367,8 @@ class ProfiloCreaCreazionePageView(CustomLoginRequiredMixin, View):
 
         # Gestione dei tag (split manuale)
         tag_names = [t.strip().lower() for t in tag_string.split(',') if t.strip()]
+        if(len(tag_names)>MAX_TAGS_N_PER_PROD):
+            return render(request, self.template_name, error)
         tag_instances = []
         for nome in tag_names:
             tag, _ = Tag.objects.get_or_create(nome=nome)
@@ -335,12 +382,6 @@ class ProfiloCreaCreazionePageView(CustomLoginRequiredMixin, View):
             except Exception:
                 return render(request, self.template_name, error)
             ImmagineProdotto.objects.create(prodotto=prodotto, immagine=img)
-
-        # Crea la creazione associata all'utente
-        Creazione.objects.create(
-            utente=request.user,
-            annuncio=annuncio
-        )
 
         return redirect('sylvelius:home')
 
@@ -383,7 +424,7 @@ class RicercaAnnunciView(TemplateView):
         if rating:
             try:
                 rating_value = int(rating)
-                if 0 <= rating_value <= 5:
+                if MIN_COMMNT_RATING_VALUE <= rating_value <= MAX_COMMNT_RATING_VALUE:
                     # Supponiamo che 'rating_value' sia il valore dell'intervallo desiderato (da 0 a 4)
                     annunci = Annuncio.objects.annotate(
                         rating_medio_calc=Avg('commenti__rating'),
@@ -431,7 +472,7 @@ class RicercaAnnunciView(TemplateView):
 
         annunci = annunci.distinct()
 
-        paginator = Paginator(annunci, 50)
+        paginator = Paginator(annunci, MAX_PAGINATOR_RICERCA_VALUE)
         page_number = self.request.GET.get('page', 1)
         try:
             page_number = int(page_number)
@@ -453,23 +494,21 @@ class RicercaAnnunciView(TemplateView):
 @require_POST
 @login_required
 def toggle_pubblicazione(request, id):
-    # Trova la creazione dell'utente (che contiene l'annuncio)
-    creazione = get_object_or_404(Creazione, annuncio__id=id, utente=request.user)
-    annuncio = creazione.annuncio
+    # Trova la creazion dell'utente (che contiene l'annuncio)
+    annuncio = get_object_or_404(Annuncio, id=id, inserzionista=request.user)
     annuncio.is_published = not annuncio.is_published
     annuncio.save()
     page = request.GET.get('page', 1)
-    return redirect(f'{reverse("sylvelius:profile_creazioni")}?page={page}')
+    return redirect(f'{reverse("sylvelius:profile_annunci")}?page={page}')
 
 @require_POST
 @login_required
 def delete_pubblicazione(request, id):
-    creazione = get_object_or_404(Creazione, id=id, utente=request.user)
-    annuncio = creazione.annuncio
+    annuncio = get_object_or_404(Annuncio, id=id, inserzionista=request.user)
     annuncio.delete()
     
     page = request.POST.get('page', 1)
-    return redirect(f'{reverse("sylvelius:profile_creazioni")}?page={page}')
+    return redirect(f'{reverse("sylvelius:profile_annunci")}?page={page}')
 
 @require_POST
 @login_required
@@ -517,7 +556,11 @@ def aggiungi_commento(request, annuncio_id):
     rating = request.POST.get('rating')
 
     # Validazione
-    if not testo or not rating.isdigit() or int(rating) < 0 or int(rating) > 5 or len(testo) > 1000:
+    if (not testo or
+        not rating.isdigit() or
+        int(rating) < MIN_COMMNT_RATING_VALUE or
+        int(rating) > MAX_COMMNT_RATING_VALUE or
+        len(testo) > MAX_COMMNT_TESTO_CHARS):
         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
             return JsonResponse({"status": "error", "message": "Dati non validi"}, status=400)
         return redirect(reverse('sylvelius:dettagli_annuncio', args=[annuncio_id]) + '?comment=notok')
@@ -547,7 +590,11 @@ def modifica_commento(request, commento_id):
     rating = request.POST.get('rating')
 
     # Validazione
-    if not testo or not rating.isdigit() or int(rating) < 0 or int(rating) > 5 or len(testo) > 1000:
+    if (not testo or
+        not rating.isdigit() or
+        int(rating) < MIN_COMMNT_RATING_VALUE or
+        int(rating) > MAX_COMMNT_RATING_VALUE or
+        len(testo) > MAX_COMMNT_TESTO_CHARS):
         return JsonResponse({"status": "error", "message": "Dati non validi"}, status=400)
 
     # Aggiorna il commento
@@ -558,7 +605,7 @@ def modifica_commento(request, commento_id):
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         return JsonResponse({"status": "success"})
 
-    return render(request, "sylvelius/annuncio/modifica_commento.html", {"commento": commento})
+    return render(request, "sylvelius/annuncio/dettagli_annuncio.html", {"commento": commento})
 
 @require_POST
 @login_required
@@ -566,4 +613,3 @@ def elimina_commento(request, commento_id):
     commento = get_object_or_404(CommentoAnnuncio, id=commento_id, utente=request.user)
     commento.delete()
     return JsonResponse({"status": "success"})
-    

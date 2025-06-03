@@ -25,22 +25,22 @@
                 {% csrf_token %}
                 <div class="form-group">
                     <label for="id_username">Username</label>
-                    <input type="text" class="form-control" id="id_username" maxlength="32" name="username" value="{{ user.username }}" required>
+                    <input type="text" class="form-control" id="id_username" maxlength="{{MAX_UNAME_CHARS}}" name="username" value="{{ user.username }}" required>
                     <div id="username-error" class="invalid-feedback" style="display:none;"></div>
                 </div>
                 <div class="form-group">
                     <label for="id_old_password">Vecchia Password</label>
-                    <input type="password" class="form-control" id="id_old_password" maxlength="32" name="old_password" required>
+                    <input type="password" class="form-control" id="id_old_password" maxlength="{{MAX_PWD_CHARS}}" name="old_password" required>
                     <div id="old-password-error" class="invalid-feedback" style="display:none;"></div>
                 </div>
                 <div class="form-group">
                     <label for="id_new_password1">Nuova Password</label>
-                    <input type="password" class="form-control" id="id_new_password1" maxlength="32" name="new_password1" placeholder="Lascia vuoto per non cambiare">
+                    <input type="password" class="form-control" id="id_new_password1" maxlength="{{MAX_PWD_CHARS}}" name="new_password1" placeholder="Lascia vuoto per non cambiare">
                     <div id="password1-error" class="invalid-feedback" style="display:none;"></div>
                 </div>
                 <div class="form-group">
                     <label for="id_new_password2">Ripeti Nuova Password</label>
-                    <input type="password" class="form-control" id="id_new_password2" maxlength="32" name="new_password2" placeholder="Ripeti la nuova password">
+                    <input type="password" class="form-control" id="id_new_password2" maxlength="{{MAX_PWD_CHARS}}" name="new_password2" placeholder="Ripeti la nuova password">
                     <div id="password2-error" class="invalid-feedback" style="display:none;"></div>
                 </div>
                 <button type="submit" class="btn btn-primary btn-block">Salva Modifiche</button>
@@ -109,22 +109,26 @@ document.addEventListener("DOMContentLoaded", function () {
             const pw2 = password2Input.value;
             let errorMsg = "";
             // Password security: at least 8 chars, one uppercase, one lowercase, one number
-            const strongPw = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+            const strongPw = new RegExp(`^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{${MIN_PWD_CHARS},}$`);
             if (!strongPw.test(pw1)) {
                 errorMsg = "La password deve contenere almeno 8 caratteri, una maiuscola, una minuscola e un numero.";
+                password1Input.classList.add("is-invalid");
+                password2Input.classList.remove("is-invalid");
             } else if (pw1 !== pw2) {
                 errorMsg = "Le password non combaciano.";
+                password2Input.classList.add("is-invalid");
+                password1Input.classList.remove("is-invalid");
             }
 
             if (errorMsg) {
                 passwordError2.textContent = errorMsg;
                 passwordError2.style.display = "block";
-                password1Input.classList.add("is-invalid");
                 return false;
             } else {
                 passwordError2.textContent = "";
                 passwordError2.style.display = "none";
                 password1Input.classList.remove("is-invalid");
+                password2Input.classList.remove("is-invalid");
                 return true;
             }
         }

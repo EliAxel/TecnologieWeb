@@ -1,8 +1,22 @@
 {% extends "base.html" %}
 
 {% block title %}Elimina Account{% endblock %}
-
+{% block nav_color %}
+    <nav class="navbar navbar-expand-lg navbar-dark bg-danger">
+{% endblock %}
 {% block middle %}
+{% if err %}
+    {% if err == "shipd" %}
+        <div class="alert alert-danger" role="alert">
+            Sono presenti ordini di vendita ancora in fase di spedizione.
+        </div>
+    {% endif %}
+    {% if err == "ship" %}
+        <div class="alert alert-danger" role="alert">
+            Sono presenti ordini d'acquisto da spedire o spediti.
+        </div>
+    {% endif %}
+{% endif %}
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
@@ -11,10 +25,34 @@
                     <h4>Conferma Eliminazione Account</h4>
                 </div>
                 <div class="card-body">
-                    <p>Sei sicuro di voler eliminare l'account <strong>{{ user.username }}</strong>?</p>
-                    <form method="post">
+                    <h4>Sei sicuro di voler eliminare l'account <strong style="color:red;">{{ user.username }}</strong>?</h4>
+                    <h5>Non sarà possibile proseguire con l'operazione nei seguenti casi:</h5>
+                    <ul style="text-align: left;">
+                        <li>Se è presente un ordine d’acquisto già spedito ma non ancora consegnato.</li>
+                        <li>Se ci sono ordini d’acquisto ancora da spedire che non sono stati preventivamente annullati.</li>
+                        <li>Se sono presenti ordini di vendita ancora in fase di spedizione.</li>
+                    </ul>
+                    <h5>Verranno eliminati:</h5>
+                    <ul style="text-align: left;">
+                        <li>Tutti gli annunci a vostro nome.</li>
+                        <li>I vostri commenti lasciati sugli annunci.</li>
+                    </ul>
+                    <h5>Verranno annullati:</h5>
+                    <ul style="text-align: left;">
+                        <li>Tutti gli ordini di vendita in attesa di spedizione.</li>
+                    </ul>
+                    
+                    <form method="post" action="{% url 'sylvelius:profile_delete' %}">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-danger">Elimina</button>
+
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="confirmDeleteCheckbox">
+                            <label class="form-check-label" for="confirmDeleteCheckbox">
+                            Confermo di voler eliminare definitivamente il profilo
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn btn-danger" id="deleteButton" disabled>Elimina</button>
                         <a href="{% url 'sylvelius:profile' %}" class="btn btn-secondary">Annulla</a>
                     </form>
                 </div>
@@ -22,4 +60,18 @@
         </div>
     </div>
 </div>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const checkbox = document.getElementById('confirmDeleteCheckbox');
+    const deleteButton = document.getElementById('deleteButton');
+
+    checkbox.addEventListener('change', function() {
+      deleteButton.disabled = !checkbox.checked;
+    });
+  });
+</script>
+
+{% endblock %}
+{% block footer_color %}
+<footer class="footer fixed-bottom py-2 bg-danger" style="line-height: 1; height: 36px;">
 {% endblock %}

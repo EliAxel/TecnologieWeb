@@ -10,7 +10,7 @@
         <div class="d-flex align-items-center mb-1 flex-wrap">
           <h6 class="mb-0 font-weight-bold mr-3">{{ commento.utente.username }}</h6>
           <div class="text-warning me-3 mr-3">
-            {% for i in "12345"|slice:":5" %}
+            {% for i in RANGE_COMMNT_RATING_STRING %} <!-- |slice:":5" -->
               {% if forloop.counter <= commento.rating %}
                 <i class="bi bi-star-fill"></i>
               {% else %}
@@ -91,21 +91,21 @@
           <div class="d-flex align-items-center mb-1 flex-wrap">
             <strong>{{ request.user.username }}</strong>
           </div>
-          <form method="post" action={% url "sylvelius:modifica_commento" commento.id %} id="edit-comment-form-{{ commento.id }}">
+          <form method="post" action="{% url 'sylvelius:modifica_commento' commento.id %}" id="edit-comment-form-{{ commento.id }}">
             {% csrf_token %}
             <div class="mb-2">
-              <textarea name="testo" class="form-control" rows="3" required maxlength="1000" placeholder="Scrivi il tuo commento..." id="comment-text-{{ commento.id }}"></textarea>
+              <textarea name="testo" class="form-control" rows="3" required maxlength="{{MAX_COMMNT_TESTO_CHARS}}" placeholder="Scrivi il tuo commento..." id="comment-text-{{ commento.id }}"></textarea>
             </div>
             <div class="d-flex align-items-center">
               <div class="me-2">
                 <label class="me-2 mb-0">Valutazione:</label>
                 <div id="star-rating-edit-{{ commento.id }}" class="d-inline-block align-middle">
                   <i class="bi bi-slash-circle text-muted me-1" data-value="0" style="cursor: pointer; font-size: 1.2rem;"></i>
-                  {% for i in "12345" %}
+                  {% for i in RANGE_COMMNT_RATING_STRING %}
                     <i class="bi bi-star text-muted" data-value="{{ forloop.counter }}" style="cursor: pointer; font-size: 1.2rem;"></i>
                   {% endfor %}
                 </div>
-                <input type="hidden" name="rating" id="rating-edit-{{ commento.id }}" value="-1">
+                <input type="hidden" name="rating" id="rating-edit-{{ commento.id }}" value="{{INVALID_COMMNT_RATING_VALUE}}">
               </div>
               <button type="submit" class="btn btn-primary btn-sm ms-auto ml-2">Pubblica</button>
               <div id="comment-error-edit-{{ commento.id }}" class="ms-2 text-danger ml-2" style="display: none; font-size: 0.9rem;"></div>

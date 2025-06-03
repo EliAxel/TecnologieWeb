@@ -4,6 +4,7 @@ from channels.db import database_sync_to_async
 from sylvelius.models import Annuncio
 from django.db.models import Q
 from sylvelius.models import Tag
+from progetto_tw.constants import MAX_WS_QUERIES
 
 class SearchConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -37,7 +38,7 @@ class SearchConsumer(AsyncWebsocketConsumer):
         annunci = Annuncio.objects.filter(
             Q(prodotto__nome__iregex=regex),
             is_published=True
-        ).order_by('prodotto__nome').select_related('prodotto')[:10]
+        ).order_by('prodotto__nome').select_related('prodotto')[:MAX_WS_QUERIES]
         
         return [annuncio.prodotto.nome for annuncio in annunci]
 
@@ -65,5 +66,5 @@ class SearchTags(AsyncWebsocketConsumer):
     def get_tags_by_query(self, query):
         # Trova tag che contengono la query (case-insensitive)
         return list(
-            Tag.objects.filter(nome__icontains=query).values_list('nome', flat=True).order_by('nome')[:10]
+            Tag.objects.filter(nome__icontains=query).values_list('nome', flat=True).order_by('nome')[:MAX_WS_QUERIES]
         )

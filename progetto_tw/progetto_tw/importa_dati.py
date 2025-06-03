@@ -2,7 +2,7 @@ import json
 import os
 import django
 from django.contrib.auth.models import User
-from sylvelius.models import Annuncio, CommentoAnnuncio, ImmagineProdotto, Ordine, Creazione, Tag, Prodotto
+from sylvelius.models import Annuncio, CommentoAnnuncio, ImmagineProdotto, Ordine, Tag, Prodotto
 from purchase.models import Invoice
 
 # Imposta le variabili d'ambiente per Django
@@ -11,7 +11,6 @@ django.setup()
 
 def delete_db():
     ImmagineProdotto.objects.all().delete()
-    Creazione.objects.all().delete()
     Ordine.objects.all().delete()
     Annuncio.objects.all().delete()
     CommentoAnnuncio.objects.all().delete()
@@ -65,9 +64,15 @@ def init_db():
             prodotto = Prodotto.objects.get(id=annuncio_data['prodotto_id'])
         except Prodotto.DoesNotExist:
             continue
+        
+        try:
+            inserzionista = User.objects.get(username=annuncio_data['inserzionista'])
+        except User.DoesNotExist:
+            continue
 
         Annuncio.objects.update_or_create(
             id=i,
+            inserzionista=inserzionista,
             prodotto=prodotto,
             defaults={
                 'data_pubblicazione': annuncio_data.get('data_pubblicazione'),
@@ -97,29 +102,6 @@ def init_db():
                 'stato_consegna': ordine_data['stato_consegna'],
             }
         )
-
-    # Importa Creazioni
-    for creazione_data in dati.get('creazioni', []):
-        try:
-            utente = User.objects.get(username=creazione_data['utente_username'])
-        except User.DoesNotExist:
-            continue
-
-        try:
-            prodotto = Prodotto.objects.get(id=creazione_data['prodotto_id'])
-            annuncio = Annuncio.objects.filter(prodotto=prodotto).first()
-            if not annuncio:
-                continue
-        except Prodotto.DoesNotExist:
-            continue
-
-        Creazione.objects.update_or_create(
-            utente=utente,
-            annuncio=annuncio,
-            defaults={
-                'data_creazione': creazione_data.get('data_creazione')
-            }
-        )
     
     for commenti_data in dati.get('commenti', []):
         try:
@@ -133,7 +115,8 @@ def init_db():
             utente=utente,
             defaults={
                 'testo': commenti_data['testo'],
-                'rating': commenti_data['rating'],
-                'data_pubblicazione': commenti_data.get('data_commento')
+                'rating': commenti_data['rating']
             }
         )
+        commento.data_pubblicazione = commenti_data.get('data_commento')
+        commento.save()

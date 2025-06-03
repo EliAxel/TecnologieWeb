@@ -16,16 +16,16 @@
                 {% csrf_token %}
                 <div class="form-group">
                     <label for="username">Username</label>
-                    <input type="text" class="form-control" id="username" name="username" required maxlength="32" style="border-color: #a78bfa;">
+                    <input type="text" class="form-control" id="username" name="username" required maxlength="{{MAX_UNAME_CHARS}}" style="border-color: #a78bfa;">
                     <div id="username-error" class="invalid-feedback" style="display:none;"></div>
                 </div>
                 <div class="form-group">
                     <label for="password1">Password</label>
-                    <input type="password" class="form-control" id="password1" name="password1" required maxlength="32" style="border-color: #a78bfa;">
+                    <input type="password" class="form-control" id="password1" name="password1" required maxlength="{{MAX_PWD_CHARS}}" style="border-color: #a78bfa;">
                 </div>
                 <div class="form-group">
                     <label for="password2">Conferma Password</label>
-                    <input type="password" class="form-control" id="password2" name="password2" required maxlength="32" style="border-color: #a78bfa;">
+                    <input type="password" class="form-control" id="password2" name="password2" required maxlength="{{MAX_PWD_CHARS}}" style="border-color: #a78bfa;">
                     <div id="password-error" class="invalid-feedback" style="display:none;"></div>
                 </div>
                 <button type="submit" class="btn btn-block text-white" style="background-color: #7c3aed;">Vai</button>
@@ -75,21 +75,26 @@
         let errorMsg = "";
 
         // Password security: at least 8 chars, one uppercase, one lowercase, one number
-        const strongPw = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+        const MIN_PWD_CHARS = {{ MIN_PWD_CHARS }};
+        const strongPw = new RegExp(`^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{${MIN_PWD_CHARS},}$`);
         if (!strongPw.test(pw1)) {
-            errorMsg = "La password deve contenere almeno 8 caratteri, una maiuscola, una minuscola e un numero.";
+            errorMsg = "La password deve contenere almeno {{ MIN_PWD_CHARS }} caratteri, una maiuscola, una minuscola e un numero.";
+            password1Input.classList.add("is-invalid");
+            password2Input.classList.remove("is-invalid");
         } else if (pw1 !== pw2) {
             errorMsg = "Le password non combaciano.";
+            password2Input.classList.add("is-invalid");
+            password1Input.classList.remove("is-invalid");
         }
 
         if (errorMsg) {
             passwordError.textContent = errorMsg;
             passwordError.style.display = "block";
-            password2Input.classList.add("is-invalid");
             return false;
         } else {
             passwordError.textContent = "";
             passwordError.style.display = "none";
+            password1Input.classList.remove("is-invalid");
             password2Input.classList.remove("is-invalid");
             return true;
         }

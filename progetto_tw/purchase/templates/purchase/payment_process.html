@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load humanize %}
 {% block sign_in_sign_up %}
     {% include "_btn_toprightbuttons.html" %}
 {% endblock %}
@@ -9,7 +10,7 @@
 <div class="container mt-5 mb-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <h2>Pagamento di: €{{ amount }}</h2>
+            <h2>Pagamento di: €{{ amount|intcomma }}</h2>
             <p>Stai acquistando: <strong>{{ item_name }}</strong> (Quantità: {{ quantity }})</p>
             
             <!-- PayPal -->

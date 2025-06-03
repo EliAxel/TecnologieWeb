@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import HttpResponse, HttpResponseBadRequest
@@ -13,6 +12,7 @@ from sylvelius.models import (
     Prodotto
 )
 from .models import Invoice
+from progetto_tw.constants import MIN_ORDN_QUANTITA_VALUE
 
 # Other
 import json
@@ -27,7 +27,7 @@ def fake_purchase(request):
     amount = request.POST.get("amount", "0.00")
     item_name = request.POST.get("item_name", "Prodotto sconosciuto")
     product_id = request.POST.get("product_id", "")
-    quantity = request.POST.get("quantity", "1")
+    quantity = request.POST.get("quantity", f"{MIN_ORDN_QUANTITA_VALUE}")
     user_id = request.POST.get("user_id")
     invoice_id = str(uuid.uuid4())
     invoice_obj =Invoice.objects.create(
@@ -149,7 +149,7 @@ def paypal_pcc(request):
                 utente=user,
                 prodotto=prodotto,
                 quantita=quantita,
-                invoice_id=invoice,
+                invoice=invoice,
             )
             ordine.save()
 
@@ -191,14 +191,14 @@ def paypal_coa(request):
             except Prodotto.DoesNotExist:
                 return HttpResponse(status=404)
 
-            ordine = Ordine.objects.filter(invoice_id=invoice, prodotto=prodotto).first()
+            ordine = Ordine.objects.filter(invoice=invoice, prodotto=prodotto).first()
 
             if ordine:
                 shipping = pu.get('shipping', {})
                 address = shipping.get('address', {})
                 ordine.luogo_consegna = address
                 ordine.save()
-                del invoice_obj
+                invoice_obj.delete()
             else:
                 return HttpResponse(status=102)
 

@@ -1,4 +1,5 @@
 (function() {
+    const MAX_WS_QUERIES = window.COSTANTI.MAX_WS_QUERIES;
     let ws = null;
     let timeout = null;
     const input = document.getElementById('search-input');
@@ -13,7 +14,7 @@
             const data = JSON.parse(e.data);
             if (data.suggestions && input.value.length > 0) {
                 suggestions.innerHTML = '';
-                const limited = data.suggestions.slice(0, 7);
+                const limited = data.suggestions.slice(0, MAX_WS_QUERIES);
                 limited.forEach(function(item) {
                     const el = document.createElement('a');
                     el.className = 'list-group-item list-group-item-action';

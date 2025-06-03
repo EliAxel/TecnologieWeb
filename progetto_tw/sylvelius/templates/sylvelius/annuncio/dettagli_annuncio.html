@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load humanize %}
 {% block sign_in_sign_up %}
     {% include "_btn_toprightbuttons.html" %}
 {% endblock %}
@@ -17,7 +18,7 @@
         <div class="col-md-6">
             <h2>{{ annuncio.prodotto.nome }}</h2>
             <p class="text-muted mb-1">
-                Pubblicato il {{ annuncio.data_pubblicazione|date:"d/m/Y" }} da {{ annuncio.creazioni.first.utente.username }}
+                Pubblicato il {{ annuncio.data_pubblicazione|date:"d/m/Y" }} da {{ annuncio.inserzionista.username }}
             </p>
             <span class="text-muted mb-4">
                 Condizione: 
@@ -33,7 +34,7 @@
             {% if annuncio.prodotto.descrizione_breve %}
                 <p class="lead">{{ annuncio.prodotto.descrizione_breve }}</p>
             {% endif %}
-            {% if annuncio.rating_medio == -1 %}
+            {% if annuncio.rating_medio == INVALID_COMMNT_RATING_VALUE %}
                 <div>Nessuna recensione</div>
             {% else %}
                 {% if annuncio.prodotto.descrizione_breve %}
@@ -42,35 +43,29 @@
                 {% endif %}
             {% endif %}
 
-            <h4 class="text-primary mt-4">€ <span id="unit-price-{{ annuncio.id }}">{{ annuncio.prodotto.prezzo }}</span> 
+            <h4 class="text-primary mt-4">€ <span id="unit-price-{{ annuncio.id }}">{{ annuncio.prodotto.prezzo|intcomma }}</span> 
                 <small class="text-muted">/unità</small>
             </h4>
             <h5 id="total-price-container-{{ annuncio.id }}" style="display: none;">Totale: <span id="total-price-{{ annuncio.id }}" class="text-success">{{ annuncio.prodotto.prezzo }}</span> €</h5>
             <p class="text-muted">Disponibilità: {{ annuncio.qta_magazzino }} unità</p>
 
             <!-- Selezione quantità -->
-            <div class="form-group mt-3 mb-3">
-                <label for="quantity-select-{{ annuncio.id }}">Quantità:</label>
-                <select class="form-control w-auto d-inline-block ml-2" id="quantity-select-{{ annuncio.id }}" name="quantity">
-                    {% with ''|center:annuncio.qta_magazzino as range %}
-                    {% for i in range %}
-                        <option value="{{ forloop.counter }}">{{ forloop.counter }}</option>
-                    {% endfor %}
-                    {% endwith %}
-                </select>
+            <div class="form-group d-flex justify-content-center align-items-center mt-3 mb-3">
+                <label class="mr-3" for="quantity-select-{{ annuncio.id }}">Quantità:</label>
+                <input type="number" class="form-control w-auto" size="7" id="quantity-select-{{ annuncio.id }}" required max="{{ annuncio.qta_magazzino }}" name="qta_magazzino" min="{{MIN_ORDN_QUANTITA_VALUE}}" step="1" value="{{MIN_ORDN_QUANTITA_VALUE}}">
             </div>
 
             <!-- Azioni -->
             <div class="mt-4 mb-4">
-                <button class="btn btn-success d-inline-block">Aggiungi al carrello</button>
+                <button class="btn btn-success d-inline-block" id="cart-btn">Aggiungi al carrello</button>
                 <form action="{% url 'purchase:fake_purchase' %}" method="post" class="d-inline-block" id="purchase-form-{{ annuncio.id }}">
                     {% csrf_token %}
                     <input type="hidden" name="amount" value="{{ annuncio.prodotto.prezzo }}" id="amount-input-{{ annuncio.id }}">
                     <input type="hidden" name="item_name" value="{{ annuncio.prodotto.nome }}">
                     <input type="hidden" name="product_id" value="{{ annuncio.prodotto.id }}">
-                    <input type="hidden" name="quantity" value="1" id="quantity-input-{{ annuncio.id }}">
+                    <input type="hidden" name="quantity" value="{{MIN_ORDN_QUANTITA_VALUE}}" id="quantity-input-{{ annuncio.id }}">
                     <input type="hidden" name="user_id" value="{{ request.user.id }}">
-                    <button type="submit" class="btn btn-primary">Acquista ora</button>
+                    <button type="submit" class="btn btn-primary" id="buy-now">Acquista ora</button>
                 </form>
             </div>
 
@@ -84,27 +79,49 @@
                     const totalPriceContainer = document.getElementById('total-price-container-{{ annuncio.id }}');
                     
                     const originalPrice = parseFloat("{{ annuncio.prodotto.prezzo }}");
-                    unitPriceElement.textContent = originalPrice.toFixed(2);
-                    totalPriceElement.textContent = originalPrice.toFixed(2);
                     
                     function updatePrices() {
-                        const quantity = parseInt(quantitySelect.value);
-                        const totalPrice = originalPrice * quantity;
-                        
+                        if(quantitySelect.value === ""){
+                            document.getElementById("buy-now").disabled = true;
+                            document.getElementById("cart-btn").disabled = true;
+                            totalPriceContainer.style.display = 'none';
+                            return;
+                        } else {
+                            document.getElementById("buy-now").disabled = false;
+                            document.getElementById("cart-btn").disabled = false;
+                        }
+                        let quantity = parseInt(quantitySelect.value);
+
+                        // Se il valore è invalido o fuori range, correggilo
+                        if (isNaN(quantity) || quantity < 1) {
+                            quantity = 1;
+                        } else if (quantity > {{ annuncio.qta_magazzino }}) {
+                            quantity = {{ annuncio.qta_magazzino }};
+                        }
+
+                        quantitySelect.value = quantity;
                         quantityInput.value = quantity;
+
+                        const totalPrice = originalPrice * quantity;
                         amountInput.value = totalPrice.toFixed(2);
-                        totalPriceElement.textContent = totalPrice.toFixed(2);
-                        
-                        // Mostra/nascondi il totale in base alla quantità
+                        totalPriceElement.textContent = totalPrice.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
                         if (quantity === 1) {
                             totalPriceContainer.style.display = 'none';
                         } else {
                             totalPriceContainer.style.display = 'block';
                         }
                     }
-                    
-                    quantitySelect.addEventListener('change', updatePrices);
-                    updatePrices(); // Inizializza al caricamento
+
+                    // Aggiorna i prezzi al cambio
+                    quantitySelect.addEventListener('input', updatePrices);
+                    updatePrices();  // Inizializza al caricamento
+                    form.addEventListener('submit', function(e) {
+                        const quantity = parseInt(quantitySelect.value);
+                        quantityInput.value = quantity;
+                        const totalPrice = originalPrice * quantity;
+                        amountInput.value = totalPrice.toFixed(2);
+                    });
                 });
             </script>
         </div>
@@ -140,7 +157,7 @@
                     {% endif %}
                 </div>
             {% else %}
-                <img src="{% static 'img/default_product.png' %}" class="img-fluid rounded shadow" alt="Immagine prodotto">
+                <img src="{% static 'img/default_product_big.png' %}" class="img-fluid rounded shadow" alt="Immagine prodotto">
             {% endif %}
         </div>
     </div>

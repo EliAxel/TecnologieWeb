@@ -19,27 +19,37 @@
                 {% csrf_token %}
                 <div class="form-group">
                     <label for="id_nome">Titolo</label>
-                    <input type="text" class="form-control" id="id_nome" name="nome" maxlength="100" required placeholder="Inserisci il titolo dell'annuncio">
+                    <input type="text" class="form-control" id="id_nome" name="nome" maxlength="{{MAX_PROD_NOME_CHARS}}" required placeholder="Inserisci il titolo dell'annuncio">
                 </div>
 
                 <div class="form-group">
                     <label for="id_descrizione_breve">Descrizione Breve</label>
-                    <input type="text" class="form-control" id="id_descrizione_breve" name="descrizione_breve" required maxlength="255" placeholder="Una breve descrizione">
+                    <input type="text" class="form-control" id="id_descrizione_breve" name="descrizione_breve" required maxlength="{{MAX_PROD_DESC_BR_CHARS}}" placeholder="Una breve descrizione">
                 </div>
 
                 <div class="form-group">
                     <label for="id_descrizione">Descrizione</label>
-                    <textarea class="form-control" id="id_descrizione" name="descrizione" rows="4" maxlength="3000" placeholder="Descrivi il tuo annuncio (opzionale)"></textarea>
+                    <textarea class="form-control" id="id_descrizione" name="descrizione" rows="4" maxlength="{{MAX_PROD_DESC_CHARS}}" placeholder="Descrivi il tuo annuncio (opzionale)"></textarea>
                 </div>
 
                 <div class="form-group">
                     <label for="id_prezzo">Prezzo (€)</label>
-                    <input type="number" class="form-control" id="id_prezzo" name="prezzo" step="0.01" min="0" required placeholder="0.00">
+                    <input type="number" class="form-control" id="id_prezzo" name="prezzo" max="{{MAX_PROD_PREZZO_VALUE}}" step="0.01" min="{{MIN_PROD_PREZZO_VALUE}}" required placeholder="1.00">
+                    <div class="invalid-feedback"></div> <!-- messaggio errore -->
                 </div>
-
+                <div class="form-group">
+                    <label for="id_iva">IVA (IT)</label>
+                    <select class="form-control" id="id_iva" name="iva" required>
+                        <option value="{{ALIQUOTA_IVA_ORD}}">{{ALIQUOTA_IVA_ORD}}% - Aliquota ordinaria</option>
+                        <option value="{{ALIQUOTA_IVA_RID}}">{{ALIQUOTA_IVA_RID}}% - Prodotti alimentari / farmaceutici</option>
+                        <option value="{{ALIQUOTA_IVA_URID}}">{{ALIQUOTA_IVA_URID}}% - Dispositivi medici / prima necessità</option>
+                        <option value="{{ALIQUOTA_IVA_ESE}}">{{ALIQUOTA_IVA_ESE}}% - Operazioni esenti</option>
+                    </select>
+                    <div id="prezzo-netto-feedback" class="text-success d-none"></div> 
+                </div>
                 <div class="form-group">
                     <label for="id_qta_magazzino">Quantità in Magazzino</label>
-                    <input type="number" class="form-control" id="id_qta_magazzino" required name="qta_magazzino" min="1" value="1">
+                    <input type="number" class="form-control" id="id_qta_magazzino" required max="{{MAX_ANNU_QTA_MAGAZZINO_VALUE}}" name="qta_magazzino" min="{{MIN_ORDN_QUANTITA_VALUE}}" value="{{MIN_ORDN_QUANTITA_VALUE}}">
                 </div>
 
                 <div class="form-group">
@@ -53,7 +63,7 @@
                 <div class="form-group">
                     <label for="id_tags_input">Categorie</label>
                     <div class="input-group">
-                        <input type="text" class="form-control" id="id_tags_input" maxlength="50" placeholder="Scrivi un tag... (opzionale)" autocomplete="off">
+                        <input type="text" class="form-control" id="id_tags_input" maxlength="{{MAX_TAGS_CHARS}}" placeholder="Scrivi un tag... (opzionale)" autocomplete="off">
                         <div id="id_tags_suggestions" class="list-group position-absolute w-100" style="top: 100%; left: 0; display: none; max-height: 200px; overflow-y: auto; z-index: 1200;"></div>
                     </div>
                     <div id="id_tags_selected" class="mt-2" style="min-height: 38px;"></div>
@@ -67,7 +77,7 @@
                     <small class="form-text text-muted">Puoi caricare più immagini.</small>
                 </div>
 
-                <button type="submit" class="btn btn-primary" style="background-color: #6f42c1; border: none;">Crea Annuncio</button>
+                <button type="submit" id='crea-annuncio-btn'class="btn btn-primary" style="background-color: #6f42c1; border: none; ">Crea Annuncio</button>
             </form>
         </div>
     </div>
@@ -75,6 +85,69 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    prezzoVal = document.getElementById("id_prezzo");
+    qtaMagazzinoVal = document.getElementById("id_qta_magazzino");
+    creaAnnuncioBtn = document.getElementById("crea-annuncio-btn");
+    function updateQtas() {
+        if(qtaMagazzinoVal.value === ""){
+            creaAnnuncioBtn.disabled = true;
+            return;
+        } else if(!prezzoVal.classList.contains('is-invalid')){
+            creaAnnuncioBtn.disabled = false;
+        }
+        let quantity = parseInt(qtaMagazzinoVal.value);
+
+        // Se il valore è invalido o fuori range, correggilo
+        if (isNaN(quantity) || quantity < 1) {
+            quantity = 1;
+        } else if (quantity > 2000000){
+            quantity = 2000000;
+        }
+
+        qtaMagazzinoVal.value = quantity;
+    }
+    function updatePrices() {
+        const nettoDiv = document.getElementById('prezzo-netto-feedback');
+        const ivaVal = parseFloat(document.getElementById('id_iva').value);
+
+        if (prezzoVal.value === "") {
+            creaAnnuncioBtn.disabled = true;
+            nettoDiv.classList.add('d-none');
+            return;
+        } else if (!qtaMagazzinoVal.classList.contains('is-invalid')){
+            creaAnnuncioBtn.disabled = false;
+        }
+
+        let prezzo = parseFloat(prezzoVal.value);
+
+        // Se il valore è invalido o fuori range, correggilo
+        if (isNaN(prezzo) || prezzo < 1) {
+            prezzo = 1;
+        } else if (prezzo > 999999.99) {
+            prezzo = 999999.99;
+        } else if (prezzo % 1 !== 0) {
+            const factor = Math.pow(10, 2);
+            prezzo = Math.round(prezzo * factor) / factor;
+        }
+
+        prezzoVal.value = prezzo;
+
+        if (prezzo >= 1) {
+            prezzo = prezzo / (1 + 0.02);
+            const netto = ivaVal === 0 ? prezzo.toFixed(2) : (prezzo / (1 + ivaVal / 100)).toFixed(2);
+            nettoDiv.textContent = `Ricavo netto con IVA al ${ivaVal}% e costi di commissione al 2%: €${netto}`;
+            nettoDiv.classList.remove('d-none');
+        } else {
+            nettoDiv.classList.add('d-none');
+        }
+    }
+
+
+    // Aggiorna i prezzi al cambio
+    qtaMagazzinoVal.addEventListener('input', updateQtas);
+    prezzoVal.addEventListener('input', updatePrices); // Inizializza al caricamento
+    document.getElementById('id_iva').addEventListener('change', updatePrices);
+
     setupSuggestions({
         inputId: 'id_tags_input',
         suggestionsId: 'id_tags_suggestions',
@@ -96,23 +169,26 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     function showError(input, message) {
-        input.classList.add('is-invalid');
-        let error = input.nextElementSibling;
-        if (!error || !error.classList.contains('invalid-feedback')) {
-            error = document.createElement('div');
-            error.className = 'invalid-feedback';
-            input.parentNode.appendChild(error);
+        input.classList.add('is-invalid'); // se usi anche validazione positiva
+
+        // cerca il div di errore nel contenitore del campo
+        const error = input.parentNode.querySelector('.invalid-feedback');
+        if (error) {
+            error.textContent = message;
+            error.classList.remove('d-none'); // nel caso tu voglia nasconderli di default
         }
-        error.textContent = message;
     }
+
 
     function clearError(input) {
         input.classList.remove('is-invalid');
-        let error = input.nextElementSibling;
-        if (error && error.classList.contains('invalid-feedback')) {
-            error.remove();
+        const error = input.parentNode.querySelector('.invalid-feedback');
+        if (error) {
+            error.textContent = '';
+            error.classList.add('d-none');
         }
     }
+
 
     function validateField(field, input) {
         const value = input.value.trim();
@@ -126,11 +202,11 @@ document.addEventListener('DOMContentLoaded', function () {
             case 'prezzo':
                 if (!value) return 'Il prezzo è obbligatorio.';
                 const prezzo = parseFloat(value);
-                if (isNaN(prezzo) || prezzo <= 0) return 'Il prezzo deve essere un numero positivo.';
+                if (isNaN(prezzo) || prezzo < 1) return 'Il prezzo deve essere un numero positivo maggiore di 1.';
                 break;
             case 'qta_magazzino':
                 const qta = parseInt(value);
-                if (isNaN(qta) || qta < 0) return 'La quantità deve essere un numero intero positivo.';
+                if (isNaN(qta) || qta < 1) return 'La quantità deve essere un numero intero positivo maggiore di 1.';
                 break;
             case 'condizione':
                 if (!value || (value !== 'nuovo' && value !== 'usato')) return 'Seleziona la condizione.';

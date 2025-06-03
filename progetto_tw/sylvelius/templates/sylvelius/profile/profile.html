@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load humanize %}
 {% block title %}{{user.username}}{% endblock %}
 {% block middle %}
 <div class="container-fluid mt-5 mb-5">
@@ -22,7 +23,7 @@
             </h2>
             {% if ordini %}
                 <div class="scrolling-wrapper d-flex flex-row overflow-auto py-2">
-                    {% for ordine in ordini|slice:5 %}
+                    {% for ordine in ordini|slice:MAX_SLICE_PROFILO_VALUE %}
                         <div class="card mx-2" style="min-width: 18rem; max-width: 18rem;">
                             <img
                                 data-prodotto-id="{{ ordine.prodotto.id }}"
@@ -46,33 +47,33 @@
         </div>
     </div>
 
-    <!-- Sezione Inserzioni (Creazioni) -->
+    <!-- Sezione Annunci (Creazioni) -->
     <div class="row justify-content-center mb-4">
         <div class="col-md-8 text-center">
             <h2>
-                Le mie inserzioni
-                <a href="{% url 'sylvelius:profile_creazioni' %}" class="btn btn-link btn-sm" style="font-size: 1rem;">Vedi tutte</a>
+                I miei annunci
+                <a href="{% url 'sylvelius:profile_annunci' %}" class="btn btn-link btn-sm" style="font-size: 1rem;">Vedi tutte</a>
             </h2>
-            {% if creazioni %}
+            {% if annunci %}
                 <div class="scrolling-wrapper d-flex flex-row overflow-auto py-2" style="margin-bottom: 14px;">
-                    {% for creazione in creazioni|slice:5 %}
+                    {% for annuncio in annunci|slice:MAX_SLICE_PROFILO_VALUE %}
                         <div class="card mx-2" style="min-width: 18rem; max-width: 18rem;">
                             <img
-                                data-prodotto-id="{{ creazione.annuncio.prodotto.id }}"
+                                data-prodotto-id="{{ annuncio.prodotto.id }}"
                                 class="card-img-top immagine-asincrona"
-                                alt="{{ creazione.annuncio.prodotto.nome }}"
+                                alt="{{ annuncio.prodotto.nome }}"
                                 src="{% static 'img/default_loading.png' %}"
                             >
                             <div class="card-body">
-                                <h5 class="card-title">{{ creazione.annuncio.prodotto.nome }}</h5>
-                                <p class="card-text">{{ creazione.annuncio.prodotto.descrizione_breve|truncatewords:15 }}</p>
-                                <p class="card-text">Prezzo: {{ creazione.annuncio.prodotto.prezzo }} €</p>
+                                <h5 class="card-title">{{ annuncio.prodotto.nome }}</h5>
+                                <p class="card-text">{{ annuncio.prodotto.descrizione_breve|truncatewords:MAX_TRUNCATED_CARDS_CHARS }}</p>
+                                <p class="card-text">Prezzo: {{ annuncio.prodotto.prezzo|intcomma }} €</p>
                             </div>
                         </div>
                     {% endfor %}
                 </div>
             {% else %}
-                <p>Non hai ancora inserzioni.</p>
+                <p>Non hai ancora annunci.</p>
             {% endif %}
         </div>
     </div>
@@ -86,14 +87,14 @@
             </h2>
             {% if clienti %}
                 <div class="scrolling-wrapper d-flex flex-row overflow-auto py-2" style="margin-bottom: 14px;">
-                    {% for cliente in clienti|slice:5 %}
+                    {% for cliente in clienti|slice:MAX_SLICE_PROFILO_VALUE %}
                         <div class="card mx-2" style="min-width: 18rem; max-width: 18rem;">
                             <div class="card-body">
                                 <h5 class="card-title">{{ cliente.username }}</h5>
                                 {% if cliente.ordini_da_rifornire %}
                                     <p class="card-text">Ordini da rifornire: {{ cliente.ordini_da_rifornire|length }}</p>
                                     <ul class="list-unstyled">
-                                        {% for ordine in cliente.ordini_da_rifornire|slice:3 %}
+                                        {% for ordine in cliente.ordini_da_rifornire|slice:MAX_LIST_CLIENTI_VALUE %}
                                             <li>
                                                 {{ ordine.prodotto.nome }} (Quantità: {{ ordine.quantita }})
                                             </li>

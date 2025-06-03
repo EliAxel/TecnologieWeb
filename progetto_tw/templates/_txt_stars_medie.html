@@ -1,5 +1,5 @@
 <div class="text-warning me-3">
-    {% for i in "12345" %}
+    {% for i in RANGE_COMMNT_RATING_STRING %}
         {% if forloop.counter < annuncio.rating_medio %}
             <i class="bi bi-star-fill"></i>
         {% elif forloop.counter == annuncio.rating_medio %}
