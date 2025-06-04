@@ -79,7 +79,7 @@
                 <div class="form-group">
                     <label for="id_immagini">Immagini</label>
                     <input type="file" class="form-control-file" id="id_immagini" name="immagini" multiple accept="image/*">
-                    <div class="invalid-feedback"></div>
+                    <div id="id_immagini_errore" class="invalid-feedback"></div>
                     <small class="form-text text-muted">Puoi caricare più immagini. (massimo {{MAX_IMGS_PER_ANNU_VALUE}})</small>
                 </div>
 
@@ -103,11 +103,14 @@ document.addEventListener('DOMContentLoaded', function () {
     prezzoVal = document.getElementById("id_prezzo");
     qtaMagazzinoVal = document.getElementById("id_qta_magazzino");
     creaAnnuncioBtn = document.getElementById("crea-annuncio-btn");
+    idTagsInput = document.getElementById("id_tags_input");
+    idImmaginiErrore = document.getElementById("id_immagini_errore");
+
     function updateQtas() {
         if(qtaMagazzinoVal.value === ""){
             creaAnnuncioBtn.disabled = true;
             return;
-        } else if(!prezzoVal.classList.contains('is-invalid')){
+        } else if(checkOthersValidation(qtaMagazzinoVal)){
             creaAnnuncioBtn.disabled = false;
         }
         let quantity = parseInt(qtaMagazzinoVal.value);
@@ -129,7 +132,7 @@ document.addEventListener('DOMContentLoaded', function () {
             creaAnnuncioBtn.disabled = true;
             nettoDiv.classList.add('d-none');
             return;
-        } else if (!qtaMagazzinoVal.classList.contains('is-invalid')){
+        } else if (checkOthersValidation(prezzoVal)){
             creaAnnuncioBtn.disabled = false;
         }
 
@@ -182,13 +185,16 @@ document.addEventListener('DOMContentLoaded', function () {
         } else {
             clearError(document.getElementById('id_tags_input'));
         }
+        if(checkOthersValidation(qtaMagazzinoVal)){
+            creaAnnuncioBtn.disabled = false;
+        }
     });
 
 // Configura l'observer per monitorare aggiunta/rimozione di figli
-observer.observe(tagsContainer, {
-    childList: true,  // Osserva cambiamenti nei figli (tag aggiunti/rimossi)
-    subtree: true     // Monitora anche eventuali sotto-nodi
-});
+    observer.observe(tagsContainer, {
+        childList: true,  // Osserva cambiamenti nei figli (tag aggiunti/rimossi)
+        subtree: true     // Monitora anche eventuali sotto-nodi
+    });
 
     const form = document.querySelector('form');
     const fields = {
@@ -248,7 +254,11 @@ observer.observe(tagsContainer, {
                 const MAX_TAGS = {{ MAX_TAGS_N_PER_PROD }};
                 
                 if (selectedTags.length > MAX_TAGS) {
+                    creaAnnuncioBtn.disabled = true;
                     return `Puoi inserire al massimo ${MAX_TAGS} tag.`;
+                }
+                if(checkOthersValidation(idTagsInput)){
+                    creaAnnuncioBtn.disabled = false;
                 }
                 break;
                 
@@ -257,6 +267,7 @@ observer.observe(tagsContainer, {
                     // Verifica il numero massimo di immagini (es. max 5)
                     const MAX_IMMAGINI = {{MAX_IMGS_PER_ANNU_VALUE}};
                     if (input.files.length > MAX_IMMAGINI) {
+                        creaAnnuncioBtn.disabled = true;
                         return `Puoi caricare al massimo ${MAX_IMMAGINI} immagini.`;
                     }
                 }
@@ -265,6 +276,9 @@ observer.observe(tagsContainer, {
                         creaAnnuncioBtn.disabled = true;
                         return 'Puoi caricare solo file immagine.';
                     }
+                }
+                if(checkOthersValidation(idImmaginiErrore)){
+                    creaAnnuncioBtn.disabled = false;
                 }
                 break;
         }
@@ -279,6 +293,23 @@ observer.observe(tagsContainer, {
         });
     });
 
+    function checkOthersValidation(value) {
+        const hasPriceError = prezzoVal.classList.contains('is-invalid');
+        const hasQuantityError = qtaMagazzinoVal.classList.contains('is-invalid');
+        const hasTagsError = idTagsInput.classList.contains('is-invalid');
+        const hasImagesError = idImmaginiErrore.classList.contains('d-none');
+        
+        if (value === prezzoVal) {
+            return !hasQuantityError && !hasTagsError && hasImagesError;
+        } else if (value === qtaMagazzinoVal) {
+            return !hasPriceError && !hasTagsError && hasImagesError;
+        } else if (value === idTagsInput) {
+            return !hasPriceError && !hasQuantityError && hasImagesError;
+        } else if (value === idImmaginiErrore) {
+            return !hasPriceError && !hasQuantityError && !hasTagsError;
+        }
+    return false;
+}
     form.addEventListener('submit', function (e) {
         e.preventDefault();
         let isValid = true;
