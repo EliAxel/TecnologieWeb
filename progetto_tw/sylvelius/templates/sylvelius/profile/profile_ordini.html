@@ -1,9 +1,10 @@
 {% extends "sylvelius/home.html" %}
 {% load static %}
 {% load humanize %}
+{% block title %}Ordini - Sylvelius{% endblock %}
 {% block main_header %}{% endblock %}
 {% block middle %}
-<div class="container mt-5 mb-5">
+<div class="container-fluid mt-5 mb-5">
     <div class="row justify-content-center">
         <div class="col-md-10">
             <h2 class="mb-4">I tuoi ordini</h2>
@@ -27,10 +28,10 @@
                             <td>
                                 {% if ordine.prodotto.annunci.is_published %}
                                     <a href="{% url 'sylvelius:dettagli_annuncio' ordine.prodotto.annunci.id %}">
-                                        {{ ordine.prodotto.nome|truncatechars:MAX_TRUNCATED_CARDS_CHARS }}
+                                        {{ ordine.prodotto.nome|truncatechars:MAX_TRUNCATED_PROFILO_CHARS }}
                                     </a>
                                 {% else %}
-                                    {{ ordine.prodotto.nome|truncatechars:MAX_TRUNCATED_CARDS_CHARS }}
+                                    {{ ordine.prodotto.nome|truncatechars:MAX_TRUNCATED_PROFILO_CHARS }}
                                 {% endif %}
                             </td>
                             <td>
@@ -48,8 +49,44 @@
                             <td>{{ ordine.stato_consegna|capfirst }}</td>
                             <td>{{ ordine.data_ordine|date:"d/m/Y H:i" }}</td>
                             <td>
-                                {% if ordine.stato_consegna != "spedito" %}
+                                <!-- Modale Bootstrap 4 -->
+                                <button class="btn btn-primary btn-sm btn-dati-spedizione" data-id="{{ ordine.id }}" data-luogo-ordine="{{ordine.json_to_string}}">
+                                    <i class="bi bi-truck"></i> Dati spedizione
+                                </button>
+                                
+                                <div class="modal fade" id="datiSpedizioneModal-{{ordine.id}}" tabindex="-1" style="z-index: 1700" role="dialog" aria-labelledby="datiSpedizioneModalLabel-{{ordine.id}}" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="datiSpedizioneModalLabel-{{ordine.id}}">
+                                            <i class="bi bi-truck"></i> Dati di spedizione
+                                            </h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <!-- Contenuto dinamico verrà inserito qui -->
+                                            <div id="contenuto-spedizione-{{ordine.id}}">
+                                            <p><strong><i class="bi bi-geo-alt"></i> Via/Strada:</strong> <span id="spedizione-via-{{ordine.id}}">N/D</span></p>
+                                            <p><strong><i class="bi bi-geo-alt"></i> Città:</strong> <span id="spedizione-citta-{{ordine.id}}">N/D</span></p>
+                                            <p><strong><i class="bi bi-geo-alt"></i> CAP:</strong> <span id="spedizione-cap-{{ordine.id}}">N/D</span></p>
+                                            <p><strong><i class="bi bi-geo-alt"></i> Provincia:</strong> <span id="spedizione-provincia-{{ordine.id}}">N/D</span></p>
+                                            <p><strong><i class="bi bi-geo-alt"></i> Paese:</strong> <span id="spedizione-paese-{{ordine.id}}">N/D</span></p>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                            Chiudi
+                                            </button>
+                                        </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% if ordine.stato_consegna == "da spedire" %}
                                     <a {#href="{% url 'sylvelius:annulla_ordine' ordine.id %}"#} class="btn btn-danger btn-sm">Annulla</a>
+                                {% else %}
+                                    <button class="btn btn-danger btn-sm" disabled>Annulla</button>
                                 {% endif %}
                             </td>
                         </tr>
@@ -65,5 +102,34 @@
         </div>
     </div>
 </div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const bottoniSpedizione = document.querySelectorAll(".btn-dati-spedizione");
+
+    bottoniSpedizione.forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            const ordineId = this.getAttribute("data-id");
+            const datiSpedizione = JSON.parse(this.getAttribute("data-luogo-ordine")) || "N/D";
+
+            document.getElementById(`spedizione-via-${ordineId}`).textContent = datiSpedizione.address_line_1 || "N/D";
+            document.getElementById(`spedizione-citta-${ordineId}`).textContent = datiSpedizione.admin_area_2 || "N/D";
+            document.getElementById(`spedizione-cap-${ordineId}`).textContent = datiSpedizione.postal_code || "N/D";
+            document.getElementById(`spedizione-provincia-${ordineId}`).textContent = datiSpedizione.admin_area_1 || "N/D";
+            document.getElementById(`spedizione-paese-${ordineId}`).textContent = datiSpedizione.country_code || "N/D";
+            // Apri la modale
+            $(`#datiSpedizioneModal-${ordineId}`).modal('show');
+        });
+    });
+});
+</script>
+
 <script src="{% static 'js/img_loader.js' %}"></script>
+<style>
+.modal-backdrop {
+    z-index: 1699 !important; /* Deve essere inferiore al modal ma superiore al resto */
+    opacity: 0.5 !important;
+    background-color: #000 !important;
+}
+</style>
+
 {% endblock %}

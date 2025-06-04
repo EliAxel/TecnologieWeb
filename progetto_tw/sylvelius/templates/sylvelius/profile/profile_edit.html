@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Modifica Profilo{% endblock %}
+{% block title %}Modifica Profilo - Sylvelius{% endblock %}
 {% block sign_in_sign_up %}
     {% include "_btn_toprightbuttons.html" %}
 {% endblock %}
@@ -64,7 +64,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const passwordError2 = document.getElementById('password2-error');
     const usernameOld = "{{ user.username }}".trim();
     // Username check (AJAX, POST)
-        usernameInput.addEventListener('blur', function() {
+        usernameInput.addEventListener('input', function() {
             const username = usernameInput.value.trim();
             if(username !== usernameOld){
                 if (username.length !== 0){
@@ -105,13 +105,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Password check
         function validatePasswords() {
+            const MIN_PWD_CHARS = {{MIN_PWD_CHARS}}
             const pw1 = password1Input.value;
             const pw2 = password2Input.value;
             let errorMsg = "";
             // Password security: at least 8 chars, one uppercase, one lowercase, one number
             const strongPw = new RegExp(`^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{${MIN_PWD_CHARS},}$`);
             if (!strongPw.test(pw1)) {
-                errorMsg = "La password deve contenere almeno 8 caratteri, una maiuscola, una minuscola e un numero.";
+                errorMsg = "La password deve contenere almeno {{MIN_PWD_CHARS}} caratteri, una maiuscola, una minuscola e un numero.";
                 password1Input.classList.add("is-invalid");
                 password2Input.classList.remove("is-invalid");
             } else if (pw1 !== pw2) {
@@ -190,6 +191,4 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 </script>
-
-
 {% endblock %}

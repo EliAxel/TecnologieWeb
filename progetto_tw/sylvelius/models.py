@@ -1,4 +1,5 @@
 from django.db import models
+import json
 from django.core.validators import MinValueValidator, MaxValueValidator
 from progetto_tw.constants import (
     MAX_TAGS_CHARS,
@@ -14,6 +15,7 @@ from progetto_tw.constants import (
     MIN_COMMNT_RATING_VALUE,
     MAX_COMMNT_RATING_VALUE,
     MAX_ORDN_INVOICE_CHARS,
+    MAX_ANNU_UUID_CHARS,
     MIN_ORDN_QUANTITA_VALUE,
     ORDN_STATO_CONSEGNA_CHOICES,
     INVALID_COMMNT_RATING_VALUE
@@ -49,6 +51,7 @@ class ImmagineProdotto(models.Model):
         return f"Immagine di {self.prodotto.nome}"
 
 class Annuncio(models.Model):
+    uuid = models.CharField(max_length=MAX_ANNU_UUID_CHARS, unique=True, blank=True, null=True)
     inserzionista = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='annunci')
     prodotto = models.OneToOneField(Prodotto, on_delete=models.CASCADE, related_name='annunci')
     data_pubblicazione = models.DateTimeField(auto_now_add=True)
@@ -103,4 +106,7 @@ class Ordine(models.Model):
     @property
     def totale(self):
         return self.prodotto.prezzo * self.quantita
-
+    
+    @property
+    def json_to_string(self):
+        return json.dumps(self.luogo_consegna)

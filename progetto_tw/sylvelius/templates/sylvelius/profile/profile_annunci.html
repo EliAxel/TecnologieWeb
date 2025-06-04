@@ -1,8 +1,9 @@
 {% extends "sylvelius/home.html" %}
 {% load static %}
 {% block main_header %}{% endblock %}
+{% block title %}Profilo - Sylvelius{% endblock %}
 {% block middle %}
-<div class="container mt-5 mb-5">
+<div class="container-fluid mt-5 mb-5">
     <div class="row justify-content-center">
         <div class="col-md-10">
             <h2 class="mb-4">I tuoi annunci</h2>
@@ -23,10 +24,10 @@
                             <td>
                                 {% if annuncio.is_published %}
                                     <a href="{% url 'sylvelius:dettagli_annuncio' annuncio.id %}">
-                                        {{ annuncio.prodotto.nome|truncatechars:MAX_TRUNCATED_CARDS_CHARS}}
+                                        {{ annuncio.prodotto.nome|truncatechars:MAX_TRUNCATED_PROFILO_CHARS}}
                                     </a>
                                 {% else %}
-                                    {{ annuncio.prodotto.nome|truncatechars:MAX_TRUNCATED_CARDS_CHARS }}
+                                    {{ annuncio.prodotto.nome|truncatechars:MAX_TRUNCATED_PROFILO_CHARS }}
                                 {% endif %}
                             </td>
                             <td>
@@ -40,6 +41,10 @@
                             </td>
                             <td>{{ annuncio.data_pubblicazione|date:"d/m/Y H:i" }}</td>
                             <td>
+                                <form {#action="{% url 'sylvelius:modifica_annuncio' annuncio.id %}?page={{ page }}"#} method="post" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-primary btn-sm">Modifica</button>
+                                </form>
                                 <form action="{% url 'sylvelius:nascondi_annuncio' annuncio.id %}?page={{ page }}" method="post" style="display:inline;">
                                     {% csrf_token %}
                                     {% if annuncio.is_published %}

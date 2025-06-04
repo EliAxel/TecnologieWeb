@@ -189,10 +189,12 @@
 
         commentForm.addEventListener('submit', function(event) {
           event.preventDefault();
+          const MIN_COMMNT_RATING_VALUE = {{MIN_COMMNT_RATING_VALUE}}
+          const INVALID_COMMNT_RATING_VALUE = {{INVALID_COMMNT_RATING_VALUE}}
           const text = commentText.value.trim();
           const rating = parseInt(ratingInput.value);
 
-          if (text === '' && rating < 0) {
+          if (text === '' && rating < MIN_COMMNT_RATING_VALUE) {
             commentError.textContent = 'Inserisci un commento e seleziona una valutazione.';
             commentError.style.display = 'block';
             return;
@@ -200,7 +202,7 @@
             commentError.textContent = 'Inserisci un commento.';
             commentError.style.display = 'block';
             return;
-          } else if (rating < 0) {
+          } else if (rating < MIN_COMMNT_RATING_VALUE) {
             commentError.textContent = 'Seleziona una valutazione.';
             commentError.style.display = 'block';
             return;
@@ -226,7 +228,7 @@
           .then(data => {
             if (data.status === "success") {
               commentText.value = '';
-              ratingInput.value = -1;
+              ratingInput.value = INVALID_COMMNT_RATING_VALUE;
               stars.forEach(star => {
                 star.classList.remove('text-warning', 'bi-star-fill');
                 star.classList.add('text-muted', 'bi-star');

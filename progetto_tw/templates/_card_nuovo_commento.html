@@ -35,132 +35,133 @@
 </div>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-    const stars = document.querySelectorAll('#star-rating-new-{{ annuncio.id }} .bi-star');
-    const banIcon = document.querySelector('#star-rating-new-{{ annuncio.id }} .bi-slash-circle');
-    const ratingInput = document.getElementById('rating-new-{{ annuncio.id }}');
-    const commentForm = document.getElementById('comment-form-new-{{ annuncio.id }}');
-    const commentText = document.getElementById('comment-text-new-{{ annuncio.id }}');
-    const commentError = document.getElementById('comment-error-new-{{ annuncio.id }}');
+        const stars = document.querySelectorAll('#star-rating-new-{{ annuncio.id }} .bi-star');
+        const banIcon = document.querySelector('#star-rating-new-{{ annuncio.id }} .bi-slash-circle');
+        const ratingInput = document.getElementById('rating-new-{{ annuncio.id }}');
+        const commentForm = document.getElementById('comment-form-new-{{ annuncio.id }}');
+        const commentText = document.getElementById('comment-text-new-{{ annuncio.id }}');
+        const commentError = document.getElementById('comment-error-new-{{ annuncio.id }}');
 
-    // Reset del rating
-    document.getElementById('rating-new-{{ annuncio.id }}').value = -1;
+        // Reset del rating
+        document.getElementById('rating-new-{{ annuncio.id }}').value = -1;
 
-    // Click sulle stelle
-    stars.forEach(star => {
-        star.addEventListener('click', function() {
-        const value = parseInt(this.getAttribute('data-value'));
-        ratingInput.value = value;
-
-        // Reset di tutte le stelle
-        stars.forEach(s => {
-            s.classList.remove('text-warning', 'bi-star-fill');
-            s.classList.add('text-muted', 'bi-star');
-        });
-
-        // Colora fino alla stella selezionata
-        for (let i = 0; i < value; i++) {
-            stars[i].classList.remove('text-muted', 'bi-star');
-            stars[i].classList.add('text-warning', 'bi-star-fill');
-        }
-
-        // Reset icona di divieto
-        banIcon.classList.remove('text-danger');
-        banIcon.classList.add('text-muted');
-        });
-    });
-
-    // Click sull'icona di divieto
-    banIcon.addEventListener('click', function() {
-        ratingInput.value = 0;
-
-        // Reset di tutte le stelle
+        // Click sulle stelle
         stars.forEach(star => {
-        star.classList.remove('text-warning', 'bi-star-fill');
-        star.classList.add('bi-star', 'text-muted');
-        });
+            star.addEventListener('click', function() {
+            const value = parseInt(this.getAttribute('data-value'));
+            ratingInput.value = value;
 
-        // Evidenzia icona di divieto
-        this.classList.remove('text-muted');
-        this.classList.add('text-danger');
-    });
-
-    // ✏️ Reset dell'errore quando si inizia a scrivere
-    commentText.addEventListener('input', function() {
-        commentError.style.display = 'none';
-    });
-
-    // ✨ CLICK stelle o divieto → nascondi errore
-    [...stars, banIcon].forEach(el => {
-        el.addEventListener('click', function() {
-        commentError.style.display = 'none';
-        });
-    });
-
-    // 📤 AJAX submit con validazione integrata
-    commentForm.addEventListener('submit', function(event) {
-
-        event.preventDefault();
-        const text = commentText.value.trim();
-        const rating = parseInt(ratingInput.value);
-
-        // Validazione client-si
-        
-        if (text === '' && rating < 0) {
-        commentError.textContent = 'Inserisci un commento e seleziona una valutazione.';
-        commentError.style.display = 'block';
-        return;
-        } else if (text === '') {
-        commentError.textContent = 'Inserisci un commento.';
-        commentError.style.display = 'block';
-        return;
-        } else if (rating < 0) {
-        commentError.textContent = 'Seleziona una valutazione.';
-        commentError.style.display = 'block';
-        return;
-        }
-
-        // Se tutto ok, invia con fetch AJAX
-        const formData = new FormData(commentForm);
-
-        fetch(commentForm.action, {
-        method: "POST",
-        body: formData,
-        headers: {
-            "X-CSRFToken": "{{ csrf_token }}",
-            "X-Requested-With": "XMLHttpRequest"
-        },
-        credentials: "same-origin"
-        })
-        .then(response => {
-        if (!response.ok) {
-            throw new Error("Errore nell'invio del commento!");
-        }
-        return response.json();
-        })
-        .then(data => {
-        if (data.status === "success") {
-             // Pulisci il form
-            commentText.value = '';
-            ratingInput.value = -1;
-            stars.forEach(star => {
-                star.classList.remove('text-warning', 'bi-star-fill');
-                star.classList.add('text-muted', 'bi-star');
+            // Reset di tutte le stelle
+            stars.forEach(s => {
+                s.classList.remove('text-warning', 'bi-star-fill');
+                s.classList.add('text-muted', 'bi-star');
             });
+
+            // Colora fino alla stella selezionata
+            for (let i = 0; i < value; i++) {
+                stars[i].classList.remove('text-muted', 'bi-star');
+                stars[i].classList.add('text-warning', 'bi-star-fill');
+            }
+
+            // Reset icona di divieto
             banIcon.classList.remove('text-danger');
             banIcon.classList.add('text-muted');
-            
-            // Ricarica la pagina
-            location.reload();
-        } else {
-            commentError.textContent = data.message || "Errore sconosciuto!";
-            commentError.style.display = 'block';
-        }
-        })
-        .catch(error => {
-        commentError.textContent = error.message;
-        commentError.style.display = 'block';
+            });
         });
-    });
+
+        // Click sull'icona di divieto
+        banIcon.addEventListener('click', function() {
+            ratingInput.value = 0;
+
+            // Reset di tutte le stelle
+            stars.forEach(star => {
+            star.classList.remove('text-warning', 'bi-star-fill');
+            star.classList.add('bi-star', 'text-muted');
+            });
+
+            // Evidenzia icona di divieto
+            this.classList.remove('text-muted');
+            this.classList.add('text-danger');
+        });
+
+        // ✏️ Reset dell'errore quando si inizia a scrivere
+        commentText.addEventListener('input', function() {
+            commentError.style.display = 'none';
+        });
+
+        // ✨ CLICK stelle o divieto → nascondi errore
+        [...stars, banIcon].forEach(el => {
+            el.addEventListener('click', function() {
+            commentError.style.display = 'none';
+            });
+        });
+
+        // 📤 AJAX submit con validazione integrata
+        commentForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const MIN_COMMNT_RATING_VALUE = {{MIN_COMMNT_RATING_VALUE}}
+            const INVALID_COMMNT_RATING_VALUE = {{INVALID_COMMNT_RATING_VALUE}}
+            const text = commentText.value.trim();
+            const rating = parseInt(ratingInput.value);
+
+            // Validazione client-si
+            
+            if (text === '' && rating < MIN_COMMNT_RATING_VALUE) {
+            commentError.textContent = 'Inserisci un commento e seleziona una valutazione.';
+            commentError.style.display = 'block';
+            return;
+            } else if (text === '') {
+            commentError.textContent = 'Inserisci un commento.';
+            commentError.style.display = 'block';
+            return;
+            } else if (rating < MIN_COMMNT_RATING_VALUE) {
+            commentError.textContent = 'Seleziona una valutazione.';
+            commentError.style.display = 'block';
+            return;
+            }
+
+            // Se tutto ok, invia con fetch AJAX
+            const formData = new FormData(commentForm);
+
+            fetch(commentForm.action, {
+            method: "POST",
+            body: formData,
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}",
+                "X-Requested-With": "XMLHttpRequest"
+            },
+            credentials: "same-origin"
+            })
+            .then(response => {
+            if (!response.ok) {
+                throw new Error("Errore nell'invio del commento!");
+            }
+            return response.json();
+            })
+            .then(data => {
+            if (data.status === "success") {
+                // Pulisci il form
+                commentText.value = '';
+                ratingInput.value = INVALID_COMMNT_RATING_VALUE;
+                stars.forEach(star => {
+                    star.classList.remove('text-warning', 'bi-star-fill');
+                    star.classList.add('text-muted', 'bi-star');
+                });
+                banIcon.classList.remove('text-danger');
+                banIcon.classList.add('text-muted');
+                
+                // Ricarica la pagina
+                location.reload();
+            } else {
+                commentError.textContent = data.message || "Errore sconosciuto!";
+                commentError.style.display = 'block';
+            }
+            })
+            .catch(error => {
+            commentError.textContent = error.message;
+            commentError.style.display = 'block';
+            });
+        });
     });
 </script>
 <style>

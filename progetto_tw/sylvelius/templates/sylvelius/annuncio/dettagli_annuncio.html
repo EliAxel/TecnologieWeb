@@ -4,7 +4,7 @@
 {% block sign_in_sign_up %}
     {% include "_btn_toprightbuttons.html" %}
 {% endblock %}
-{% block title %}{{ annuncio.prodotto.nome }}{% endblock %}
+{% block title %}{{ annuncio.prodotto.nome }} - Sylvelius{% endblock %}
 
 {% block middle %}
 {% if request.GET.comment == "notok" %}
@@ -68,62 +68,6 @@
                     <button type="submit" class="btn btn-primary" id="buy-now">Acquista ora</button>
                 </form>
             </div>
-
-            <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    const quantitySelect = document.getElementById('quantity-select-{{ annuncio.id }}');
-                    const quantityInput = document.getElementById('quantity-input-{{ annuncio.id }}');
-                    const amountInput = document.getElementById('amount-input-{{ annuncio.id }}');
-                    const unitPriceElement = document.getElementById('unit-price-{{ annuncio.id }}');
-                    const totalPriceElement = document.getElementById('total-price-{{ annuncio.id }}');
-                    const totalPriceContainer = document.getElementById('total-price-container-{{ annuncio.id }}');
-                    
-                    const originalPrice = parseFloat("{{ annuncio.prodotto.prezzo }}");
-                    
-                    function updatePrices() {
-                        if(quantitySelect.value === ""){
-                            document.getElementById("buy-now").disabled = true;
-                            document.getElementById("cart-btn").disabled = true;
-                            totalPriceContainer.style.display = 'none';
-                            return;
-                        } else {
-                            document.getElementById("buy-now").disabled = false;
-                            document.getElementById("cart-btn").disabled = false;
-                        }
-                        let quantity = parseInt(quantitySelect.value);
-
-                        // Se il valore è invalido o fuori range, correggilo
-                        if (isNaN(quantity) || quantity < 1) {
-                            quantity = 1;
-                        } else if (quantity > {{ annuncio.qta_magazzino }}) {
-                            quantity = {{ annuncio.qta_magazzino }};
-                        }
-
-                        quantitySelect.value = quantity;
-                        quantityInput.value = quantity;
-
-                        const totalPrice = originalPrice * quantity;
-                        amountInput.value = totalPrice.toFixed(2);
-                        totalPriceElement.textContent = totalPrice.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-                        if (quantity === 1) {
-                            totalPriceContainer.style.display = 'none';
-                        } else {
-                            totalPriceContainer.style.display = 'block';
-                        }
-                    }
-
-                    // Aggiorna i prezzi al cambio
-                    quantitySelect.addEventListener('input', updatePrices);
-                    updatePrices();  // Inizializza al caricamento
-                    form.addEventListener('submit', function(e) {
-                        const quantity = parseInt(quantitySelect.value);
-                        quantityInput.value = quantity;
-                        const totalPrice = originalPrice * quantity;
-                        amountInput.value = totalPrice.toFixed(2);
-                    });
-                });
-            </script>
         </div>
 
         <!-- Colonna Destra: Carosello -->
@@ -198,4 +142,61 @@
 </div>
 
 <script src="{% static 'js/imgs_loader.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const MIN_ORDN_QUANTITA_VALUE = {{MIN_ORDN_QUANTITA_VALUE}}
+        const MAX_PROD_PREZZO_DIGITS_DECIMAL = {{MAX_PROD_PREZZO_DIGITS_DECIMAL.1}}
+        const quantitySelect = document.getElementById('quantity-select-{{ annuncio.id }}');
+        const quantityInput = document.getElementById('quantity-input-{{ annuncio.id }}');
+        const amountInput = document.getElementById('amount-input-{{ annuncio.id }}');
+        const unitPriceElement = document.getElementById('unit-price-{{ annuncio.id }}');
+        const totalPriceElement = document.getElementById('total-price-{{ annuncio.id }}');
+        const totalPriceContainer = document.getElementById('total-price-container-{{ annuncio.id }}');
+        
+        const originalPrice = parseFloat("{{ annuncio.prodotto.prezzo }}");
+        
+        function updatePrices() {
+            if(quantitySelect.value === ""){
+                document.getElementById("buy-now").disabled = true;
+                document.getElementById("cart-btn").disabled = true;
+                totalPriceContainer.style.display = 'none';
+                return;
+            } else {
+                document.getElementById("buy-now").disabled = false;
+                document.getElementById("cart-btn").disabled = false;
+            }
+            let quantity = parseInt(quantitySelect.value);
+
+            // Se il valore è invalido o fuori range, correggilo
+            if (isNaN(quantity) || quantity < MIN_ORDN_QUANTITA_VALUE) {
+                quantity = MIN_ORDN_QUANTITA_VALUE;
+            } else if (quantity > {{ annuncio.qta_magazzino }}) {
+                quantity = {{ annuncio.qta_magazzino }};
+            }
+
+            quantitySelect.value = quantity;
+            quantityInput.value = quantity;
+
+            const totalPrice = originalPrice * quantity;
+            amountInput.value = totalPrice.toFixed(MAX_PROD_PREZZO_DIGITS_DECIMAL);
+            totalPriceElement.textContent = totalPrice.toLocaleString('it-IT', { minimumFractionDigits: MAX_PROD_PREZZO_DIGITS_DECIMAL, maximumFractionDigits: MAX_PROD_PREZZO_DIGITS_DECIMAL });
+
+            if (quantity === 1) {
+                totalPriceContainer.style.display = 'none';
+            } else {
+                totalPriceContainer.style.display = 'block';
+            }
+        }
+
+        // Aggiorna i prezzi al cambio
+        quantitySelect.addEventListener('input', updatePrices);
+        updatePrices();  // Inizializza al caricamento
+        form.addEventListener('submit', function(e) {
+            const quantity = parseInt(quantitySelect.value);
+            quantityInput.value = quantity;
+            const totalPrice = originalPrice * quantity;
+            amountInput.value = totalPrice.toFixed(MAX_PROD_PREZZO_DIGITS_DECIMAL);
+        });
+    });
+</script>
 {% endblock %}

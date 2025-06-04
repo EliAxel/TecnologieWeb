@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Registrati{% endblock %}
+{% block title %}Registrati - Sylvelius{% endblock %}
 {% block middle %}
 {% if request.GET.auth == "notok" %}
 <div class="alert alert-danger" role="alert">
@@ -75,10 +75,10 @@
         let errorMsg = "";
 
         // Password security: at least 8 chars, one uppercase, one lowercase, one number
-        const MIN_PWD_CHARS = {{ MIN_PWD_CHARS }};
+        const MIN_PWD_CHARS = {{MIN_PWD_CHARS}};
         const strongPw = new RegExp(`^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{${MIN_PWD_CHARS},}$`);
         if (!strongPw.test(pw1)) {
-            errorMsg = "La password deve contenere almeno {{ MIN_PWD_CHARS }} caratteri, una maiuscola, una minuscola e un numero.";
+            errorMsg = "La password deve contenere almeno {{MIN_PWD_CHARS}} caratteri, una maiuscola, una minuscola e un numero.";
             password1Input.classList.add("is-invalid");
             password2Input.classList.remove("is-invalid");
         } else if (pw1 !== pw2) {
