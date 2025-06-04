@@ -23,7 +23,7 @@
                         <tr>
                             <td>
                                 {% if annuncio.is_published %}
-                                    <a href="{% url 'sylvelius:dettagli_annuncio' annuncio.id %}">
+                                    <a href="{% url 'sylvelius:dettagli_annuncio' annuncio.uuid %}">
                                         {{ annuncio.prodotto.nome|truncatechars:MAX_TRUNCATED_PROFILO_CHARS}}
                                     </a>
                                 {% else %}

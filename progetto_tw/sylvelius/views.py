@@ -52,6 +52,7 @@ from progetto_tw.constants import (
 )
 # Other
 import json
+import uuid
 from PIL import Image
 
 # Create your views here.
@@ -223,8 +224,8 @@ class AnnuncioDetailView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
-        annuncio_id = self.kwargs['pk']
-        annuncio = get_object_or_404(Annuncio, id=annuncio_id, is_published=True)
+        annuncio_uuid = self.kwargs['uuid']
+        annuncio = get_object_or_404(Annuncio, uuid=annuncio_uuid, is_published=True)
         commenti = CommentoAnnuncio.objects.filter(
             annuncio=annuncio
         ).select_related('utente').order_by('-data_pubblicazione')
@@ -358,6 +359,7 @@ class ProfiloCreaAnnuncioPageView(CustomLoginRequiredMixin, View):
             )
         # Creazion dell'annuncio
         annuncio = Annuncio.objects.create(
+            uuid=uuid.uuid4(),
             inserzionista=request.user,
             prodotto=prodotto,
             data_pubblicazione=None,

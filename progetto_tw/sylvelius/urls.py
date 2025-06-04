@@ -17,7 +17,7 @@ urlpatterns = [
     path("account/profilo/annunci/crea/", views.ProfiloCreaAnnuncioPageView.as_view(), name="crea_annuncio"),
     path("account/profilo/annunci/nascondi/<int:id>/", views.toggle_pubblicazione , name="nascondi_annuncio"),
     path("account/profilo/annunci/elimina/<int:id>/", views.delete_pubblicazione, name="elimina_annuncio"),
-    path("annuncio/<int:pk>/", views.AnnuncioDetailView.as_view(), name="dettagli_annuncio"),
+    path("annuncio/<str:uuid>/", views.AnnuncioDetailView.as_view(), name="dettagli_annuncio"),
     path("ricerca/", views.RicercaAnnunciView.as_view(), name="ricerca_annunci"),
     # fbv
     path('check_old_password/', views.check_old_password, name='check_old_password'),

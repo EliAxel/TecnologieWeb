@@ -3,7 +3,7 @@
 {% for annuncio in annunci %}
     <div class="col-md-4 mb-4">
         <div class="card h-100">
-            <a href="{% url 'sylvelius:dettagli_annuncio' annuncio.id %}" class="text-decoration-none text-dark">
+            <a href="{% url 'sylvelius:dettagli_annuncio' annuncio.uuid %}" class="text-decoration-none text-dark">
                 <img
                     data-prodotto-id="{{ annuncio.prodotto.id }}"
                     class="card-img-top immagine-asincrona"
@@ -13,7 +13,7 @@
             </a>
             <div class="card-body">
                 <h5 class="card-title">
-                    <a href="{% url 'sylvelius:dettagli_annuncio' annuncio.id %}" class="text-decoration-none text-dark">
+                    <a href="{% url 'sylvelius:dettagli_annuncio' annuncio.uuid %}" class="text-decoration-none text-dark">
                         <strong>{{ annuncio.prodotto.nome }}</strong>
                     </a>
                 </h5>

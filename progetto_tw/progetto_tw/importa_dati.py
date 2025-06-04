@@ -1,6 +1,7 @@
 import json
 import os
 import django
+import uuid
 from django.contrib.auth.models import User
 from sylvelius.models import Annuncio, CommentoAnnuncio, ImmagineProdotto, Ordine, Tag, Prodotto
 from purchase.models import Invoice
@@ -72,6 +73,7 @@ def init_db():
 
         Annuncio.objects.update_or_create(
             id=i,
+            uuid=uuid.uuid4(),
             inserzionista=inserzionista,
             prodotto=prodotto,
             defaults={
