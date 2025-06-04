@@ -13,8 +13,7 @@ from .models import (
 from purchase.models import Invoice
 
 LAST_PROD_ID=101
-__UNUSED_PROD_ID=1
-__NON_EXISTENT_PROD_ID=1000
+NEXT_PROD_ID=LAST_PROD_ID+1
 
 class AnonUrls(TestCase):
 
@@ -123,7 +122,7 @@ class UrlsWithData(TestCase):
         user = User.objects.create_user(username='testuser', password='Testpass0')
         # Crea il prodotto SENZA i tag
         prodotto = Prodotto.objects.create(
-            id=LAST_PROD_ID+1,
+            id=NEXT_PROD_ID,
             nome="Prodotto di Test",
             descrizione_breve="Breve descrizione del prodotto di test",
             descrizione="Descrizione dettagliata del prodotto di test",
@@ -139,7 +138,9 @@ class UrlsWithData(TestCase):
         # Aggiungi i tag al prodotto
         prodotto.tags.add(tag1, tag2)
 
-        annuncio=Annuncio.objects.create(
+        self.ann_uuid=uuid.uuid4()
+        Annuncio.objects.create(
+            uuid=self.ann_uuid,
             inserzionista=user,
             prodotto=prodotto,
             qta_magazzino=10,
@@ -155,7 +156,7 @@ class UrlsWithData(TestCase):
         self.assertEqual(response.status_code, 405)
     
     def test_annuncio_1(self):
-        response = self.client.get('/annuncio/1/')
+        response = self.client.get(f'/annuncio/{self.ann_uuid}/')
         self.assertEqual(response.status_code, 200)
     
     def test_aggiungi_commento_1(self):
@@ -171,7 +172,7 @@ class UrlsWithData(TestCase):
         self.assertEqual(response.status_code, 405)
     
     def test_api_immagine(self):
-        response = self.client.get('/api/immagine/102/')
+        response = self.client.get(f'/api/immagine/{NEXT_PROD_ID}/')
         self.assertEqual(response.status_code, 200)
 
         data = response.json()
@@ -185,7 +186,7 @@ class UrlsWithData(TestCase):
         self.assertEqual(data['url'],"/static/img/default_product.png")
     
     def test_api_immagini(self):
-        response = self.client.get('/api/immagini/102/')
+        response = self.client.get(f'/api/immagini/{NEXT_PROD_ID}/')
         self.assertEqual(response.status_code, 200)
 
         data = response.json()
@@ -207,7 +208,7 @@ class ModelsTestingStringsCoverage(TestCase):
         self.user = User.objects.create_user(username='testuser', password='Testpass0')
         # Crea il prodotto SENZA i tag
         prodotto = Prodotto.objects.create(
-            id=LAST_PROD_ID+1,
+            id=NEXT_PROD_ID,
             nome="Prodotto di Test",
             descrizione_breve="Breve descrizione del prodotto di test",
             descrizione="Descrizione dettagliata del prodotto di test",
@@ -225,7 +226,7 @@ class ModelsTestingStringsCoverage(TestCase):
         prodotto.tags.add(tag1, tag2)
 
         Annuncio.objects.create(
-            id=LAST_PROD_ID+1,
+            id=NEXT_PROD_ID,
             inserzionista=self.user,
             prodotto=prodotto,
             qta_magazzino=10,
@@ -233,8 +234,8 @@ class ModelsTestingStringsCoverage(TestCase):
         )
 
         CommentoAnnuncio.objects.create(
-            id = LAST_PROD_ID+1,
-            annuncio = Annuncio.objects.get(id=LAST_PROD_ID+1),
+            id = NEXT_PROD_ID,
+            annuncio = Annuncio.objects.get(id=NEXT_PROD_ID),
             utente = self.user,
             testo = "Bello",
             rating = 4
@@ -244,11 +245,11 @@ class ModelsTestingStringsCoverage(TestCase):
             invoice_id=uuid.uuid4(),
             user_id=self.user.id, #type: ignore
             quantita=3,
-            prodotto_id=LAST_PROD_ID+1
+            prodotto_id=NEXT_PROD_ID
         )
 
         Ordine.objects.create(
-            id=LAST_PROD_ID+1,
+            id=NEXT_PROD_ID,
             invoice = invoice.invoice_id,
             utente = User.objects.get(id=invoice.user_id), 
             prodotto = Prodotto.objects.get(id=invoice.prodotto_id),
@@ -258,10 +259,10 @@ class ModelsTestingStringsCoverage(TestCase):
         
     def test_to_string(self):
         self.assertEqual(Tag.objects.get(nome="tag01").__str__(),"tag01")
-        self.assertEqual(Prodotto.objects.get(id=LAST_PROD_ID+1).immagini.first().__str__(),"Immagine di Prodotto di Test") #type: ignore
-        self.assertEqual(Annuncio.objects.get(id=LAST_PROD_ID+1).__str__(),"Prodotto di Test")
-        self.assertEqual(CommentoAnnuncio.objects.get(id=LAST_PROD_ID+1).__str__(),"testuser su Prodotto di Test - 4/5")
-        self.assertEqual(Annuncio.objects.get(id=LAST_PROD_ID+1).rating_medio,4)
-        self.assertEqual(Annuncio.objects.get(id=LAST_PROD_ID+1).rating_count,1)
-        self.assertEqual(Ordine.objects.get(id=LAST_PROD_ID+1).__str__(),"testuser - Prodotto di Test")
-        self.assertEqual(Ordine.objects.get(id=LAST_PROD_ID+1).totale,300.00)
+        self.assertEqual(Prodotto.objects.get(id=NEXT_PROD_ID).immagini.first().__str__(),"Immagine di Prodotto di Test") #type: ignore
+        self.assertEqual(Annuncio.objects.get(id=NEXT_PROD_ID).__str__(),"Prodotto di Test")
+        self.assertEqual(CommentoAnnuncio.objects.get(id=NEXT_PROD_ID).__str__(),"testuser su Prodotto di Test - 4/5")
+        self.assertEqual(Annuncio.objects.get(id=NEXT_PROD_ID).rating_medio,4)
+        self.assertEqual(Annuncio.objects.get(id=NEXT_PROD_ID).rating_count,1)
+        self.assertEqual(Ordine.objects.get(id=NEXT_PROD_ID).__str__(),"testuser - Prodotto di Test")
+        self.assertEqual(Ordine.objects.get(id=NEXT_PROD_ID).totale,300.00)
