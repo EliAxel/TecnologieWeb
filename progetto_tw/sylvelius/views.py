@@ -34,7 +34,9 @@ from .models import (
 from progetto_tw.constants import (
     MAX_UNAME_CHARS,
     MAX_PWD_CHARS,
+    MAX_TAGS_CHARS,
     MAX_TAGS_N_PER_PROD,
+    MAX_IMGS_PER_ANNU_VALUE,
     MAX_PROD_NOME_CHARS,
     MAX_PROD_DESC_BR_CHARS,
     MAX_PROD_DESC_CHARS,
@@ -371,13 +373,22 @@ class ProfiloCreaAnnuncioPageView(CustomLoginRequiredMixin, View):
         tag_names = [t.strip().lower() for t in tag_string.split(',') if t.strip()]
         if(len(tag_names)>MAX_TAGS_N_PER_PROD):
             return render(request, self.template_name, error)
+        
         tag_instances = []
+
+        for nome in tag_names:
+            if (len(nome) > MAX_TAGS_CHARS):
+                return render(request, self.template_name, error)
+            
         for nome in tag_names:
             tag, _ = Tag.objects.get_or_create(nome=nome)
             tag_instances.append(tag)
+            
         annuncio.prodotto.tags.set(tag_instances)
 
         # Salva immagini
+        if(len(immagini) > MAX_IMGS_PER_ANNU_VALUE):
+            return render(request, self.template_name, error)
         for img in immagini:
             try:
                 Image.open(img).verify()  # Verifica se è immagine valida

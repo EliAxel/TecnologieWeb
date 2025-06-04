@@ -7,8 +7,8 @@
 </div>
 {% endif %}
 <div class="container mt-5" style="max-width: 400px;">
-    <div class="card shadow" style="border-color: #7c3aed;">
-        <div class="card-header text-white" style="background-color: #7c3aed;">
+    <div class="card shadow" style="border-color: {{SECONDARY_COLOR}};">
+        <div class="card-header text-white" style="background-color: {{SECONDARY_COLOR}};">
             <h4 class="mb-0">Login</h4>
         </div>
         <div class="card-body">
@@ -24,7 +24,7 @@
                     <input type="password" class="form-control" id="password" name="password" required maxlength="{{MAX_PWD_CHARS}}" style="border-color: #a78bfa;">
                     <div id="password-error" class="invalid-feedback" style="display:none;"></div>
                 </div>
-                <button type="submit" class="btn btn-block text-white" style="background-color: #7c3aed;">Accedi</button>
+                <button type="submit" class="btn btn-block text-white" style="background-color: {{SECONDARY_COLOR}};">Accedi</button>
             </form>
         </div>
     </div>

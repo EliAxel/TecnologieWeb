@@ -57,7 +57,9 @@
 
             <!-- Azioni -->
             <div class="mt-4 mb-4">
-                <button class="btn btn-success d-inline-block" id="cart-btn">Aggiungi al carrello</button>
+                <button class="btn text-white d-inline-block" id="cart-btn" style="background-color:{{SECONDARY_COLOR}};">
+                    <i class="bi bi-cart"></i>
+                    Aggiungi al carrello</button>
                 <form action="{% url 'purchase:fake_purchase' %}" method="post" class="d-inline-block" id="purchase-form-{{ annuncio.id }}">
                     {% csrf_token %}
                     <input type="hidden" name="amount" value="{{ annuncio.prodotto.prezzo }}" id="amount-input-{{ annuncio.id }}">
@@ -65,7 +67,7 @@
                     <input type="hidden" name="product_id" value="{{ annuncio.prodotto.id }}">
                     <input type="hidden" name="quantity" value="{{MIN_ORDN_QUANTITA_VALUE}}" id="quantity-input-{{ annuncio.id }}">
                     <input type="hidden" name="user_id" value="{{ request.user.id }}">
-                    <button type="submit" class="btn btn-primary" id="buy-now">Acquista ora</button>
+                    <button type="submit" class="btn text-white" style="background-color:{{SECONDARY_COLOR}};" id="buy-now">Acquista ora</button>
                 </form>
             </div>
         </div>
@@ -115,9 +117,9 @@
                 <h2 class="text-muted mb-5">Nessuna descrizione</h2>
             {% endif %}
             <div>Categorie:</div>
-            {% if annuncio.prodotto.tags.count > 1 %}
+            {% if annuncio.prodotto.tags.count >= 1 %}
                 {% for tag in annuncio.prodotto.tags.all %}
-                    <span class="badge bg-primary text-white">{{ tag.nome }}</span>
+                    <span class="badge text-white" style="background-color:{{TERTIARY_COLOR}}">{{ tag.nome }}</span>
                 {% endfor %}
             {% else %}
                 <p class="text-muted">Nessuna categoria specificata.</p>

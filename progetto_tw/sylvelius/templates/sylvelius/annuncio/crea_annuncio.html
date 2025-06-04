@@ -10,12 +10,12 @@
 {% endif %}
 {% block sign_in_sign_up %}{% endblock %}
 <div class="container mt-5 mb-5" style="max-width: 700px;">
-    <div class="card shadow">
-        <div class="card-header text-white" style="background-color: #6f42c1;">
+    <div class="card shadow" style="border-color: {{SECONDARY_COLOR}};">
+        <div class="card-header text-white" style="background-color: {{SECONDARY_COLOR}};">
             <h4 class="mb-0">Crea un nuovo annuncio</h4>
         </div>
         <div class="card-body">
-            <form method="post" enctype="multipart/form-data">
+            <form method="post" enctype="multipart/form-data" autocomplete="off">
                 {% csrf_token %}
                 <div class="form-group">
                     <label for="id_nome">Titolo</label>
@@ -65,29 +65,34 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="id_tags_input">Categorie</label>
+                    <label for="id_tags_input">Categorie / Tags</label>
                     <div class="input-group">
                         <input type="text" class="form-control" id="id_tags_input" maxlength="{{MAX_TAGS_CHARS}}" placeholder="Scrivi un tag... (opzionale)" autocomplete="off">
+                        <div class="invalid-feedback"></div>
                         <div id="id_tags_suggestions" class="list-group position-absolute w-100" style="top: 100%; left: 0; display: none; max-height: 200px; overflow-y: auto; z-index: 1200;"></div>
                     </div>
                     <div id="id_tags_selected" class="mt-2" style="min-height: 38px;"></div>
                     <input type="hidden" name="tags" id="id_tags_hidden">
-                    <small class="form-text text-muted">Aggiungi più categorie e clicca sulla “x” per rimuoverli.</small>
+                    <small class="form-text text-muted">Aggiungi più tags e cliccali per rimuoverli. (massimo {{MAX_TAGS_N_PER_PROD}})</small>
                 </div>
 
                 <div class="form-group">
                     <label for="id_immagini">Immagini</label>
                     <input type="file" class="form-control-file" id="id_immagini" name="immagini" multiple accept="image/*">
-                    <small class="form-text text-muted">Puoi caricare più immagini.</small>
+                    <div class="invalid-feedback"></div>
+                    <small class="form-text text-muted">Puoi caricare più immagini. (massimo {{MAX_IMGS_PER_ANNU_VALUE}})</small>
                 </div>
 
-                <button type="submit" id='crea-annuncio-btn'class="btn btn-primary" style="background-color: #6f42c1; border: none; ">Crea Annuncio</button>
+                <button type="submit" id='crea-annuncio-btn'class="btn btn-primary" style="background-color: {{SECONDARY_COLOR}}; border: none; ">Crea Annuncio</button>
             </form>
         </div>
     </div>
 </div>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    window.addEventListener('beforeunload', function() {
+        observer.disconnect(); // Interrompi l'observer
+    });
     const MIN_ORDN_QUANTITA_VALUE = {{MIN_ORDN_QUANTITA_VALUE}}
     const MAX_ANNU_QTA_MAGAZZINO_VALUE = {{MAX_ANNU_QTA_MAGAZZINO_VALUE}}
     const MIN_PROD_PREZZO_VALUE = {{MIN_PROD_PREZZO_VALUE}}
@@ -166,6 +171,24 @@ document.addEventListener('DOMContentLoaded', function () {
         hiddenInputId: 'id_tags_hidden',
         isMulti: true
     });
+    // Dopo setupSuggestions()
+    const tagsContainer = document.getElementById('id_tags_selected');
+
+    // Observer per rilevare aggiunta/rimozione di tag
+    const observer = new MutationObserver(function(mutations) {
+        const error = validateField('tags', document.getElementById('id_tags_input'));
+        if (error) {
+            showError(document.getElementById('id_tags_input'), error);
+        } else {
+            clearError(document.getElementById('id_tags_input'));
+        }
+    });
+
+// Configura l'observer per monitorare aggiunta/rimozione di figli
+observer.observe(tagsContainer, {
+    childList: true,  // Osserva cambiamenti nei figli (tag aggiunti/rimossi)
+    subtree: true     // Monitora anche eventuali sotto-nodi
+});
 
     const form = document.querySelector('form');
     const fields = {
@@ -175,6 +198,7 @@ document.addEventListener('DOMContentLoaded', function () {
         prezzo: document.getElementById('id_prezzo'),
         qta_magazzino: document.getElementById('id_qta_magazzino'),
         condizione: document.getElementById('id_condizione'),
+        tags: document.getElementById('id_tags_input'),
         immagini: document.getElementById('id_immagini')
     };
 
@@ -219,9 +243,26 @@ document.addEventListener('DOMContentLoaded', function () {
             case 'condizione':
                 if (!value || (value !== 'nuovo' && value !== 'usato')) return 'Seleziona la condizione.';
                 break;
+            case 'tags':
+                const selectedTags = document.getElementById('id_tags_selected').querySelectorAll('.badge');
+                const MAX_TAGS = {{ MAX_TAGS_N_PER_PROD }};
+                
+                if (selectedTags.length > MAX_TAGS) {
+                    return `Puoi inserire al massimo ${MAX_TAGS} tag.`;
+                }
+                break;
+                
             case 'immagini':
+                if (input.files.length > 0) {
+                    // Verifica il numero massimo di immagini (es. max 5)
+                    const MAX_IMMAGINI = {{MAX_IMGS_PER_ANNU_VALUE}};
+                    if (input.files.length > MAX_IMMAGINI) {
+                        return `Puoi caricare al massimo ${MAX_IMMAGINI} immagini.`;
+                    }
+                }
                 for (let file of input.files) {
                     if (!file.type.startsWith('image/')) {
+                        creaAnnuncioBtn.disabled = true;
                         return 'Puoi caricare solo file immagine.';
                     }
                 }
@@ -266,4 +307,15 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
+<style>
+    .badge-primary {
+        background-color: {{TERTIARY_COLOR}} !important;
+        color: white !important;
+        border: none !important;
+    }
+    
+    .badge-primary:hover {
+        background-color: {{SECONDARY_COLOR}} !important;
+    }
+</style>
 {% endblock %}
