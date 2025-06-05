@@ -50,7 +50,8 @@ from progetto_tw.constants import (
     MAX_PAGINATOR_ORDINI_VALUE,
     MAX_PAGINATOR_ANNUNCI_VALUE,
     MAX_PAGINATOR_RICERCA_VALUE,
-    MIN_CREA_ANNUNCIO_QTA_VALUE
+    MIN_CREA_ANNUNCIO_QTA_VALUE,
+    PROD_CONDIZIONE_CHOICES_ID
 )
 # Other
 import json
@@ -325,7 +326,7 @@ class ProfiloCreaAnnuncioPageView(CustomLoginRequiredMixin, View):
         qta_magazzino = request.POST.get('qta_magazzino', MIN_CREA_ANNUNCIO_QTA_VALUE)
         condizione = request.POST.get('condizione', 'nuovo')
 
-        if condizione not in ['nuovo', 'usato']:
+        if condizione not in PROD_CONDIZIONE_CHOICES_ID:
             return render(request, self.template_name, error)
 
         # Validazione base
@@ -427,12 +428,9 @@ class RicercaAnnunciView(TemplateView):
                     annunci = annunci.filter(prodotto__tags__nome=tag)
         
 
-        if condizione == 'cond-new':
-            annunci = annunci.filter(prodotto__condizione='nuovo')
-        elif condizione == 'cond-used':
-            annunci = annunci.filter(prodotto__condizione='usato')
-        elif condizione == 'all':
-            pass
+        if condizione in PROD_CONDIZIONE_CHOICES_ID:
+            annunci = annunci.filter(prodotto__condizione=condizione)
+        # Se condizione == 'all' o non valida, non filtrare
             
         if rating:
             try:

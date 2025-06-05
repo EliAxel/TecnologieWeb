@@ -20,10 +20,12 @@ MAX_PROD_DESC_CHARS = 3000
 MIN_PROD_PREZZO_VALUE = 1.00
 MAX_PROD_PREZZO_DIGITS_DECIMAL = (8,2)
 MAX_PROD_PREZZO_VALUE = float('9' * (MAX_PROD_PREZZO_DIGITS_DECIMAL[0] - MAX_PROD_PREZZO_DIGITS_DECIMAL[1]) + '.' + '9' * MAX_PROD_PREZZO_DIGITS_DECIMAL[1])
-PROD_CONDIZIONE_CHOICES = [
-    ('nuovo', 'Nuovo'),
-    ('usato', 'Usato')
+PROD_CONDIZIONE_CHOICES = [ #ONLY ADD NEW ITEMS
+    ("nuovo", "Nuovo"),
+    ("usato", "Usato"),
 ]
+PROD_CONDIZIONE_CHOICES_ID = [id for id, _ in PROD_CONDIZIONE_CHOICES]
+
 
 MIN_ANNU_QTA_MAGAZZINO_VALUE = 0
 MAX_ANNU_QTA_MAGAZZINO_VALUE = 2000000
@@ -38,11 +40,11 @@ RANGE_RAV_RATING_STRING = f"0{RANGE_COMMNT_RATING_STRING}"
 MAX_ORDN_INVOICE_CHARS = 255
 MAX_ANNU_UUID_CHARS = MAX_ORDN_INVOICE_CHARS
 MIN_ORDN_QUANTITA_VALUE = 1
-ORDN_STATO_CONSEGNA_CHOICES = [
-    ('da spedire', 'Da spedire'),
-    ('spedito', 'Spedito'),
-    ('consegnato', 'Consegnato'),
-    ('annullato', 'Annullato')
+ORDN_STATO_CONSEGNA_CHOICES = [ #ONLY ADD NEW ITEMS
+    ("da spedire", "Da spedire"),
+    ("spedito", "Spedito"),
+    ("consegnato", "Consegnato"),
+    ("annullato", "Annullato")
 ]
 
 MAX_PAGINATOR_HOME_VALUE = 21

@@ -58,10 +58,12 @@
 
                 <div class="form-group">
                     <label for="id_condizione">Condizione</label>
-                    <select class="form-control" id="id_condizione" name="condizione" required>
-                        <option value="nuovo" selected>Nuovo</option>
-                        <option value="usato">Usato</option>
+                    <select name="condizione" id="id_condizione" class="form-control" required>
+                        {% for value, label in PROD_CONDIZIONE_CHOICES %}
+                            <option value="{{ value }}">{{ label }}</option>
+                        {% endfor %}
                     </select>
+                    <div class="invalid-feedback"></div>
                 </div>
 
                 <div class="form-group">
@@ -99,6 +101,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const MAX_PROD_PREZZO_VALUE = {{MAX_PROD_PREZZO_VALUE}}
     const MAX_PROD_PREZZO_DIGITS_DECIMAL = {{MAX_PROD_PREZZO_DIGITS_DECIMAL.1}}
     const SYLVELIUS_FEES = {{SYLVELIUS_FEES}}
+    const PROD_CONDIZIONE_CHOICES_ID = {{PROD_CONDIZIONE_CHOICES_ID|safe}}
 
     prezzoVal = document.getElementById("id_prezzo");
     qtaMagazzinoVal = document.getElementById("id_qta_magazzino");
@@ -247,7 +250,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (isNaN(qta) || qta < MIN_ORDN_QUANTITA_VALUE) return 'La quantità deve essere un numero intero positivo maggiore di {{MIN_ORDN_QUANTITA_VALUE}}.';
                 break;
             case 'condizione':
-                if (!value || (value !== 'nuovo' && value !== 'usato')) return 'Seleziona la condizione.';
+                if (!value) return 'Seleziona una condizione fra quelle presenti.';
+                let boole = true;
+                for (let condizione of PROD_CONDIZIONE_CHOICES_ID){
+                    if(value === condizione){
+                        boole = false;
+                    }
+                }
+                if(boole) return 'Seleziona una condizione fra quelle presenti.';
                 break;
             case 'tags':
                 const selectedTags = document.getElementById('id_tags_selected').querySelectorAll('.badge');
