@@ -27,7 +27,7 @@
                         <tr>
                             <td>
                                 {% if ordine.prodotto.annunci.is_published %}
-                                    <a href="{% url 'sylvelius:dettagli_annuncio' ordine.prodotto.annunci.id %}">
+                                    <a href="{% url 'sylvelius:dettagli_annuncio' ordine.prodotto.annunci.uuid %}">
                                         {{ ordine.prodotto.nome|truncatechars:MAX_TRUNCATED_PROFILO_CHARS }}
                                     </a>
                                 {% else %}

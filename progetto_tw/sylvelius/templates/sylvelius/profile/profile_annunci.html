@@ -41,11 +41,11 @@
                             </td>
                             <td>{{ annuncio.data_pubblicazione|date:"d/m/Y H:i" }}</td>
                             <td>
-                                <form {#action="{% url 'sylvelius:modifica_annuncio' annuncio.id %}?page={{ page }}"#} method="post" style="display:inline;">
+                                <form {#action="{% url 'sylvelius:modifica_annuncio' annuncio.id %}?page={{ page }}"#} method="post" style="display:inline;" class="save-scroll-form">
                                     {% csrf_token %}
                                     <button type="submit" class="btn btn-primary btn-sm">Modifica</button>
                                 </form>
-                                <form action="{% url 'sylvelius:nascondi_annuncio' annuncio.id %}?page={{ page }}" method="post" style="display:inline;">
+                                <form action="{% url 'sylvelius:nascondi_annuncio' annuncio.id %}?page={{ page }}" method="post" style="display:inline;" class="save-scroll-form">
                                     {% csrf_token %}
                                     {% if annuncio.is_published %}
                                         <button type="submit" class="btn btn-warning btn-sm" onclick="return confirm('Sei sicuro di voler nascondere questo annuncio? Chiunque abbia ordinato il prodotto avrà comunque il diritto di riceverlo. ');">Nascondi</button>
@@ -53,7 +53,7 @@
                                         <button type="submit" class="btn btn-success btn-sm" >Pubblica</button>
                                     {% endif %}
                                 </form>
-                                <form action="{% url 'sylvelius:elimina_annuncio' annuncio.id %}?page={{ page }}" method="post" style="display:inline;">
+                                <form action="{% url 'sylvelius:elimina_annuncio' annuncio.id %}?page={{ page }}" method="post" style="display:inline;" class="save-scroll-form">
                                     {% csrf_token %}
                                     <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Sei sicuro di voler eliminare questo annuncio? Chiunque abbia ordinato il prodotto avrà comunque il diritto di riceverlo.');">Elimina</button>
                                 </form>
@@ -71,5 +71,22 @@
         </div>
     </div>
 </div>
+<script>
+    // Salva la posizione di scroll prima di inviare il form
+    document.querySelectorAll('.save-scroll-form').forEach(form => {
+        form.addEventListener('submit', () => {
+            sessionStorage.setItem('scrollPosition', window.scrollY);
+        });
+    });
+
+    // Ripristina la posizione di scroll dopo il caricamento
+    window.addEventListener('load', () => {
+        const savedPosition = sessionStorage.getItem('scrollPosition');
+        if (savedPosition) {
+            window.scrollTo(0, savedPosition);
+            sessionStorage.removeItem('scrollPosition');
+        }
+    });
+</script>
 <script src="{% static 'js/img_loader.js' %}"></script>
 {% endblock %}

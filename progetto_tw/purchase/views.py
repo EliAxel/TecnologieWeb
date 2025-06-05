@@ -9,7 +9,8 @@ from django.shortcuts import render
 from django.conf import settings
 from sylvelius.models import (
     Ordine,
-    Prodotto
+    Prodotto,
+    Annuncio
 )
 from .models import Invoice
 from progetto_tw.constants import MIN_ORDN_QUANTITA_VALUE
@@ -144,12 +145,25 @@ def paypal_pcc(request):
             except User.DoesNotExist:
                 return HttpResponse(status=404)
             
+            try:
+                annuncio=Annuncio.objects.get(prodotto=prodotto)
+            except Annuncio.DoesNotExist:
+                return HttpResponse(status=404)
+            
+            if(annuncio.qta_magazzino < quantita):
+                stato="annullato"
+            else:
+                annuncio.qta_magazzino = annuncio.qta_magazzino-quantita
+                annuncio.save()
+                stato="da spedire"
+            
             # Cerchiamo l'ordine completato
             ordine = Ordine.objects.create(
                 utente=user,
                 prodotto=prodotto,
                 quantita=quantita,
                 invoice=invoice,
+                stato_consegna=stato
             )
             ordine.save()
 
