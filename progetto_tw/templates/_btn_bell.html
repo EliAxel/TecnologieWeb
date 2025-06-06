@@ -3,58 +3,174 @@
   <button class="btn position-relative text-white" id="bellDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
     <i class="bi bi-bell" style="font-size: 1.5rem;"></i>
     <span id="notificationBadge" class="badge badge-danger position-absolute"
-          style="top: 10px; right: 10px; border-radius: 50%; width: 12px; height: 12px; padding: 0; z-index: 10; display: {% if unread_count > 0 %}inline{% else %}none{% endif %};">
+          style="top: 10px; right: 10px; border-radius: 50%; width: 18px; height: 18px; padding: 0; z-index: 10; display: none;">
+      <span id="notifCount" style="font-size: 0.75rem;"></span>
     </span>
   </button>
 
-  <div class="dropdown-menu dropdown-menu-right p-2" aria-labelledby="bellDropdown"
-       style="width: 300px; max-height: 400px; overflow-y: auto;" id="notificationMenu">
-    <h6 class="dropdown-header">Avvisi</h6>
+  <!-- Aggiungi questa classe "dropdown-menu-fixed-right" -->
+  <div class="dropdown-menu dropdown-menu-right dropdown-menu-fixed-right p-2" aria-labelledby="bellDropdown"
+       style="max-width: 400px; min-width: 400px; max-height: 800px; overflow-y: auto; z-index: 2000;" id="notificationMenu">
+    <h6 class="dropdown-header">Notifiche</h6>
     <div id="notificationList">
-      {% if notifications %}
-        {% for notif in notifications %}
-          <div class="dropdown-item{% if not notif.read %} font-weight-bold{% endif %}">
-            {{ notif.message }}
-          </div>
-        {% endfor %}
-      {% else %}
-        <span class="dropdown-item text-muted">Nessun avviso</span>
-      {% endif %}
+      <span class="dropdown-item text-muted">Nessuna notifica</span>
     </div>
   </div>
 </div>
+<style>
+.dropdown-menu-fixed-right {
+  position: fixed !important;
+  right: 0 !important;
+  left: auto !important;
+  transform: none !important; /* Rimuove il posizionamento relativo al bottone */
+  top: auto !important; /* Mantiene l'allineamento verticale rispetto al bottone */
+  margin-top: 0.5rem !important; /* Aggiunge un piccolo spazio sotto il bottone */
+}
+</style>
 
 <script>
-  const userId = "{{ request.user.id }}";
-  const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
-  const notificationSocket = new WebSocket(`${wsScheme}://${window.location.host}/ws/notifications/`);
-
-  notificationSocket.onmessage = function(e) {
-    const data = JSON.parse(e.data);
-
-    if (data.type === 'notification') {
-      const notifList = document.getElementById('notificationList');
-      const notifBadge = document.getElementById('notificationBadge');
-
-      const newNotif = document.createElement('div');
-      newNotif.className = "dropdown-item font-weight-bold";
-      newNotif.textContent = data.message;
-      notifList.prepend(newNotif);
-
-      notifBadge.style.display = 'inline';
-    }
-  };
-
-  document.getElementById("bellDropdown").addEventListener("click", () => {
+  document.addEventListener("DOMContentLoaded", () => {
     const notifBadge = document.getElementById('notificationBadge');
-    notifBadge.style.display = 'none';
+    const notifCount = document.getElementById('notifCount');
+    const notifList = document.getElementById('notificationList');
+    let notificationSocket;
+    let unreadCount = 0;
 
-    // (Opzionale) Fai una richiesta per segnare tutte le notifiche come lette
-    fetch("{% url 'mark_notifications_read' %}", {
-      method: 'POST',
-      headers: {
-        'X-CSRFToken': '{{ csrf_token }}'
+    // Funzione per connettersi al WebSocket
+    function connectWebSocket() {
+      const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
+      notificationSocket = new WebSocket(`${wsScheme}://${window.location.host}/ws/notifications/`);
+
+      notificationSocket.onopen = function(e) {
+        console.log("Connessione WebSocket stabilita");
+        // Carica le notifiche iniziali
+        fetchNotifications();
+      };
+
+      notificationSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        console.log("Nuova notifica WebSocket:", data);
+        
+        if (data.type === 'notification') {
+          addNotificationToUI({
+            title: data.title,
+            message: data.message,
+            read: false
+          });
+          updateBadge(++unreadCount);
+        }
+      };
+
+      notificationSocket.onclose = function(e) {
+        console.log("Connessione WebSocket chiusa, riconnessione in 5 secondi...");
+        setTimeout(connectWebSocket, 5000);
+      };
+
+      notificationSocket.onerror = function(err) {
+        console.error("WebSocket error:", err);
+      };
+    }
+
+    // Fetch notifiche iniziali dal server
+    async function fetchNotifications() {
+      try {
+        const response = await fetch('/api/notifications/'); // Sostituisci con il tuo endpoint API
+        const notifications = await response.json();
+        
+        notifList.innerHTML = '';
+        unreadCount = notifications.filter(n => !n.read).length;
+        
+        if (notifications.length === 0) {
+          notifList.innerHTML = '<span class="dropdown-item text-muted">Nessuna notifica</span>';
+        } else {
+          notifications.forEach(notif => {
+            addNotificationToUI(notif);
+          });
+        }
+        
+        updateBadge(unreadCount);
+      } catch (error) {
+        console.error("Errore nel caricamento notifiche:", error);
+        notifList.innerHTML = '<span class="dropdown-item text-danger">Errore nel caricamento</span>';
+      }
+    }
+
+    // Aggiungi notifica all'interfaccia
+    function addNotificationToUI(notif) {
+      if (notifList.firstChild && notifList.firstChild.classList.contains('text-muted')) {
+        notifList.removeChild(notifList.firstChild);
+      }
+      
+      const notifElement = document.createElement('div');
+      notifElement.className = `dropdown-item${notif.read ? '' : ' font-weight-bold'}`;
+      notifElement.style.pointerEvents = 'none'; // Disabilita il clic
+      notifElement.style.cursor = 'default';
+
+      notifElement.style.whiteSpace = 'wrap';
+      notifElement.innerHTML = `<strong>${notif.title}</strong><br>${notif.message}`;
+      
+      // Inserisci in cima alla lista
+      if (notifList.firstChild) {
+        notifList.insertBefore(notifElement, notifList.firstChild);
+      } else {
+        notifList.appendChild(notifElement);
+      }
+    }
+
+    // Aggiorna il badge delle notifiche
+    function updateBadge(count) {
+      if (count > 0) {
+        notifBadge.style.display = 'inline';
+        notifCount.textContent = count;
+      } else {
+        notifBadge.style.display = 'none';
+        notifCount.textContent = '';
+      }
+    }
+
+    // Quando l'utente apre il menu notifiche
+    document.getElementById("bellDropdown").addEventListener("click", async () => {
+      // Segna come lette
+      try {
+        const response = await fetch('/mark_notifications_read/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+          },
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          // Aggiorna UI
+          document.querySelectorAll('#notificationList .dropdown-item').forEach(item => {
+            item.classList.remove('font-weight-bold');
+          });
+          unreadCount = 0;
+          updateBadge(0);
+        }
+      } catch (error) {
+        console.error("Errore nel segnare notifiche come lette:", error);
       }
     });
+
+    // Helper per ottenere i cookie
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+
+    // Inizia la connessione
+    connectWebSocket();
   });
 </script>

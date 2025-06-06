@@ -1,6 +1,5 @@
 <div class="ml-auto d-flex align-items-center">
     {% if user.is_authenticated %}
-        {% include "_btn_bell.html" %}
         <a href="{% url 'sylvelius:profile' %}" class="text-white mr-2 ml-2" id="profileBtn" style="background: none; border: none; font-size: 1.1rem; font-weight: bold; cursor: pointer; text-decoration: none;">{{ user.username }}</a>
         {% include "_btn_logout.html"%}
     {% else %}

@@ -3,7 +3,7 @@ import os
 import django
 import uuid
 from django.contrib.auth.models import User
-from sylvelius.models import Annuncio, CommentoAnnuncio, ImmagineProdotto, Ordine, Tag, Prodotto
+from sylvelius.models import Annuncio, CommentoAnnuncio, ImmagineProdotto, Ordine, Tag, Prodotto, Notification
 from purchase.models import Invoice
 
 # Imposta le variabili d'ambiente per Django
@@ -18,6 +18,7 @@ def delete_db():
     Prodotto.objects.all().exclude(id=1).delete()
     Tag.objects.all().delete()
     Invoice.objects.all().delete()
+    Notification.objects.all().delete()
 
 def init_db():
     with open('static/json/dati.json', 'r', encoding='utf-8') as file:

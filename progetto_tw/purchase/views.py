@@ -12,6 +12,7 @@ from sylvelius.models import (
     Prodotto,
     Annuncio
 )
+from sylvelius.views import create_notification
 from .models import Invoice
 from progetto_tw.constants import MIN_ORDN_QUANTITA_VALUE
 
@@ -151,6 +152,8 @@ def paypal_pcc(request):
                 return HttpResponse(status=404)
             
             if(annuncio.qta_magazzino < quantita):
+                create_notification(recipient=user,title="Acquisto Annullato",
+                                    message=f"Purtroppo l'acquisto non è andato a buon fine, le scorte del prodotto {prodotto.nome} in magazzino sono finite. Le arriverà un rimborso completo il prima possibile.")
                 stato="annullato"
             else:
                 annuncio.qta_magazzino = annuncio.qta_magazzino-quantita
@@ -166,7 +169,7 @@ def paypal_pcc(request):
                 stato_consegna=stato
             )
             ordine.save()
-
+            create_notification(recipient=user,title="Acquisto Confermato!",message=f"L'acquisto di {prodotto.nome} è andato a buon fine!")
             return HttpResponse(status=200)
         return HttpResponse(status=400)
     except Exception as e:

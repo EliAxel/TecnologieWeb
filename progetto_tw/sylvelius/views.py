@@ -29,7 +29,8 @@ from .models import (
     ImmagineProdotto,
     Ordine,
     Tag,
-    Prodotto
+    Prodotto,
+    Notification
 )
 from progetto_tw.constants import (
     MAX_UNAME_CHARS,
@@ -57,8 +58,51 @@ from progetto_tw.constants import (
 import json
 import uuid
 from PIL import Image
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 # Create your views here.
+def send_notification(user_id=None,title="", message="", global_notification=False):
+    channel_layer = get_channel_layer()
+
+    if global_notification:
+        async_to_sync(channel_layer.group_send)( #type: ignore
+            "global", {"type": "send_notification", "title":title, "message": message}
+        )
+    elif user_id:
+        async_to_sync(channel_layer.group_send)( #type: ignore
+            f"user_{user_id}", {"type": "send_notification", "title":title, "message": message}
+        )
+
+from django.views.decorators.http import require_POST
+from django.http import JsonResponse
+
+@require_POST
+def mark_notifications_read(request):
+    Notification.objects.filter(recipient=request.user, read=False).update(read=True)
+    return JsonResponse({'status': 'ok'})
+
+def create_notification(recipient=None, title="", message="", is_global=False, sender=None):
+    # Salva nel database
+    notifica = Notification.objects.create(
+        recipient=recipient,
+        sender=sender,
+        title=title,
+        message=message,
+        is_global=is_global,
+        read=False
+    )
+    
+    # Invia via WebSocket
+    send_notification(
+        user_id=recipient.id if recipient else None,
+        title=title,
+        message=message,
+        global_notification=is_global
+    )
+    
+    return notifica
+
 class HomePageView(TemplateView):
     template_name = "sylvelius/home.html"
 
@@ -114,11 +158,11 @@ class ProfiloPageView(CustomLoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
         utente = self.request.user
         context['user'] = utente
         context['annunci'] = Annuncio.objects.filter(inserzionista=utente).order_by('-data_pubblicazione')
         context['ordini'] = Ordine.objects.filter(utente=utente).order_by('-data_ordine')
-
         # Trova tutti gli utenti che hanno fatto ordini su annunci creati dall'utente corrente
         # e per cui almeno un ordine è "in attesa"
         miei_annunci = Annuncio.objects.filter(inserzionista=utente).values_list('id', flat=True)
@@ -498,7 +542,7 @@ class RicercaAnnunciView(TemplateView):
         context['has_next'] = page_obj.has_next()
         context['has_previous'] = page_obj.has_previous()
         context['request'] = self.request
-
+        
         return context
 
 @require_POST
@@ -509,6 +553,7 @@ def toggle_pubblicazione(request, id):
     annuncio.is_published = not annuncio.is_published
     annuncio.save()
     page = request.GET.get('page', 1)
+
     return redirect(f'{reverse("sylvelius:profile_annunci")}?page={page}&evento=nascondi')
 
 @require_POST
@@ -624,26 +669,5 @@ def elimina_commento(request, commento_id):
     commento.delete()
     return JsonResponse({"status": "success"})
 
-from channels.layers import get_channel_layer
-from asgiref.sync import async_to_sync
 
-def send_notification(user_id=None, message="", global_notification=False):
-    channel_layer = get_channel_layer()
-
-    if global_notification:
-        async_to_sync(channel_layer.group_send)(
-            "global", {"type": "send_notification", "message": message}
-        )
-    elif user_id:
-        async_to_sync(channel_layer.group_send)(
-            f"user_{user_id}", {"type": "send_notification", "message": message}
-        )
-
-from django.views.decorators.http import require_POST
-from django.http import JsonResponse
-
-@require_POST
-def mark_notifications_read(request):
-    Notification.objects.filter(user=request.user, read=False).update(read=True)
-    return JsonResponse({'status': 'ok'})
 

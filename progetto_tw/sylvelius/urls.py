@@ -1,6 +1,6 @@
 from django.urls import path, re_path
 from . import views
-from .api_views import get_immagine_prodotto, get_immagini_prodotto
+from .api_views import get_immagine_prodotto, get_immagini_prodotto, notifications_api
 
 app_name = "sylvelius"
 
@@ -26,7 +26,9 @@ urlpatterns = [
     path("aggiungi_commento/<int:annuncio_id>/", views.aggiungi_commento, name="aggiungi_commento"),
     path("modifica_commento/<int:commento_id>/", views.modifica_commento, name="modifica_commento"),
     path("elimina_commento/<int:commento_id>/", views.elimina_commento, name="elimina_commento"),
+    path('mark_notifications_read/', views.mark_notifications_read, name='mark_notifications_read'),
     # async
     path('api/immagine/<int:prodotto_id>/', get_immagine_prodotto),
     path('api/immagini/<int:prodotto_id>/', get_immagini_prodotto),
+    path('api/notifications/', notifications_api, name='notifications_api'),
 ]
