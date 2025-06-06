@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html>        
 <head>
     {% load static %}
     <meta charset="utf-8">
@@ -18,12 +18,20 @@
     
     {% block head %}{% endblock %}
     {% block nav_color %}
-    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: {{PRIMARY_COLOR}};">
+    {% if 'moderatori' in user.groups.values_list|join:',' %}
+        <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: {{ADMIN_PRIMARY_COLOR}};">
+    {% else %}
+        <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: {{PRIMARY_COLOR}};">
+    {% endif %}
     {% endblock %}
         <div class="container-fluid">
             <!-- Logo (sempre allineato a sinistra) -->
             <a class="navbar-brand text-white d-flex align-items-center mr-auto" href="{% url 'sylvelius:home' %}" style="font-family: 'Copperplate', 'Copperplate Gothic Light', fantasy; font-size: 1.1rem; font-weight: bold;">
-                <img src="{% static 'img/splash_art.png' %}" width="105" height="30" class="d-inline-block align-top mr-2" alt="Favicon">
+                <img src="{% if 'moderatori' in user.groups.values_list|join:',' %}
+    {% static 'img/splash_art_admin.png' %}
+{% else %}
+    {% static 'img/splash_art.png' %}
+{% endif %}" width="105" height="30" class="d-inline-block align-top mr-2" alt="Favicon">
             </a>
 
             <!-- Pulsanti Login/Signup (a destra su desktop, accanto al logo su mobile) -->
@@ -39,11 +47,19 @@
                 <form id="search-form" class="form-inline d-flex justify-content-center w-100" method="get" style="max-width: 800px; width: 100%;">
                     <div class="input-group w-100 position-relative">
                         <div class="input-group-prepend">
-                            <button class="btn btn-outline-light mr-1 rounded-left" type="button" id="advanced-search-toggle">Ricerca avanzata</button>
+                            <button class="btn {% if 'moderatori' in user.groups.values_list|join:',' %}
+    btn-outline-dark
+{% else %}
+    btn-outline-light
+{% endif %} mr-1 rounded-left" type="button" id="advanced-search-toggle">Ricerca avanzata</button>
                         </div>
                         <input id="search-input" class="form-control" type="search" placeholder="Cerca..." aria-label="Cerca" name="q" autocomplete="off">
                         <div class="input-group-append">
-                            <button class="btn btn-outline-light ml-1 rounded-right " type="submit">
+                            <button class="btn btn-outline-light{% if 'moderatori' in user.groups.values_list|join:',' %}
+    btn-outline-dark
+{% else %}
+    btn-outline-light
+{% endif %} ml-1 rounded-right" type="submit">
                                 <i class="bi bi-search"></i>
                             </button>
                         </div>
@@ -153,13 +169,20 @@
     </script>
     <script src="{% static 'js/base.js' %}"></script>
 
-    
 {% block footer_color %}
-<footer class="footer fixed-bottom py-2" style="background-color: {{PRIMARY_COLOR}}; line-height: 1; height: 36px;">
+{% if 'moderatori' in user.groups.values_list|join:',' %}
+    <footer class="footer fixed-bottom py-2" style="background-color: {{ADMIN_PRIMARY_COLOR}}; line-height: 1; height: 36px;">
+{% else %}
+    <footer class="footer fixed-bottom py-2" style="background-color: {{PRIMARY_COLOR}}; line-height: 1; height: 36px;">
+{% endif %}
 {% endblock %}
     <center>
         <div class="container text-center p-0 m-0">
-            <span class="text-white" style="font-size: 0.95rem;">© 2025 Sylvelius. Tutti i diritti riservati.</span>
+            <span class="{% if 'moderatori' in user.groups.values_list|join:',' %}
+    
+{% else %}
+    text-white
+{% endif %}" style="font-size: 0.95rem;">© 2025 Sylvelius. Tutti i diritti riservati.</span>
         </div>
     </center>
 </footer>

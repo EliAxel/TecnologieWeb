@@ -4,7 +4,7 @@ from django.contrib.auth import update_session_auth_hash, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm, PasswordChangeForm
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.contrib.auth.views import LoginView, LogoutView
 from django.core.paginator import Paginator
 from django.db.models import Q
@@ -134,6 +134,18 @@ class RegistrazionePageView(CreateView):
     form_class = CustomUserCreationForm
     template_name = "sylvelius/register.html"
 
+    def form_valid(self, form):
+        response = super().form_valid(form)
+
+        # Aggiungi l'utente appena creato al gruppo "utenti"
+        try:
+            group = Group.objects.get(name="utenti")
+            self.object.groups.add(group) #type: ignore
+        except Group.DoesNotExist:
+            pass  # Puoi loggare o creare il gruppo se non esiste
+
+        return response
+    
     def form_invalid(self, form):
         return HttpResponseRedirect(reverse('sylvelius:register') + '?auth=notok')
     

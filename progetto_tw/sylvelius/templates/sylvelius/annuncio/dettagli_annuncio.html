@@ -53,12 +53,24 @@
             <p class="text-muted">Disponibilità: {{ annuncio.qta_magazzino }} unità</p>
 
             <!-- Selezione quantità -->
+             {% if 'moderatori' in user.groups.values_list|join:',' %}
+            <div class="mt-4 mb-4">
+                <button class="btn d-inline-block" style="background-color:{{ADMIN_SECONDARY_COLOR}};">
+                    Cancella annuncio</button>
+                <form method="post" class="d-inline-block">
+                    {% csrf_token %}
+                    <button type="submit" class="btn" style="background-color:{{ADMIN_SECONDARY_COLOR}};" id="buy-now">
+                        Espelli utente</button>
+                </form>
+            </div>   
+            {% else %}
             <div class="form-group d-flex justify-content-center align-items-center mt-3 mb-3">
                 <label class="mr-3" for="quantity-select-{{ annuncio.id }}">Quantità:</label>
                 <input type="number" class="form-control w-auto" size="7" id="quantity-select-{{ annuncio.id }}" required max="{{ annuncio.qta_magazzino }}" name="qta_magazzino" min="{{MIN_ORDN_QUANTITA_VALUE}}" step="1" value="{{MIN_ORDN_QUANTITA_VALUE}}">
             </div>
 
             <!-- Azioni -->
+            
             <div class="mt-4 mb-4">
                 <button class="btn text-white d-inline-block" id="cart-btn" style="background-color:{{SECONDARY_COLOR}};">
                     <i class="bi bi-cart"></i>
@@ -73,6 +85,7 @@
                     <button type="submit" class="btn text-white" style="background-color:{{SECONDARY_COLOR}};" id="buy-now">Acquista ora</button>
                 </form>
             </div>
+            {% endif %}
         </div>
 
         <!-- Colonna Destra: Carosello -->

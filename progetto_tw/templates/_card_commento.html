@@ -19,8 +19,9 @@
             {% endfor %}
           </div>
           <small class="text-muted">{{ commento.data_pubblicazione|date:"d/m/Y" }}</small>
-
-          {% if commento.utente == request.user %}
+          {% if 'moderatori' in user.groups.values_list|join:',' %}
+            <small id="cancella-commento-{{ commento.id }}" data-comment-id="{{ commento.id }}" class="ml-2 text-warning" style="cursor: pointer;">Elimina</small>
+          {% elif commento.utente == request.user %}
             <small id="modifica-commento-{{ commento.id }}" data-comment-id="{{ commento.id }}" class="ml-2 text-muted" style="cursor: pointer;">Modifica</small>
             <small id="cancella-commento-{{ commento.id }}" data-comment-id="{{ commento.id }}" class="ml-2 text-danger" style="cursor: pointer;">Elimina</small>
 
