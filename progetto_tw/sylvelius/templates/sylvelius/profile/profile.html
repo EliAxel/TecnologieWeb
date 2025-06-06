@@ -126,5 +126,13 @@
     border-radius: 4px;
 }
 </style>
+{% if request.GET.evento == 'profile_edit'%}
+    <script src="{% static 'js/toast.js' %}"></script>
+    <script>
+        showBootstrapAlertWithIcon(
+            "Modifica account completata con successo!","good"
+        );
+    </script>
+{% endif %}
 <script src="{% static 'js/img_loader.js' %}"></script>
 {% endblock %}

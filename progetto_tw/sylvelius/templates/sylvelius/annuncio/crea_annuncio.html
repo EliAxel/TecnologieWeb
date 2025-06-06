@@ -3,10 +3,75 @@
 {% block title %}Crea Annuncio - Sylvelius{% endblock %}
 
 {% block middle %}
-{% if notok == '1' %}
-<div class="alert alert-danger" role="alert">
-    Si è verificato un errore durante la creazione dell'annuncio. Per favore, riprova.
-</div>
+{% if notok %}
+    <script src="{% static 'js/toast.js' %}"></script>
+    {% if notok ==  "cond" %}
+    <script>
+        showBootstrapAlertWithIcon(
+            "Condizioni incorrette","warning"
+        );
+    </script>
+    {% elif notok ==  "noval" %}
+    <script>
+        showBootstrapAlertWithIcon(
+            "Nome, descrizione breve o prezzo mancanti","warning"
+        );
+    </script>
+    {% elif notok ==  "lentxt" %}
+    <script>
+        showBootstrapAlertWithIcon(
+            "Nome, descrizione breve o descrizione troppo lunghi","warning"
+        );
+    </script>
+    {% elif notok ==  "prerr" %}
+    <script>
+        showBootstrapAlertWithIcon(
+            "Prezzo invalido","warning"
+        );
+    </script>
+    {% elif notok ==  "price" %}
+    <script>
+        showBootstrapAlertWithIcon(
+            "Prezzo fuori dai limiti","warning"
+        );
+    </script>
+    {% elif notok ==  "qtaerr" %}
+    <script>
+        showBootstrapAlertWithIcon(
+            "Quantità invalida","warning"
+        );
+    </script>
+    {% elif notok ==  "qta" %}
+    <script>
+        showBootstrapAlertWithIcon(
+            "Quantità fuori dai limiti","warning"
+        );
+    </script>
+    {% elif notok ==  "tagn" %}
+    <script>
+        showBootstrapAlertWithIcon(
+            "Troppi tag","warning"
+        );
+    </script>
+    {% elif notok ==  "tagchar" %}
+    <script>
+        showBootstrapAlertWithIcon(
+            "Uno o più tag troppo lunghi","warning"
+        );
+    </script>
+    {% elif notok ==  "imgn" %}
+    <script>
+        showBootstrapAlertWithIcon(
+            "Troppe immagini","warning"
+        );
+    </script>
+    {% elif notok ==  "imgtype" %}
+    <script>
+        showBootstrapAlertWithIcon(
+            "Trovati file non in formati immagine","warning"
+        );
+    </script>
+    {% endif %}
 {% endif %}
 {% block sign_in_sign_up %}{% endblock %}
 <div class="container mt-5 mb-5" style="max-width: 700px;">

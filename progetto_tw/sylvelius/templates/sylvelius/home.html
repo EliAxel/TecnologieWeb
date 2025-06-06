@@ -4,6 +4,20 @@
     {% include "_btn_toprightbuttons.html" %}
 {% endblock %}
 {% block middle %}
+<script src="{% static 'js/toast.js' %}"></script>
+{% if request.GET.evento == 'logout'%}
+    <script>
+        showBootstrapAlertWithIcon(
+            "Logout completato con successo!","good"
+        );
+    </script>
+{% elif request.GET.evento == 'crea_annuncio' %}
+    <script>
+        showBootstrapAlertWithIcon(
+            "Annuncio creato con successo!","good"
+        );
+    </script>
+{% endif %}
 <div class="container mt-5 mb-5">
     <div class="row justify-content-center">
         <div class="col-md-12 text-center">

@@ -36,11 +36,13 @@
                 <form id="search-form" class="form-inline d-flex justify-content-center w-100" method="get" style="max-width: 800px; width: 100%;">
                     <div class="input-group w-100 position-relative">
                         <div class="input-group-prepend">
-                            <button class="btn btn-outline-light mr-1" type="button" id="advanced-search-toggle">Ricerca avanzata</button>
+                            <button class="btn btn-outline-light mr-1 rounded-left" type="button" id="advanced-search-toggle" style="width: 143px;">Ricerca avanzata</button>
                         </div>
                         <input id="search-input" class="form-control" type="search" placeholder="Cerca..." aria-label="Cerca" name="q" autocomplete="off">
                         <div class="input-group-append">
-                            <button class="btn btn-light ml-1" type="submit" >Cerca</button>
+                            <button class="btn btn-outline-light ml-1 rounded-right " type="submit">
+                                <i class="bi bi-search"></i>
+                            </button>
                         </div>
                         <div id="search-suggestions" class="list-group position-absolute w-100" style="top: 100%; left: 0; display: none; max-height: 250px; overflow-y: auto; z-index: 1200;"></div>
                     </div>
@@ -132,6 +134,7 @@
         };
     </script>
     <script src="{% static 'js/suggestions.js' %}"></script>
+    
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         setupSuggestions({
@@ -142,9 +145,12 @@
             isMulti: true,
             containerId: 'category-tags'
         });
+        // Esempio di utilizzo
     });
     </script>
     <script src="{% static 'js/base.js' %}"></script>
+
+    
 {% block footer_color %}
 <footer class="footer fixed-bottom py-2" style="background-color: {{PRIMARY_COLOR}}; line-height: 1; height: 36px;">
 {% endblock %}

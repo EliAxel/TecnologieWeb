@@ -1,20 +1,25 @@
 {% extends "base.html" %}
-
+{% load static %}
 {% block title %}Elimina Account - Sylvelius{% endblock %}
 {% block nav_color %}
     <nav class="navbar navbar-expand-lg navbar-dark bg-danger">
 {% endblock %}
 {% block middle %}
 {% if err %}
+    <script src="{% static 'js/toast.js' %}"></script>
     {% if err == "shipd" %}
-        <div class="alert alert-danger" role="alert">
-            Sono presenti ordini di vendita ancora in fase di spedizione.
-        </div>
+        <script>
+            showBootstrapAlertWithIcon(
+                "Sono presenti ordini di vendita ancora in fase di spedizione.","warning"
+            );
+        </script>
     {% endif %}
     {% if err == "ship" %}
-        <div class="alert alert-danger" role="alert">
-            Sono presenti ordini d'acquisto da spedire o spediti.
-        </div>
+        <script>
+            showBootstrapAlertWithIcon(
+                "Sono presenti ordini d'acquisto da spedire o spediti.","warning"
+            );
+        </script>
     {% endif %}
 {% endif %}
 <div class="container mt-5">

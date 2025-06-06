@@ -40,6 +40,7 @@ def init_db():
                 'nome': prodotto_data['nome'],
                 'descrizione_breve': prodotto_data.get('descrizione_breve', ''),
                 'prezzo': prodotto_data['prezzo'],
+                'condizione' : prodotto_data['condizione']
             }
         )
 

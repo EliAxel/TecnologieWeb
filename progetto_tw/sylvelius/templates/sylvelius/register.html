@@ -1,10 +1,14 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Registrati - Sylvelius{% endblock %}
 {% block middle %}
 {% if request.GET.auth == "notok" %}
-<div class="alert alert-danger" role="alert">
-    Si è verificato un errore durante la registrazione. Per favore, riprova.
-</div>
+<script src="{% static 'js/toast.js' %}"></script>
+<script>
+    showBootstrapAlertWithIcon(
+        "Si è verificato un errore durante la registrazione. Per favore, riprova.","bad"
+    );
+</script>
 {% endif %}
 <div class="container mt-5" style="max-width: 400px;">
     <div class="card shadow" style="border-color: {{SECONDARY_COLOR}};">

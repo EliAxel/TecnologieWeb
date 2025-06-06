@@ -3,6 +3,20 @@
 {% block main_header %}{% endblock %}
 {% block title %}Profilo - Sylvelius{% endblock %}
 {% block middle %}
+<script src="{% static 'js/toast.js' %}"></script>
+{% if request.GET.evento == "nascondi" %}
+<script>
+    showBootstrapAlertWithIcon(
+        "","good"
+    );
+</script>
+{% elif request.GET.evento == "elimina" %}
+<script>
+    showBootstrapAlertWithIcon(
+        "Annuncio eliminato con successo!","good"
+    );
+</script>
+{% endif %}
 <div class="container-fluid mt-5 mb-5">
     <div class="row justify-content-center">
         <div class="col-md-10">

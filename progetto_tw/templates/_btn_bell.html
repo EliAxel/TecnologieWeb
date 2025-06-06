@@ -1,0 +1,60 @@
+<!-- _btn_bell.html -->
+<div class="dropdown" id="notificationDropdown">
+  <button class="btn position-relative text-white" id="bellDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    <i class="bi bi-bell" style="font-size: 1.5rem;"></i>
+    <span id="notificationBadge" class="badge badge-danger position-absolute"
+          style="top: 10px; right: 10px; border-radius: 50%; width: 12px; height: 12px; padding: 0; z-index: 10; display: {% if unread_count > 0 %}inline{% else %}none{% endif %};">
+    </span>
+  </button>
+
+  <div class="dropdown-menu dropdown-menu-right p-2" aria-labelledby="bellDropdown"
+       style="width: 300px; max-height: 400px; overflow-y: auto;" id="notificationMenu">
+    <h6 class="dropdown-header">Avvisi</h6>
+    <div id="notificationList">
+      {% if notifications %}
+        {% for notif in notifications %}
+          <div class="dropdown-item{% if not notif.read %} font-weight-bold{% endif %}">
+            {{ notif.message }}
+          </div>
+        {% endfor %}
+      {% else %}
+        <span class="dropdown-item text-muted">Nessun avviso</span>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+  const userId = "{{ request.user.id }}";
+  const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
+  const notificationSocket = new WebSocket(`${wsScheme}://${window.location.host}/ws/notifications/`);
+
+  notificationSocket.onmessage = function(e) {
+    const data = JSON.parse(e.data);
+
+    if (data.type === 'notification') {
+      const notifList = document.getElementById('notificationList');
+      const notifBadge = document.getElementById('notificationBadge');
+
+      const newNotif = document.createElement('div');
+      newNotif.className = "dropdown-item font-weight-bold";
+      newNotif.textContent = data.message;
+      notifList.prepend(newNotif);
+
+      notifBadge.style.display = 'inline';
+    }
+  };
+
+  document.getElementById("bellDropdown").addEventListener("click", () => {
+    const notifBadge = document.getElementById('notificationBadge');
+    notifBadge.style.display = 'none';
+
+    // (Opzionale) Fai una richiesta per segnare tutte le notifiche come lette
+    fetch("{% url 'mark_notifications_read' %}", {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': '{{ csrf_token }}'
+      }
+    });
+  });
+</script>

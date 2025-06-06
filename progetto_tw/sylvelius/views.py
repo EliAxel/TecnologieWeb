@@ -100,7 +100,8 @@ class LoginPageView(LoginView):
     template_name = "sylvelius/login.html"
 
 class LogoutPageView(LogoutView):
-    next_page = reverse_lazy('sylvelius:home')
+    def get_success_url(self):
+        return reverse('sylvelius:home') + '?evento=logout'
 
 class CustomLoginRequiredMixin(LoginRequiredMixin):
     def get_login_url(self):
@@ -184,7 +185,7 @@ class ProfiloEditPageView(CustomLoginRequiredMixin, View):
 
         if password_change_form_valid:
             update_session_auth_hash(request, request.user)
-            return redirect('sylvelius:profile')
+            return redirect(f'{reverse("sylvelius:profile")}?evento=profile_edit')
         else:
             return render(request, self.template_name, {'pwd': 'bad'})
 
@@ -315,8 +316,6 @@ class ProfiloCreaAnnuncioPageView(CustomLoginRequiredMixin, View):
         return render(request, self.template_name)
 
     def post(self, request):
-        error = {'notok': '1'}
-
         nome = request.POST.get('nome').strip()
         descrizione = request.POST.get('descrizione', '')
         descrizione_breve = request.POST.get('descrizione_breve').strip()
@@ -327,31 +326,31 @@ class ProfiloCreaAnnuncioPageView(CustomLoginRequiredMixin, View):
         condizione = request.POST.get('condizione', 'nuovo')
 
         if condizione not in PROD_CONDIZIONE_CHOICES_ID:
-            return render(request, self.template_name, error)
+            return render(request, self.template_name, {'notok': 'cond'})
 
         # Validazione base
         if not nome or not descrizione_breve or not prezzo:
-            return render(request, self.template_name, error)
+            return render(request, self.template_name, {'notok': 'noval'})
         
         if (len(nome) > MAX_PROD_NOME_CHARS or
             len(descrizione_breve) > MAX_PROD_DESC_BR_CHARS or
             len(descrizione) > MAX_PROD_DESC_CHARS):
-            return render(request, self.template_name, error)
+            return render(request, self.template_name, {'notok': 'lentxt'})
         
         try:
             prezzo = float(prezzo)
         except ValueError:
-            return render(request, self.template_name, error)
+            return render(request, self.template_name, {'notok': 'prerr'})
         
         if prezzo < MIN_PROD_PREZZO_VALUE or prezzo > MAX_PROD_PREZZO_VALUE:
-            return render(request, self.template_name, error)
+            return render(request, self.template_name, {'notok': 'price'})
         
         try:
             qta_magazzino = int(qta_magazzino)
         except ValueError:
-            return render(request, self.template_name, error)
+            return render(request, self.template_name, {'notok': 'qtaerr'})
         if qta_magazzino < MIN_CREA_ANNUNCIO_QTA_VALUE or qta_magazzino > MAX_ANNU_QTA_MAGAZZINO_VALUE:
-            return render(request, self.template_name, error)
+            return render(request, self.template_name, {'notok': 'qta'})
 
         prodotto=Prodotto.objects.create(
                 nome=nome,
@@ -373,13 +372,13 @@ class ProfiloCreaAnnuncioPageView(CustomLoginRequiredMixin, View):
         # Gestione dei tag (split manuale)
         tag_names = [t.strip().lower() for t in tag_string.split(',') if t.strip()]
         if(len(tag_names)>MAX_TAGS_N_PER_PROD):
-            return render(request, self.template_name, error)
+            return render(request, self.template_name, {'notok': 'tagn'})
         
         tag_instances = []
 
         for nome in tag_names:
             if (len(nome) > MAX_TAGS_CHARS):
-                return render(request, self.template_name, error)
+                return render(request, self.template_name, {'notok': 'tagchar'})
             
         for nome in tag_names:
             tag, _ = Tag.objects.get_or_create(nome=nome)
@@ -389,15 +388,15 @@ class ProfiloCreaAnnuncioPageView(CustomLoginRequiredMixin, View):
 
         # Salva immagini
         if(len(immagini) > MAX_IMGS_PER_ANNU_VALUE):
-            return render(request, self.template_name, error)
+            return render(request, self.template_name, {'notok': 'imgn'})
         for img in immagini:
             try:
                 Image.open(img).verify()  # Verifica se è immagine valida
             except Exception:
-                return render(request, self.template_name, error)
+                return render(request, self.template_name, {'notok': 'imgtype'})
             ImmagineProdotto.objects.create(prodotto=prodotto, immagine=img)
 
-        return redirect('sylvelius:home')
+        return redirect(f'{reverse("sylvelius:home")}?evento=crea_annuncio')
 
 class RicercaAnnunciView(TemplateView):
     template_name = "sylvelius/ricerca.html"
@@ -510,7 +509,7 @@ def toggle_pubblicazione(request, id):
     annuncio.is_published = not annuncio.is_published
     annuncio.save()
     page = request.GET.get('page', 1)
-    return redirect(f'{reverse("sylvelius:profile_annunci")}?page={page}')
+    return redirect(f'{reverse("sylvelius:profile_annunci")}?page={page}&evento=nascondi')
 
 @require_POST
 @login_required
@@ -519,7 +518,7 @@ def delete_pubblicazione(request, id):
     annuncio.delete()
     
     page = request.POST.get('page', 1)
-    return redirect(f'{reverse("sylvelius:profile_annunci")}?page={page}')
+    return redirect(f'{reverse("sylvelius:profile_annunci")}?page={page}&evento=elimina')
 
 @require_POST
 @login_required
@@ -624,3 +623,27 @@ def elimina_commento(request, commento_id):
     commento = get_object_or_404(CommentoAnnuncio, id=commento_id, utente=request.user)
     commento.delete()
     return JsonResponse({"status": "success"})
+
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+
+def send_notification(user_id=None, message="", global_notification=False):
+    channel_layer = get_channel_layer()
+
+    if global_notification:
+        async_to_sync(channel_layer.group_send)(
+            "global", {"type": "send_notification", "message": message}
+        )
+    elif user_id:
+        async_to_sync(channel_layer.group_send)(
+            f"user_{user_id}", {"type": "send_notification", "message": message}
+        )
+
+from django.views.decorators.http import require_POST
+from django.http import JsonResponse
+
+@require_POST
+def mark_notifications_read(request):
+    Notification.objects.filter(user=request.user, read=False).update(read=True)
+    return JsonResponse({'status': 'ok'})
+

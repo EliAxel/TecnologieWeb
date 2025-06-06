@@ -47,6 +47,7 @@
       "nome": "Scarpe da corsa",
       "descrizione_breve": "Scarpe leggere e traspiranti.",
       "prezzo": "59.90",
+      "condizione": "usato",
       "immagini": [
         {
           "id": 2,
@@ -60,6 +61,7 @@
       "nome": "Bicicletta da montagna",
       "descrizione_breve": "Bicicletta con telaio in alluminio e 21 velocità.",
       "prezzo": "299.99",
+      "condizione": "nuovo",
       "immagini": [
         {
           "id": 3,
@@ -73,6 +75,7 @@
       "nome": "Racchetta da tennis",
       "descrizione_breve": "Racchetta leggera per principianti.",
       "prezzo": "49.50",
+      "condizione": "nuovo",
       "immagini": [
         {
           "id": 4,
@@ -86,6 +89,7 @@
       "nome": "Tappetino yoga",
       "descrizione_breve": "Tappetino antiscivolo, ideale per yoga e pilates.",
       "prezzo": "25.00",
+      "condizione": "usato",
       "immagini": [
         {
           "id": 5,
@@ -99,6 +103,7 @@
       "nome": "Set di pesi",
       "descrizione_breve": "Set di pesi regolabili da 5 a 20 kg.",
       "prezzo": "89.99",
+      "condizione": "nuovo",
       "immagini": [
         {
           "id": 6,
@@ -112,6 +117,7 @@
       "nome": "Casco da bici",
       "descrizione_breve": "Casco leggero e sicuro per ciclisti.",
       "prezzo": "34.99",
+      "condizione": "usato",
       "immagini": [
         {
           "id": 7,
@@ -125,6 +131,7 @@
       "nome": "Guanti da boxe",
       "descrizione_breve": "Guanti professionali per allenamento.",
       "prezzo": "45.00",
+      "condizione": "nuovo",
       "immagini": [
         {
           "id": 8,
@@ -138,6 +145,7 @@
       "nome": "Corda per saltare",
       "descrizione_breve": "Corda regolabile per allenamento cardio.",
       "prezzo": "12.50",
+      "condizione": "usato",
       "immagini": [
         {
           "id": 9,
@@ -151,6 +159,7 @@
       "nome": "Zaino da trekking",
       "descrizione_breve": "Zaino ergonomico 30L per escursioni.",
       "prezzo": "49.99",
+      "condizione": "nuovo",
       "immagini": [
         {
           "id": 10,
@@ -164,6 +173,7 @@
       "nome": "Occhialini da nuoto",
       "descrizione_breve": "Occhialini antiappannamento per piscina.",
       "prezzo": "15.99",
+      "condizione": "usato",
       "immagini": [
         {
           "id": 11,
@@ -177,6 +187,7 @@
       "nome": "Borraccia termica",
       "descrizione_breve": "Borraccia da 750ml che mantiene la temperatura.",
       "prezzo": "18.50",
+      "condizione": "nuovo",
       "immagini": [
         {
           "id": 12,
@@ -190,6 +201,7 @@
       "nome": "Tappeto elastico",
       "descrizione_breve": "Mini trampolino per allenamento domestico.",
       "prezzo": "79.99",
+      "condizione": "usato",
       "immagini": [
         {
           "id": 13,
@@ -203,6 +215,7 @@
       "nome": "Palla medica",
       "descrizione_breve": "Palla da 5kg per esercizi funzionali.",
       "prezzo": "29.99",
+      "condizione": "nuovo",
       "immagini": [
         {
           "id": 14,
@@ -216,6 +229,7 @@
       "nome": "Bande elastiche",
       "descrizione_breve": "Set di 5 bande con diversi livelli di resistenza.",
       "prezzo": "22.99",
+      "condizione": "usato",
       "immagini": [
         {
           "id": 15,
@@ -229,6 +243,7 @@
       "nome": "Smartwatch sportivo",
       "descrizione_breve": "Smartwatch con GPS e monitoraggio attività.",
       "prezzo": "129.99",
+      "condizione": "nuovo",
       "immagini": [
         {
           "id": 16,
@@ -242,6 +257,7 @@
       "nome": "Pattini in linea",
       "descrizione_breve": "Pattini regolabili per adulti e ragazzi.",
       "prezzo": "89.99",
+      "condizione": "usato",
       "immagini": [
         {
           "id": 17,
@@ -255,6 +271,7 @@
       "nome": "Giubbotto zavorrato",
       "descrizione_breve": "Giubbotto regolabile fino a 20kg.",
       "prezzo": "59.99",
+      "condizione": "nuovo",
       "immagini": [
         {
           "id": 18,
@@ -268,6 +285,7 @@
       "nome": "Bastoni da trekking",
       "descrizione_breve": "Bastoni telescopici in alluminio.",
       "prezzo": "39.99",
+      "condizione": "usato",
       "immagini": [
         {
           "id": 19,
@@ -281,6 +299,7 @@
       "nome": "Sacco da boxe",
       "descrizione_breve": "Sacco da boxe da appendere, 50kg.",
       "prezzo": "69.99",
+      "condizione": "nuovo",
       "immagini": [
         {
           "id": 20,
@@ -294,6 +313,7 @@
       "nome": "Fascia per capelli sportiva",
       "descrizione_breve": "Fascia assorbente per allenamenti intensi.",
       "prezzo": "8.99",
+      "condizione": "usato",
       "immagini": [
         {
           "id": 21,
@@ -307,6 +327,7 @@
       "nome": "Pedometro digitale",
       "descrizione_breve": "Contapassi preciso con display LCD.",
       "prezzo": "14.99",
+      "condizione": "nuovo",
       "immagini": [
         {
           "id": 22,
@@ -320,6 +341,7 @@
       "nome": "Tappeto per addominali",
       "descrizione_breve": "Tappeto spesso per esercizi a terra.",
       "prezzo": "19.99",
+      "condizione": "usato",
       "immagini": [
         {
           "id": 23,
@@ -333,6 +355,7 @@
       "nome": "Disco volante",
       "descrizione_breve": "Disco per giochi all'aperto.",
       "prezzo": "9.99",
+      "condizione": "nuovo",
       "immagini": [
         {
           "id": 24,
@@ -346,6 +369,7 @@
       "nome": "Set badminton",
       "descrizione_breve": "Racchette e volano per giocare a badminton.",
       "prezzo": "24.99",
+      "condizione": "usato",
       "immagini": [
         {
           "id": 25,
@@ -359,6 +383,7 @@
       "nome": "Palla da basket",
       "descrizione_breve": "Palla da basket ufficiale misura 7.",
       "prezzo": "29.99",
+      "condizione": "nuovo",
       "immagini": [
         {
           "id": 26,
@@ -372,6 +397,7 @@
       "nome": "Palla da pallavolo",
       "descrizione_breve": "Palla ufficiale per pallavolo.",
       "prezzo": "27.50",
+      "condizione": "usato",
       "immagini": [
         {
           "id": 27,
@@ -385,6 +411,7 @@
       "nome": "Borsa sportiva",
       "descrizione_breve": "Borsa capiente per attrezzatura sportiva.",
       "prezzo": "34.99",
+      "condizione": "nuovo",
       "immagini": [
         {
           "id": 28,
@@ -398,6 +425,7 @@
       "nome": "Tappeto da palestra",
       "descrizione_breve": "Tappeto antiscivolo per esercizi.",
       "prezzo": "42.99",
+      "condizione": "usato",
       "immagini": [
         {
           "id": 29,
@@ -411,6 +439,7 @@
       "nome": "Panca pieghevole",
       "descrizione_breve": "Panca regolabile per allenamento a casa.",
       "prezzo": "79.99",
+      "condizione": "nuovo",
       "immagini": [
         {
           "id": 30,
@@ -424,6 +453,7 @@
       "nome": "Set golf per principianti",
       "descrizione_breve": "Mazze e palline per iniziare a giocare a golf.",
       "prezzo": "99.99",
+      "condizione": "usato",
       "immagini": [
         {
           "id": 31,
@@ -437,6 +467,7 @@
       "nome": "Roller per schiena",
       "descrizione_breve": "Massaggiatore per rilassare i muscoli.",
       "prezzo": "19.99",
+      "condizione": "nuovo",
       "immagini": [
         {
           "id": 32,
@@ -450,6 +481,7 @@
       "nome": "Bilancia pesapersone",
       "descrizione_breve": "Bilancia digitale precisa fino a 180kg.",
       "prezzo": "24.99",
+      "condizione": "usato",
       "immagini": [
         {
           "id": 33,
@@ -463,6 +495,7 @@
       "nome": "Set ping pong",
       "descrizione_breve": "Racchette, palline e rete per ping pong.",
       "prezzo": "39.99",
+      "condizione": "nuovo",
       "immagini": [
         {
           "id": 34,
@@ -476,6 +509,7 @@
       "nome": "Palla da rugby",
       "descrizione_breve": "Palla ufficiale per partite di rugby.",
       "prezzo": "34.99",
+      "condizione": "usato",
       "immagini": [
         {
           "id": 35,
@@ -489,6 +523,7 @@
       "nome": "Bicicletta stazionaria",
       "descrizione_breve": "Bicicletta per allenamento indoor.",
       "prezzo": "199.99",
+      "condizione": "nuovo",
       "immagini": [
         {
           "id": 36,
@@ -502,6 +537,7 @@
       "nome": "Tapis roulant pieghevole",
       "descrizione_breve": "Tapis roulant compatto per casa.",
       "prezzo": "349.99",
+      "condizione": "usato",
       "immagini": [
         {
           "id": 37,
@@ -515,6 +551,7 @@
       "nome": "Ellittica domestica",
       "descrizione_breve": "Attrezzo per allenamento cardio completo.",
       "prezzo": "279.99",
+      "condizione": "nuovo",
       "immagini": [
         {
           "id": 38,
@@ -528,6 +565,7 @@
       "nome": "Palla da pilates",
       "descrizione_breve": "Palla grande per esercizi di equilibrio.",
       "prezzo": "22.99",
+      "condizione": "usato",
       "immagini": [
         {
           "id": 39,
@@ -541,6 +579,7 @@
       "nome": "Set hockey su prato",
       "descrizione_breve": "Mazze e pallina per hockey su prato.",
       "prezzo": "49.99",
+      "condizione": "nuovo",
       "immagini": [
         {
           "id": 40,
@@ -554,6 +593,7 @@
       "nome": "Gilet termico",
       "descrizione_breve": "Gilet per correre con temperature fredde.",
       "prezzo": "39.99",
+      "condizione": "usato",
       "immagini": [
         {
           "id": 41,
@@ -567,6 +607,7 @@
       "nome": "Pantaloni da running",
       "descrizione_breve": "Pantaloni traspiranti per correre.",
       "prezzo": "29.99",
+      "condizione": "nuovo",
       "immagini": [
         {
           "id": 42,
@@ -580,6 +621,7 @@
       "nome": "Maglia termica",
       "descrizione_breve": "Maglia a maniche lunghe per sport invernali.",
       "prezzo": "24.99",
+      "condizione": "usato",
       "immagini": [
         {
           "id": 43,
@@ -593,6 +635,7 @@
       "nome": "Calze tecniche running",
       "descrizione_breve": "Calze con supporto per arco plantare.",
       "prezzo": "12.99",
+      "condizione": "nuovo",
       "immagini": [
         {
           "id": 44,
@@ -606,6 +649,7 @@
       "nome": "Braccialetto fitness",
       "descrizione_breve": "Braccialetto che monitora passi e calorie.",
       "prezzo": "19.99",
+      "condizione": "usato",
       "immagini": [
         {
           "id": 45,
@@ -619,6 +663,7 @@
       "nome": "Bilancino da cucina",
       "descrizione_breve": "Bilancia digitale per alimenti.",
       "prezzo": "14.99",
+      "condizione": "nuovo",
       "immagini": [
         {
           "id": 46,
@@ -632,6 +677,7 @@
       "nome": "Frullatore sportivo",
       "descrizione_breve": "Frullatore portatile per proteine.",
       "prezzo": "29.99",
+      "condizione": "usato",
       "immagini": [
         {
           "id": 47,
@@ -645,6 +691,7 @@
       "nome": "Shaker proteico",
       "descrizione_breve": "Shaker con misurino incluso.",
       "prezzo": "9.99",
+      "condizione": "nuovo",
       "immagini": [
         {
           "id": 48,
@@ -658,6 +705,7 @@
       "nome": "Cintura per idratazione",
       "descrizione_breve": "Cintura con borracce per running.",
       "prezzo": "24.99",
+      "condizione": "usato",
       "immagini": [
         {
           "id": 49,
@@ -671,6 +719,7 @@
       "nome": "Orologio impermeabile",
       "descrizione_breve": "Orologio sportivo resistente all'acqua.",
       "prezzo": "34.99",
+      "condizione": "nuovo",
       "immagini": [
         {
           "id": 50,
@@ -684,6 +733,7 @@
       "nome": "Mascherina sportiva",
       "descrizione_breve": "Mascherina traspirante per allenamenti.",
       "prezzo": "12.99",
+      "condizione": "usato",
       "immagini": [
         {
           "id": 51,
@@ -697,6 +747,7 @@
       "nome": "Paracadute per speed training",
       "descrizione_breve": "Paracadute per aumentare resistenza nella corsa.",
       "prezzo": "39.99",
+      "condizione": "nuovo",
       "immagini": [
         {
           "id": 52,
@@ -710,6 +761,7 @@
       "nome": "Manubri regolabili",
       "descrizione_breve": "Manubri da 5kg a 20kg con sistema rapido.",
       "prezzo": "89.99",
+      "condizione": "usato",
       "immagini": [
         {
           "id": 53,
@@ -723,6 +775,7 @@
       "nome": "Scala per agilità",
       "descrizione_breve": "Scala per allenamento pliometrico.",
       "prezzo": "24.99",
+      "condizione": "nuovo",
       "immagini": [
         {
           "id": 54,
@@ -736,6 +789,7 @@
       "nome": "Palla da baseball",
       "descrizione_breve": "Palla ufficiale da baseball.",
       "prezzo": "14.99",
+      "condizione": "usato",
       "immagini": [
         {
           "id": 55,
@@ -749,6 +803,7 @@
       "nome": "Guanti da golf",
       "descrizione_breve": "Guanti in pelle per migliorare la presa.",
       "prezzo": "19.99",
+      "condizione": "nuovo",
       "immagini": [
         {
           "id": 56,
@@ -762,6 +817,7 @@
       "nome": "Tenda da campeggio",
       "descrizione_breve": "Tenda 2 posti per escursioni.",
       "prezzo": "79.99",
+      "condizione": "usato",
       "immagini": [
         {
           "id": 57,
@@ -775,6 +831,7 @@
       "nome": "Sacco a pelo",
       "descrizione_breve": "Sacco a pelo leggero per temperature fino a 10°C.",
       "prezzo": "49.99",
+      "condizione": "nuovo",
       "immagini": [
         {
           "id": 58,
@@ -788,6 +845,7 @@
       "nome": "Kit pronto soccorso",
       "descrizione_breve": "Kit compatto per escursioni.",
       "prezzo": "29.99",
+      "condizione": "usato",
       "immagini": [
         {
           "id": 59,
@@ -801,6 +859,7 @@
       "nome": "Lampada frontale",
       "descrizione_breve": "Lampada LED ricaricabile per escursioni notturne.",
       "prezzo": "34.99",
+      "condizione": "nuovo",
       "immagini": [
         {
           "id": 60,
@@ -814,6 +873,7 @@
       "nome": "Scarponi da trekking",
       "descrizione_breve": "Scarponi impermeabili per sentieri difficili.",
       "prezzo": "119.99",
+      "condizione": "usato",
       "immagini": [
         {
           "id": 61,
@@ -827,6 +887,7 @@
       "nome": "Bussola digitale",
       "descrizione_breve": "Bussola con altimetro e barometro.",
       "prezzo": "44.99",
+      "condizione": "nuovo",
       "immagini": [
         {
           "id": 62,
@@ -840,6 +901,7 @@
       "nome": "Materassino gonfiabile",
       "descrizione_breve": "Materassino ultra leggero per campeggio.",
       "prezzo": "39.99",
+      "condizione": "usato",
       "immagini": [
         {
           "id": 63,
@@ -853,6 +915,7 @@
       "nome": "Coltello multiuso",
       "descrizione_breve": "Coltello con 12 funzioni per escursioni.",
       "prezzo": "24.99",
+      "condizione": "nuovo",
       "immagini": [
         {
           "id": 64,
@@ -866,6 +929,7 @@
       "nome": "Binocolo compatto",
       "descrizione_breve": "Binocolo 8x25 per osservazioni.",
       "prezzo": "59.99",
+      "condizione": "usato",
       "immagini": [
         {
           "id": 65,
@@ -879,6 +943,7 @@
       "nome": "Set pesca portatile",
       "descrizione_breve": "Canna pieghevole e accessori per pesca.",
       "prezzo": "49.99",
+      "condizione": "nuovo",
       "immagini": [
         {
           "id": 66,
@@ -892,6 +957,7 @@
       "nome": "Kayak gonfiabile",
       "descrizione_breve": "Kayak per 1 persona, facile da trasportare.",
       "prezzo": "249.99",
+      "condizione": "usato",
       "immagini": [
         {
           "id": 67,
@@ -905,6 +971,7 @@
       "nome": "Giacca antivento",
       "descrizione_breve": "Giacca leggera e impermeabile.",
       "prezzo": "59.99",
+      "condizione": "nuovo",
       "immagini": [
         {
           "id": 68,
@@ -918,6 +985,7 @@
       "nome": "Pantaloni impermeabili",
       "descrizione_breve": "Pantaloni per pioggia e vento.",
       "prezzo": "45.99",
+      "condizione": "nuovo",
       "immagini": [
         {
           "id": 69,
@@ -931,6 +999,7 @@
       "nome": "Scarpe da arrampicata",
       "descrizione_breve": "Scarpe aderenti per arrampicata su roccia.",
       "prezzo": "89.99",
+      "condizione": "usato",
       "immagini": [
         {
           "id": 70,
@@ -944,6 +1013,7 @@
       "nome": "Imbracatura da arrampicata",
       "descrizione_breve": "Imbracatura regolabile per adulti.",
       "prezzo": "69.99",
+      "condizione": "nuovo",
       "immagini": [
         {
           "id": 71,
@@ -957,6 +1027,7 @@
       "nome": "Moschettoni da arrampicata",
       "descrizione_breve": "Set di 5 moschettoni resistenti.",
       "prezzo": "29.99",
+      "condizione": "usato",
       "immagini": [
         {
           "id": 72,
@@ -970,6 +1041,7 @@
       "nome": "Corda da arrampicata",
       "descrizione_breve": "Corda dinamica 40m per arrampicata.",
       "prezzo": "129.99",
+      "condizione": "nuovo",
       "immagini": [
         {
           "id": 73,
@@ -983,6 +1055,7 @@
       "nome": "Set snorkeling",
       "descrizione_breve": "Maschera, boccaglio e pinne per snorkeling.",
       "prezzo": "39.99",
+      "condizione": "nuovo",
       "immagini": [
         {
           "id": 74,
@@ -992,344 +1065,369 @@
       "tag": ["snorkeling", "acqua", "accessori"]
     },
     {
-    "id": 75,
-    "nome": "Muta subacquea",
-    "descrizione_breve": "Muta in neoprene 3mm per immersioni.",
-    "prezzo": "89.99",
-    "immagini": [
-      {
-        "id": 75,
-        "immagine": "/prodotti/immagini/muta_subacquea.jpg"
-      }
-    ],
-    "tag": ["subacquea", "acqua", "abbigliamento"]
-  },
-  {
-    "id": 76,
-    "nome": "Pinne subacquee",
-    "descrizione_breve": "Pinne regolabili per immersioni.",
-    "prezzo": "49.99",
-    "immagini": [
-      {
-        "id": 76,
-        "immagine": "/prodotti/immagini/pinne_subacquee.jpg"
-      }
-    ],
-    "tag": ["subacquea", "acqua", "accessori"]
-  },
-  {
-    "id": 77,
-    "nome": "Borsa termica subacquea",
-    "descrizione_breve": "Borsa per mantenere l'attrezzatura al caldo.",
-    "prezzo": "34.99",
-    "immagini": [
-      {
-        "id": 77,
-        "immagine": "/prodotti/immagini/borsa_termica_subacquea.jpg"
-      }
-    ],
-    "tag": ["subacquea", "acqua", "accessori"]
-  },
-  {
-    "id": 78,
-    "nome": "Girovita per pesi",
-    "descrizione_breve": "Cintura con pesi per immersioni.",
-    "prezzo": "29.99",
-    "immagini": [
-      {
-        "id": 78,
-        "immagine": "/prodotti/immagini/girovita_per_pesi.jpg"
-      }
-    ],
-    "tag": ["subacquea", "acqua", "accessori"]
-  },
-  {
-    "id": 79,
-    "nome": "Torcia subacquea",
-    "descrizione_breve": "Torcia LED resistente all'acqua fino a 100m.",
-    "prezzo": "59.99",
-    "immagini": [
-      {
-        "id": 79,
-        "immagine": "/prodotti/immagini/torcia_subacquea.jpg"
-      }
-    ],
-    "tag": ["subacquea", "acqua", "accessori"]
-  },
-  {
-    "id": 80,
-    "nome": "Bussola subacquea",
-    "descrizione_breve": "Bussola resistente all'acqua per immersioni.",
-    "prezzo": "39.99",
-    "immagini": [
-      {
-        "id": 80,
-        "immagine": "/prodotti/immagini/bussola_subacquea.jpg"
-      }
-    ],
-    "tag": ["subacquea", "acqua", "accessori"]
-  },
-  {
-    "id": 81,
-    "nome": "Tavola da surf",
-    "descrizione_breve": "Tavola da surf in schiuma per principianti.",
-    "prezzo": "199.99",
-    "immagini": [
-      {
-        "id": 81,
-        "immagine": "/prodotti/immagini/tavola_da_surf.jpg"
-      }
-    ],
-    "tag": ["surf", "acqua", "sport"]
-  },
-  {
-    "id": 82,
-    "nome": "Paddleboard gonfiabile",
-    "descrizione_breve": "Paddleboard con pagaia inclusa.",
-    "prezzo": "349.99",
-    "immagini": [
-      {
-        "id": 82,
-        "immagine": "/prodotti/immagini/paddleboard_gonfiabile.jpg"
-      }
-    ],
-    "tag": ["paddleboard", "acqua", "sport"]
-  },
-  {
-    "id": 83,
-    "nome": "Muta da surf",
-    "descrizione_breve": "Muta in neoprene 2mm per surf.",
-    "prezzo": "79.99",
-    "immagini": [
-      {
-        "id": 83,
-        "immagine": "/prodotti/immagini/muta_da_surf.jpg"
-      }
-    ],
-    "tag": ["surf", "acqua", "abbigliamento"]
-  },
-  {
-    "id": 84,
-    "nome": "Casco da kayak",
-    "descrizione_breve": "Casco protettivo per sport acquatici.",
-    "prezzo": "49.99",
-    "immagini": [
-      {
-        "id": 84,
-        "immagine": "/prodotti/immagini/casco_da_kayak.jpg"
-      }
-    ],
-    "tag": ["kayak", "acqua", "sicurezza"]
-  },
-  {
-    "id": 85,
-    "nome": "Giubbotto di salvataggio",
-    "descrizione_breve": "Giubbotto galleggiante per adulti.",
-    "prezzo": "39.99",
-    "immagini": [
-      {
-        "id": 85,
-        "immagine": "/prodotti/immagini/giubbotto_di_salvataggio.jpg"
-      }
-    ],
-    "tag": ["acqua", "sicurezza", "accessori"]
-  },
-  {
-    "id": 86,
-    "nome": "Pagaia da kayak",
-    "descrizione_breve": "Pagaia regolabile in alluminio.",
-    "prezzo": "59.99",
-    "immagini": [
-      {
-        "id": 86,
-        "immagine": "/prodotti/immagini/pagaia_da_kayak.jpg"
-      }
-    ],
-    "tag": ["kayak", "acqua", "accessori"]
-  },
-  {
-    "id": 87,
-    "nome": "Borsa impermeabile",
-    "descrizione_breve": "Borsa 20L resistente all'acqua.",
-    "prezzo": "29.99",
-    "immagini": [
-      {
-        "id": 87,
-        "immagine": "/prodotti/immagini/borsa_impermeabile.jpg"
-      }
-    ],
-    "tag": ["acqua", "accessori", "borsa"]
-  },
-  {
-    "id": 88,
-    "nome": "Telo da spiaggia",
-    "descrizione_breve": "Telo grande e resistente all'acqua.",
-    "prezzo": "19.99",
-    "immagini": [
-      {
-        "id": 88,
-        "immagine": "/prodotti/immagini/telo_da_spiaggia.jpg"
-      }
-    ],
-    "tag": ["spiaggia", "accessori", "outdoor"]
-  },
-  {
-    "id": 89,
-    "nome": "Ombrellone da spiaggia",
-    "descrizione_breve": "Ombrellone resistente al vento.",
-    "prezzo": "49.99",
-    "immagini": [
-      {
-        "id": 89,
-        "immagine": "/prodotti/immagini/ombrellone_da_spiaggia.jpg"
-      }
-    ],
-    "tag": ["spiaggia", "outdoor", "accessori"]
-  },
-  {
-    "id": 90,
-    "nome": "Sedia da spiaggia",
-    "descrizione_breve": "Sedia pieghevole per spiaggia.",
-    "prezzo": "24.99",
-    "immagini": [
-      {
-        "id": 90,
-        "immagine": "/prodotti/immagini/sedia_da_spiaggia.jpg"
-      }
-    ],
-    "tag": ["spiaggia", "outdoor", "accessori"]
-  },
-  {
-    "id": 91,
-    "nome": "Cooler portatile",
-    "descrizione_breve": "Cooler 15L per picnic e spiaggia.",
-    "prezzo": "34.99",
-    "immagini": [
-      {
-        "id": 91,
-        "immagine": "/prodotti/immagini/cooler_portatile.jpg"
-      }
-    ],
-    "tag": ["spiaggia", "outdoor", "accessori"]
-  },
-  {
-    "id": 92,
-    "nome": "Set beach tennis",
-    "descrizione_breve": "Racchette e palline per beach tennis.",
-    "prezzo": "29.99",
-    "immagini": [
-      {
-        "id": 92,
-        "immagine": "/prodotti/immagini/set_beach_tennis.jpg"
-      }
-    ],
-    "tag": ["beach tennis", "spiaggia", "outdoor"]
-  },
-  {
-    "id": 93,
-    "nome": "Palla da waterpolo",
-    "descrizione_breve": "Palla ufficiale per waterpolo.",
-    "prezzo": "24.99",
-    "immagini": [
-      {
-        "id": 93,
-        "immagine": "/prodotti/immagini/palla_da_waterpolo.jpg"
-      }
-    ],
-    "tag": ["waterpolo", "acqua", "pallone"]
-  },
-  {
-    "id": 94,
-    "nome": "Costume da bagno sportivo",
-    "descrizione_breve": "Costume per nuoto agonistico.",
-    "prezzo": "39.99",
-    "immagini": [
-      {
-        "id": 94,
-        "immagine": "/prodotti/immagini/costume_da_bagno_sportivo.jpg"
-      }
-    ],
-    "tag": ["nuoto", "acqua", "abbigliamento"]
-  },
-  {
-    "id": 95,
-    "nome": "Tappeto da palestra in gomma",
-    "descrizione_breve": "Tappeto antiscivolo per pesi.",
-    "prezzo": "44.99",
-    "immagini": [
-      {
-        "id": 95,
-        "immagine": "/prodotti/immagini/tappeto_da_palestra_in_gomma.jpg"
-      }
-    ],
-    "tag": ["fitness", "indoor", "tappeto"]
-  },
-  {
-    "id": 96,
-    "nome": "Barra per trazioni",
-    "descrizione_breve": "Barra da montare in porta.",
-    "prezzo": "29.99",
-    "immagini": [
-      {
-        "id": 96,
-        "immagine": "/prodotti/immagini/barra_per_trazioni.jpg"
-      }
-    ],
-    "tag": ["fitness", "indoor", "accessori"]
-  },
-  {
-    "id": 97,
-    "nome": "Anelli da ginnastica",
-    "descrizione_breve": "Anelli regolabili per allenamento.",
-    "prezzo": "39.99",
-    "immagini": [
-      {
-        "id": 97,
-        "immagine": "/prodotti/immagini/anelli_da_ginnastica.jpg"
-      }
-    ],
-    "tag": ["fitness", "indoor", "accessori"]
-  },
-  {
-    "id": 98,
-    "nome": "Kettlebell 12kg",
-    "descrizione_breve": "Kettlebell in ghisa per allenamento.",
-    "prezzo": "34.99",
-    "immagini": [
-      {
-        "id": 98,
-        "immagine": "/prodotti/immagini/kettlebell_12kg.jpg"
-      }
-    ],
-    "tag": ["fitness", "indoor", "pesi"]
-  },
-  {
-    "id": 99,
-    "nome": "Panca per addominali",
-    "descrizione_breve": "Panca inclinabile per esercizi.",
-    "prezzo": "59.99",
-    "immagini": [
-      {
-        "id": 99,
-        "immagine": "/prodotti/immagini/panca_per_addominali.jpg"
-      }
-    ],
-    "tag": ["fitness", "indoor", "panca"]
-  },
-  {
-    "id": 100,
-    "nome": "Cavo per esercizi",
-    "descrizione_breve": "Cavo con maniglie per allenamento.",
-    "prezzo": "24.99",
-    "immagini": [
-      {
-        "id": 100,
-        "immagine": "/prodotti/immagini/cavo_per_esercizi.jpg"
-      }
-    ],
-    "tag": ["fitness", "indoor", "accessori"]
-}
-
+      "id": 75,
+      "nome": "Muta subacquea",
+      "descrizione_breve": "Muta in neoprene 3mm per immersioni.",
+      "prezzo": "89.99",
+      "condizione": "usato",
+      "immagini": [
+        {
+          "id": 75,
+          "immagine": "/prodotti/immagini/muta_subacquea.jpg"
+        }
+      ],
+      "tag": ["subacquea", "acqua", "abbigliamento"]
+    },
+    {
+      "id": 76,
+      "nome": "Pinne subacquee",
+      "descrizione_breve": "Pinne regolabili per immersioni.",
+      "prezzo": "49.99",
+      "condizione": "nuovo",
+      "immagini": [
+        {
+          "id": 76,
+          "immagine": "/prodotti/immagini/pinne_subacquee.jpg"
+        }
+      ],
+      "tag": ["subacquea", "acqua", "accessori"]
+    },
+    {
+      "id": 77,
+      "nome": "Borsa termica subacquea",
+      "descrizione_breve": "Borsa per mantenere l'attrezzatura al caldo.",
+      "prezzo": "34.99",
+      "condizione": "usato",
+      "immagini": [
+        {
+          "id": 77,
+          "immagine": "/prodotti/immagini/borsa_termica_subacquea.jpg"
+        }
+      ],
+      "tag": ["subacquea", "acqua", "accessori"]
+    },
+    {
+      "id": 78,
+      "nome": "Girovita per pesi",
+      "descrizione_breve": "Cintura con pesi per immersioni.",
+      "prezzo": "29.99",
+      "condizione": "nuovo",
+      "immagini": [
+        {
+          "id": 78,
+          "immagine": "/prodotti/immagini/girovita_per_pesi.jpg"
+        }
+      ],
+      "tag": ["subacquea", "acqua", "accessori"]
+    },
+    {
+      "id": 79,
+      "nome": "Torcia subacquea",
+      "descrizione_breve": "Torcia LED resistente all'acqua fino a 100m.",
+      "prezzo": "59.99",
+      "condizione": "usato",
+      "immagini": [
+        {
+          "id": 79,
+          "immagine": "/prodotti/immagini/torcia_subacquea.jpg"
+        }
+      ],
+      "tag": ["subacquea", "acqua", "accessori"]
+    },
+    {
+      "id": 80,
+      "nome": "Bussola subacquea",
+      "descrizione_breve": "Bussola resistente all'acqua per immersioni.",
+      "prezzo": "39.99",
+      "condizione": "nuovo",
+      "immagini": [
+        {
+          "id": 80,
+          "immagine": "/prodotti/immagini/bussola_subacquea.jpg"
+        }
+      ],
+      "tag": ["subacquea", "acqua", "accessori"]
+    },
+    {
+      "id": 81,
+      "nome": "Tavola da surf",
+      "descrizione_breve": "Tavola da surf in schiuma per principianti.",
+      "prezzo": "199.99",
+      "condizione": "usato",
+      "immagini": [
+        {
+          "id": 81,
+          "immagine": "/prodotti/immagini/tavola_da_surf.jpg"
+        }
+      ],
+      "tag": ["surf", "acqua", "sport"]
+    },
+    {
+      "id": 82,
+      "nome": "Paddleboard gonfiabile",
+      "descrizione_breve": "Paddleboard con pagaia inclusa.",
+      "prezzo": "349.99",
+      "condizione": "nuovo",
+      "immagini": [
+        {
+          "id": 82,
+          "immagine": "/prodotti/immagini/paddleboard_gonfiabile.jpg"
+        }
+      ],
+      "tag": ["paddleboard", "acqua", "sport"]
+    },
+    {
+      "id": 83,
+      "nome": "Muta da surf",
+      "descrizione_breve": "Muta in neoprene 2mm per surf.",
+      "prezzo": "79.99",
+      "condizione": "usato",
+      "immagini": [
+        {
+          "id": 83,
+          "immagine": "/prodotti/immagini/muta_da_surf.jpg"
+        }
+      ],
+      "tag": ["surf", "acqua", "abbigliamento"]
+    },
+    {
+      "id": 84,
+      "nome": "Casco da kayak",
+      "descrizione_breve": "Casco protettivo per sport acquatici.",
+      "prezzo": "49.99",
+      "condizione": "nuovo",
+      "immagini": [
+        {
+          "id": 84,
+          "immagine": "/prodotti/immagini/casco_da_kayak.jpg"
+        }
+      ],
+      "tag": ["kayak", "acqua", "sicurezza"]
+    },
+    {
+      "id": 85,
+      "nome": "Giubbotto di salvataggio",
+      "descrizione_breve": "Giubbotto galleggiante per adulti.",
+      "prezzo": "39.99",
+      "condizione": "usato",
+      "immagini": [
+        {
+          "id": 85,
+          "immagine": "/prodotti/immagini/giubbotto_di_salvataggio.jpg"
+        }
+      ],
+      "tag": ["acqua", "sicurezza", "accessori"]
+    },
+    {
+      "id": 86,
+      "nome": "Pagaia da kayak",
+      "descrizione_breve": "Pagaia regolabile in alluminio.",
+      "prezzo": "59.99",
+      "condizione": "nuovo",
+      "immagini": [
+        {
+          "id": 86,
+          "immagine": "/prodotti/immagini/pagaia_da_kayak.jpg"
+        }
+      ],
+      "tag": ["kayak", "acqua", "accessori"]
+    },
+    {
+      "id": 87,
+      "nome": "Borsa impermeabile",
+      "descrizione_breve": "Borsa 20L resistente all'acqua.",
+      "prezzo": "29.99",
+      "condizione": "usato",
+      "immagini": [
+        {
+          "id": 87,
+          "immagine": "/prodotti/immagini/borsa_impermeabile.jpg"
+        }
+      ],
+      "tag": ["acqua", "accessori", "borsa"]
+    },
+    {
+      "id": 88,
+      "nome": "Telo da spiaggia",
+      "descrizione_breve": "Telo grande e resistente all'acqua.",
+      "prezzo": "19.99",
+      "condizione": "nuovo",
+      "immagini": [
+        {
+          "id": 88,
+          "immagine": "/prodotti/immagini/telo_da_spiaggia.jpg"
+        }
+      ],
+      "tag": ["spiaggia", "accessori", "outdoor"]
+    },
+    {
+      "id": 89,
+      "nome": "Ombrellone da spiaggia",
+      "descrizione_breve": "Ombrellone resistente al vento.",
+      "prezzo": "49.99",
+      "condizione": "usato",
+      "immagini": [
+        {
+          "id": 89,
+          "immagine": "/prodotti/immagini/ombrellone_da_spiaggia.jpg"
+        }
+      ],
+      "tag": ["spiaggia", "outdoor", "accessori"]
+    },
+    {
+      "id": 90,
+      "nome": "Sedia da spiaggia",
+      "descrizione_breve": "Sedia pieghevole per spiaggia.",
+      "prezzo": "24.99",
+      "condizione": "nuovo",
+      "immagini": [
+        {
+          "id": 90,
+          "immagine": "/prodotti/immagini/sedia_da_spiaggia.jpg"
+        }
+      ],
+      "tag": ["spiaggia", "outdoor", "accessori"]
+    },
+    {
+      "id": 91,
+      "nome": "Cooler portatile",
+      "descrizione_breve": "Cooler 15L per picnic e spiaggia.",
+      "prezzo": "34.99",
+      "condizione": "usato",
+      "immagini": [
+        {
+          "id": 91,
+          "immagine": "/prodotti/immagini/cooler_portatile.jpg"
+        }
+      ],
+      "tag": ["spiaggia", "outdoor", "accessori"]
+    },
+    {
+      "id": 92,
+      "nome": "Set beach tennis",
+      "descrizione_breve": "Racchette e palline per beach tennis.",
+      "prezzo": "29.99",
+      "condizione": "nuovo",
+      "immagini": [
+        {
+          "id": 92,
+          "immagine": "/prodotti/immagini/set_beach_tennis.jpg"
+        }
+      ],
+      "tag": ["beach tennis", "spiaggia", "outdoor"]
+    },
+    {
+      "id": 93,
+      "nome": "Palla da waterpolo",
+      "descrizione_breve": "Palla ufficiale per waterpolo.",
+      "prezzo": "24.99",
+      "condizione": "usato",
+      "immagini": [
+        {
+          "id": 93,
+          "immagine": "/prodotti/immagini/palla_da_waterpolo.jpg"
+        }
+      ],
+      "tag": ["waterpolo", "acqua", "pallone"]
+    },
+    {
+      "id": 94,
+      "nome": "Costume da bagno sportivo",
+      "descrizione_breve": "Costume per nuoto agonistico.",
+      "prezzo": "39.99",
+      "condizione": "nuovo",
+      "immagini": [
+        {
+          "id": 94,
+          "immagine": "/prodotti/immagini/costume_da_bagno_sportivo.jpg"
+        }
+      ],
+      "tag": ["nuoto", "acqua", "abbigliamento"]
+    },
+    {
+      "id": 95,
+      "nome": "Tappeto da palestra in gomma",
+      "descrizione_breve": "Tappeto antiscivolo per pesi.",
+      "prezzo": "44.99",
+      "condizione": "usato",
+      "immagini": [
+        {
+          "id": 95,
+          "immagine": "/prodotti/immagini/tappeto_da_palestra_in_gomma.jpg"
+        }
+      ],
+      "tag": ["fitness", "indoor", "tappeto"]
+    },
+    {
+      "id": 96,
+      "nome": "Barra per trazioni",
+      "descrizione_breve": "Barra da montare in porta.",
+      "prezzo": "29.99",
+      "condizione": "nuovo",
+      "immagini": [
+        {
+          "id": 96,
+          "immagine": "/prodotti/immagini/barra_per_trazioni.jpg"
+        }
+      ],
+      "tag": ["fitness", "indoor", "accessori"]
+    },
+    {
+      "id": 97,
+      "nome": "Anelli da ginnastica",
+      "descrizione_breve": "Anelli regolabili per allenamento.",
+      "prezzo": "39.99",
+      "condizione": "usato",
+      "immagini": [
+        {
+          "id": 97,
+          "immagine": "/prodotti/immagini/anelli_da_ginnastica.jpg"
+        }
+      ],
+      "tag": ["fitness", "indoor", "accessori"]
+    },
+    {
+      "id": 98,
+      "nome": "Kettlebell 12kg",
+      "descrizione_breve": "Kettlebell in ghisa per allenamento.",
+      "prezzo": "34.99",
+      "condizione": "nuovo",
+      "immagini": [
+        {
+          "id": 98,
+          "immagine": "/prodotti/immagini/kettlebell_12kg.jpg"
+        }
+      ],
+      "tag": ["fitness", "indoor", "pesi"]
+    },
+    {
+      "id": 99,
+      "nome": "Panca per addominali",
+      "descrizione_breve": "Panca inclinabile per esercizi.",
+      "prezzo": "59.99",
+      "condizione": "usato",
+      "immagini": [
+        {
+          "id": 99,
+          "immagine": "/prodotti/immagini/panca_per_addominali.jpg"
+        }
+      ],
+      "tag": ["fitness", "indoor", "panca"]
+    },
+    {
+      "id": 100,
+      "nome": "Cavo per esercizi",
+      "descrizione_breve": "Cavo con maniglie per allenamento.",
+      "prezzo": "24.99",
+      "condizione": "nuovo",
+      "immagini": [
+        {
+          "id": 100,
+          "immagine": "/prodotti/immagini/cavo_per_esercizi.jpg"
+        }
+      ],
+      "tag": ["fitness", "indoor", "accessori"]
+    }
   ],
   "annunci": [
     {"prodotto_id": 101, "data_pubblicazione": "2024-06-01T09:00:00Z", "qta_magazzino": 10, "inserzionista": "Silvia", "is_published": true},

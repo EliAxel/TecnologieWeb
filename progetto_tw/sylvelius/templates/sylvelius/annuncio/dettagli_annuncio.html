@@ -8,9 +8,12 @@
 
 {% block middle %}
 {% if request.GET.comment == "notok" %}
-    <div class="alert alert-danger" role="alert">
-        Errore nella gestione dei commenti
-    </div>
+<script src="{% static 'js/toast.js' %}"></script>
+<script>
+    showBootstrapAlertWithIcon(
+        "Errore nella gestione dei commenti.","bad"
+    );
+</script>
 {% endif %}
 <div class="container mt-5 mb-5">
     <div class="row">

@@ -1,19 +1,23 @@
 {% extends "base.html" %}
-
+{% load static %}
 {% block title %}Modifica Profilo - Sylvelius{% endblock %}
 {% block sign_in_sign_up %}
     {% include "_btn_toprightbuttons.html" %}
 {% endblock %}
 {% block middle %}
+<script src="{% static 'js/toast.js' %}"></script>
 {% if usr == "bad" %}
-<div class="alert alert-danger" role="alert">
-    Si è verificato un errore con la modifica dell'username. Per favore, riprova.
-</div>
-{% endif %}
-{% if pwd == "bad" %}
-<div class="alert alert-danger" role="alert">
-    Si è verificato un errore con la modifica della password. Per favore, riprova.
-</div>
+<script>
+    showBootstrapAlertWithIcon(
+        "Si è verificato un errore con la modifica dell'username. Per favore, riprova.","bad"
+    );
+</script>
+{% elif pwd == "bad" %}
+<script>
+    showBootstrapAlertWithIcon(
+        "Si è verificato un errore con la modifica della password. Per favore, riprova.","bad"
+    );
+</script>
 {% endif %}
 <div class="container mt-5 mb-5" style="max-width: 500px;">
     <div class="card shadow">
