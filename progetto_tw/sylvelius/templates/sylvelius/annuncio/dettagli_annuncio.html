@@ -135,7 +135,11 @@
             <div>Categorie:</div>
             {% if annuncio.prodotto.tags.count >= 1 %}
                 {% for tag in annuncio.prodotto.tags.all %}
-                    <span class="badge text-white" style="background-color:{{TERTIARY_COLOR}}">{{ tag.nome }}</span>
+                    <span class="badge text-white" style="background-color:{% if 'moderatori' in user.groups.values_list|join:',' %}
+    {{ADMIN_TERTIARY_COLOR}}
+{% else %}
+    {{TERTIARY_COLOR}}
+{% endif %}">{{ tag.nome }}</span>
                 {% endfor %}
             {% else %}
                 <p class="text-muted">Nessuna categoria specificata.</p>

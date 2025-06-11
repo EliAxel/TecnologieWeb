@@ -83,13 +83,21 @@
                 </div>
                 <style>
                     .badge-primary {
-                        background-color: {{TERTIARY_COLOR}} !important;
+                        background-color: {% if 'moderatori' in user.groups.values_list|join:',' %}
+    {{ADMIN_TERTIARY_COLOR}}
+{% else %}
+    {{TERTIARY_COLOR}}
+{% endif %} !important;
                         color: white !important;
                         border: none !important;
                     }
                     
                     .badge-primary:hover {
-                        background-color: {{SECONDARY_COLOR}} !important;
+                        background-color: {% if 'moderatori' in user.groups.values_list|join:',' %}
+    {{ADMIN_SECONDARY_COLOR}}
+{% else %}
+    {{SECONDARY_COLOR}}
+{% endif %} !important;
                     }
                 </style>
                 <div class="form-group col-md-3">
