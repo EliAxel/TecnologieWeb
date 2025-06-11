@@ -1,6 +1,5 @@
 from django.db import models
 import json
-from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
 from progetto_tw.constants import (
     MAX_TAGS_CHARS,
@@ -115,8 +114,8 @@ class Ordine(models.Model):
         return json.dumps(self.luogo_consegna)
     
 class Notification(models.Model):
-    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications', null=True, blank=True)
-    sender = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='sent_notifications')
+    recipient = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='notifications', null=True, blank=True)
+    sender = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True, related_name='sent_notifications')
     
     title = models.CharField(max_length=MAX_MESSAGE_TITLE_VALUE)
     message = models.CharField(max_length=MAX_MESSAGE_MESSAGE_VALUE)

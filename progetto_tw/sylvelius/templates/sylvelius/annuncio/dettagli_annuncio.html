@@ -55,11 +55,14 @@
             <!-- Selezione quantità -->
              {% if 'moderatori' in user.groups.values_list|join:',' %}
             <div class="mt-4 mb-4">
-                <button class="btn d-inline-block" style="background-color:{{ADMIN_SECONDARY_COLOR}};">
-                    Cancella annuncio</button>
-                <form method="post" class="d-inline-block">
+                <form action="{% url 'sylvelius:elimina_annuncio' annuncio.id %}" method="post" class="d-inline-block">
+                    <button class="btn d-inline-block" style="background-color:{{ADMIN_SECONDARY_COLOR}};" onclick="return confirm('Sei sicuro di voler eliminare questo annuncio?');">
                     {% csrf_token %}
-                    <button type="submit" class="btn" style="background-color:{{ADMIN_SECONDARY_COLOR}};" id="buy-now">
+                    Cancella annuncio</button>
+                </form>
+                <form {#action="{% url 'sylvelius:espelli_utente' annuncio.inserzionista.id %}"#} method="post" class="d-inline-block">
+                    {% csrf_token %}
+                    <button type="submit" class="btn" style="background-color:{{ADMIN_SECONDARY_COLOR}};" id="ban-user">
                         Espelli utente</button>
                 </form>
             </div>   

@@ -132,14 +132,6 @@ class RegistrazionePageView(CreateView):
 
     def form_valid(self, form):
         response = super().form_valid(form)
-
-        # Aggiungi l'utente appena creato al gruppo "utenti"
-        try:
-            group = Group.objects.get(name="utenti")
-            self.object.groups.add(group) #type: ignore
-        except Group.DoesNotExist:
-            pass  # Puoi loggare o creare il gruppo se non esiste
-
         return response
     
     def form_invalid(self, form):
@@ -561,11 +553,15 @@ def toggle_pubblicazione(request, id):
 @require_POST
 @login_required
 def delete_pubblicazione(request, id):
-    annuncio = get_object_or_404(Annuncio, id=id, inserzionista=request.user)
-    annuncio.delete()
-    
-    page = request.POST.get('page', 1)
-    return redirect(f'{reverse("sylvelius:profile_annunci")}?page={page}&evento=elimina')
+    if request.user.groups.filter(name='moderatori').exists():
+        annuncio = get_object_or_404(Annuncio, id=id)
+        annuncio.delete()  
+        return redirect(f'{reverse("sylvelius:home")}?evento=elimina')
+    else:
+        annuncio = get_object_or_404(Annuncio, id=id, inserzionista=request.user)
+        annuncio.delete()  
+        page = request.POST.get('page', 1)
+        return redirect(f'{reverse("sylvelius:profile_annunci")}?page={page}&evento=elimina')
 
 @require_POST
 @login_required
@@ -667,6 +663,10 @@ def modifica_commento(request, commento_id):
 @require_POST
 @login_required
 def elimina_commento(request, commento_id):
-    commento = get_object_or_404(CommentoAnnuncio, id=commento_id, utente=request.user)
-    commento.delete()
+    if request.user.groups.filter(name='moderatori').exists():
+        commento = get_object_or_404(CommentoAnnuncio, id=commento_id)
+        commento.delete()
+    else:
+        commento = get_object_or_404(CommentoAnnuncio, id=commento_id, utente=request.user)
+        commento.delete()
     return JsonResponse({"status": "success"})
