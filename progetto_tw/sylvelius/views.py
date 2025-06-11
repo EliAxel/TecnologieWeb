@@ -1,9 +1,8 @@
 # Django core
-from django.conf import settings
 from django.contrib.auth import update_session_auth_hash, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import UserCreationForm, UserChangeForm, PasswordChangeForm
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth.models import User
 from django.contrib.auth.views import LoginView, LogoutView
 from django.core.paginator import Paginator
 from django.db.models import Q
@@ -11,7 +10,7 @@ from django.http import HttpResponseRedirect, JsonResponse, HttpResponseForbidde
 from django.urls import reverse, reverse_lazy
 from django.views import View
 from django.views.decorators.http import require_POST
-from django.views.generic import TemplateView, CreateView, UpdateView
+from django.views.generic import TemplateView, CreateView
 from django.db.models import Avg
 from django.db.models.functions import Floor
 from django.shortcuts import (
@@ -170,6 +169,10 @@ class ProfiloPageView(CustomLoginRequiredMixin, TemplateView):
             .filter(prodotto_id__in=prodotti_miei_annunci, stato_consegna='da spedire')
             .select_related('utente', 'prodotto')
         )
+
+        if self.request.user.groups.filter(name='moderatori').exists():
+            user_without_is_active = User.objects.filter(is_active=False).order_by('date_joined')
+            context['user_without_is_active'] = user_without_is_active
 
         clienti_dict = {}
         for ordine in ordini_clienti:
@@ -594,6 +597,7 @@ def check_login_credentials(request):
     except User.DoesNotExist:
         exists = False
         valid_password = False
+        is_active = False
 
     return JsonResponse({
         "exists": exists,
