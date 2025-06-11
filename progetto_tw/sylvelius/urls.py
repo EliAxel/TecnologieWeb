@@ -27,7 +27,7 @@ urlpatterns = [
     path("modifica_commento/<int:commento_id>/", views.modifica_commento, name="modifica_commento"),
     path("elimina_commento/<int:commento_id>/", views.elimina_commento, name="elimina_commento"),
     path('mark_notifications_read/', views.mark_notifications_read, name='mark_notifications_read'),
-    # async
+    # api
     path('api/immagine/<int:prodotto_id>/', get_immagine_prodotto),
     path('api/immagini/<int:prodotto_id>/', get_immagini_prodotto),
     path('api/notifications/', notifications_api, name='notifications_api'),

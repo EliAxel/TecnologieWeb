@@ -1,7 +1,8 @@
-from django.http import Http404, JsonResponse
+from django.http import JsonResponse
 from .models import ImmagineProdotto, Notification
 from asgiref.sync import sync_to_async
 from django.db.models import Q
+from progetto_tw.constants import MAX_MESSAGES_PER_PAGE
 
 async def get_immagine_prodotto(request, prodotto_id):
     immagini = await sync_to_async(list)(ImmagineProdotto.objects.filter(prodotto_id=prodotto_id).order_by('id')[:1])
@@ -30,7 +31,7 @@ def notifications_api(request):
     notifications = Notification.objects.filter(
         Q(recipient=request.user) | 
         Q(is_global=True)
-    ).order_by('created_at')[:20]
+    ).order_by('created_at')[:MAX_MESSAGES_PER_PAGE]
     
     data = [{
         'title': n.title,

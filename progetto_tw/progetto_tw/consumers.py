@@ -92,9 +92,6 @@ class GetNotifications(AsyncWebsocketConsumer):
             await self.channel_layer.group_discard(self.personal_group, self.channel_name)#type: ignore
             await self.channel_layer.group_discard(self.global_group, self.channel_name) #type: ignore
 
-    async def receive(self, text_data):
-        pass  # Puoi gestire richieste dal client se necessario
-
     async def send_notification(self, event):
         await self.send(text_data=json.dumps({
             'type': 'notification',

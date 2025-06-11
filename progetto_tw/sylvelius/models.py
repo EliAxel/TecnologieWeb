@@ -19,7 +19,9 @@ from progetto_tw.constants import (
     MAX_ANNU_UUID_CHARS,
     MIN_ORDN_QUANTITA_VALUE,
     ORDN_STATO_CONSEGNA_CHOICES,
-    INVALID_COMMNT_RATING_VALUE
+    INVALID_COMMNT_RATING_VALUE,
+    MAX_MESSAGE_MESSAGE_VALUE,
+    MAX_MESSAGE_TITLE_VALUE
 )
 
 
@@ -116,11 +118,11 @@ class Notification(models.Model):
     recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications', null=True, blank=True)
     sender = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='sent_notifications')
     
-    title = models.CharField(max_length=30)
-    message = models.CharField(max_length=255)
+    title = models.CharField(max_length=MAX_MESSAGE_TITLE_VALUE)
+    message = models.CharField(max_length=MAX_MESSAGE_MESSAGE_VALUE)
     created_at = models.DateTimeField(auto_now_add=True)
     read = models.BooleanField(default=False)
     is_global = models.BooleanField(default=False)
 
     class Meta:
-        ordering = ['-created_at']
+        ordering = ['created_at']

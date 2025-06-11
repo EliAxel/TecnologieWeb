@@ -9,6 +9,7 @@
         <div class="col-md-10">
             <h2 class="mb-4">I tuoi ordini</h2>
             {% if ordini %}
+                <div class="table-responsive">
                 <table class="table table-striped">
                     <thead>
                         <tr>
@@ -93,6 +94,7 @@
                         {% endfor %}
                     </tbody>
                 </table>
+            </div>
 
                 <!-- Include della paginazione -->
                 {% include "_btn_paginazione.html" %}

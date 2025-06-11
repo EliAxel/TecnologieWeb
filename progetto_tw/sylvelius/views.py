@@ -3,7 +3,6 @@ from django.conf import settings
 from django.contrib.auth import update_session_auth_hash, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm, PasswordChangeForm
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.views import LoginView, LogoutView
 from django.core.paginator import Paginator
@@ -18,11 +17,11 @@ from django.db.models.functions import Floor
 from django.shortcuts import (
     render, 
     redirect, 
-    get_object_or_404,
-    resolve_url
+    get_object_or_404
 )
 # Project specific
 from .forms import CustomUserCreationForm
+from .mixins import CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin
 from .models import (
     Annuncio,
     CommentoAnnuncio,
@@ -73,9 +72,6 @@ def send_notification(user_id=None,title="", message="", global_notification=Fal
         async_to_sync(channel_layer.group_send)( #type: ignore
             f"user_{user_id}", {"type": "send_notification", "title":title, "message": message}
         )
-
-from django.views.decorators.http import require_POST
-from django.http import JsonResponse
 
 @require_POST
 def mark_notifications_read(request):
@@ -158,11 +154,6 @@ class LoginPageView(LoginView):
 class LogoutPageView(LogoutView):
     def get_success_url(self):
         return reverse('sylvelius:home') + '?evento=logout'
-
-class CustomLoginRequiredMixin(LoginRequiredMixin):
-    def get_login_url(self):
-        login_url = super().get_login_url()
-        return f"{resolve_url(login_url)}?auth=error"
     
 class ProfiloPageView(CustomLoginRequiredMixin, TemplateView):
     template_name = "sylvelius/profile/profile.html"
@@ -315,7 +306,7 @@ class AnnuncioDetailView(TemplateView):
         context['commenti'] = commenti
         return context
     
-class ProfiloOrdiniPageView(CustomLoginRequiredMixin, TemplateView):
+class ProfiloOrdiniPageView(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin, TemplateView):
     template_name = "sylvelius/profile/profile_ordini.html"
     login_url = reverse_lazy('sylvelius:login')
 
@@ -337,10 +328,9 @@ class ProfiloOrdiniPageView(CustomLoginRequiredMixin, TemplateView):
         context['has_previous'] = page_obj.has_previous()
         context['request'] = self.request
 
-        
         return context
     
-class ProfiloAnnunciPageView(CustomLoginRequiredMixin, TemplateView):
+class ProfiloAnnunciPageView(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin, TemplateView):
     template_name = "sylvelius/profile/profile_annunci.html"
     login_url = reverse_lazy('sylvelius:login')
 
@@ -364,7 +354,7 @@ class ProfiloAnnunciPageView(CustomLoginRequiredMixin, TemplateView):
 
         return context
 
-class ProfiloCreaAnnuncioPageView(CustomLoginRequiredMixin, View):
+class ProfiloCreaAnnuncioPageView(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin, View):
     template_name = "sylvelius/annuncio/crea_annuncio.html"
     login_url = reverse_lazy('sylvelius:login')
 
@@ -680,6 +670,3 @@ def elimina_commento(request, commento_id):
     commento = get_object_or_404(CommentoAnnuncio, id=commento_id, utente=request.user)
     commento.delete()
     return JsonResponse({"status": "success"})
-
-
-
