@@ -60,7 +60,7 @@
                     {% csrf_token %}
                     Cancella annuncio</button>
                 </form>
-                <form {#action="{% url 'sylvelius:espelli_utente' annuncio.inserzionista.id %}"#} method="post" class="d-inline-block">
+                <form action="{% url 'sylvelius:espelli_utente' annuncio.inserzionista.id %}" method="post" class="d-inline-block" onclick="return confirm('Sei sicuro di voler espellere questo utente?');">
                     {% csrf_token %}
                     <button type="submit" class="btn" style="background-color:{{ADMIN_SECONDARY_COLOR}};" id="ban-user">
                         Espelli utente</button>

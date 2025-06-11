@@ -117,9 +117,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 passwordError.style.display = "none";
                 passwordInput.classList.remove("is-invalid");
             }
+            if (!data.is_active) {
+                usernameError.textContent = "User espulso permanentemente.";
+                usernameError.style.display = "block";
+                usernameInput.classList.add("is-invalid");
+            } else {
+                usernameError.textContent = "";
+                usernameError.style.display = "none";
+                usernameInput.classList.remove("is-invalid");
+            }
 
             // Se tutto è valido, invia il form normalmente
-            if (data.exists && data.valid_password) {
+            if (data.exists && data.valid_password && data.is_active) {
                 form.submit();
             }
         });

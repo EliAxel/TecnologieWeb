@@ -7,7 +7,7 @@ from django.contrib.auth.models import User, Group
 from django.contrib.auth.views import LoginView, LogoutView
 from django.core.paginator import Paginator
 from django.db.models import Q
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse, HttpResponseForbidden
 from django.urls import reverse, reverse_lazy
 from django.views import View
 from django.views.decorators.http import require_POST
@@ -556,7 +556,7 @@ def delete_pubblicazione(request, id):
     if request.user.groups.filter(name='moderatori').exists():
         annuncio = get_object_or_404(Annuncio, id=id)
         annuncio.delete()  
-        return redirect(f'{reverse("sylvelius:home")}?evento=elimina')
+        return redirect(f'{reverse("sylvelius:home")}?evento=elimina_pub')
     else:
         annuncio = get_object_or_404(Annuncio, id=id, inserzionista=request.user)
         annuncio.delete()  
@@ -590,6 +590,7 @@ def check_login_credentials(request):
         user = User.objects.get(username=username)
         exists = True
         valid_password = user.check_password(password)
+        is_active = user.is_active
     except User.DoesNotExist:
         exists = False
         valid_password = False
@@ -597,6 +598,7 @@ def check_login_credentials(request):
     return JsonResponse({
         "exists": exists,
         "valid_password": valid_password,
+        "is_active": is_active
     })
 
 @require_POST
@@ -670,3 +672,14 @@ def elimina_commento(request, commento_id):
         commento = get_object_or_404(CommentoAnnuncio, id=commento_id, utente=request.user)
         commento.delete()
     return JsonResponse({"status": "success"})
+
+@require_POST
+@login_required
+def espelli_utente(request, user_id):
+    if request.user.groups.filter(name='moderatori').exists():
+        user = get_object_or_404(User, id=user_id)
+        user.is_active = False
+        user.save()
+        return redirect(f'{reverse("sylvelius:home")}?evento=elimina_ut')
+    else:
+        return HttpResponseForbidden()
