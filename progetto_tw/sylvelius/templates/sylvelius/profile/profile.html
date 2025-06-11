@@ -4,6 +4,20 @@
 {% block title %}{{user.username}} - Sylvelius{% endblock %}
     
 {% block middle %}
+<script src="{% static 'js/toast.js' %}"></script>
+{% if request.GET.evento == 'elimina_ut' %}
+    <script>
+        showBootstrapAlertWithIcon(
+            "User modificato con successo!","good"
+        );
+    </script>
+{% elif request.GET.evento == 'formatta_ut' %}
+    <script>
+        showBootstrapAlertWithIcon(
+            "User formattato con successo!","good"
+        );
+    </script>
+{% endif %}
 <div class="container-fluid mt-5 mb-5">
     <div class="row justify-content-center">
         <div class="col-md-8 text-center">
@@ -39,12 +53,18 @@
                             <td>{{ user.username }}</td>
                             <td>{{ user.last_login|date:"d/m/Y H:i" }}</td>
                             <td>
-                                <button class="btn btn-success btn-sm sbanna-btn" data-userid="{{ user.id }}">
-                                    Riammetti
-                                </button>
-                                <button class="btn btn-danger btn-sm cancella-btn" data-userid="{{ user.id }}">
-                                    Cancella attività
-                                </button>
+                                <form action="{% url 'sylvelius:espelli_utente' 'unban' user.id %}" method="post" class="d-inline-block" >
+                                    {% csrf_token %}
+                                    <button class="btn btn-success btn-sm sbanna-btn" onclick="return confirm('Sei sicuro di voler riammettere questo utente?');">
+                                        Riammetti
+                                    </button>
+                                </form>
+                                <form action="{% url 'sylvelius:formatta_utente' user.id %}" method="post" class="d-inline-block" >
+                                    {% csrf_token %}
+                                    <button class="btn btn-danger btn-sm cancella-btn" onclick="return confirm('Sei sicuro di voler cancellare tutta l\'attività di questo utente? IRREVERSIBILE');">
+                                        Cancella attività
+                                    </button>
+                                </form>
                             </td>
                         </tr>
                         {% endfor %}

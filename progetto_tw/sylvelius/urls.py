@@ -27,7 +27,9 @@ urlpatterns = [
     path("modifica_commento/<int:commento_id>/", views.modifica_commento, name="modifica_commento"),
     path("elimina_commento/<int:commento_id>/", views.elimina_commento, name="elimina_commento"),
     path('mark_notifications_read/', views.mark_notifications_read, name='mark_notifications_read'),
-    path('espelli_utente/<int:user_id>/',views.espelli_utente, name='espelli_utente'),
+    path('espelli_utente/<str:is_active>/<int:user_id>/',views.espelli_utente, name='espelli_utente'),
+    path('formatta_utente/<int:user_id>',views.formatta_utente,name='formatta_utente'),
+    path('annulla_ordine/<int:order_id>',views.annulla_ordine,name='annulla_ordine'),
     # api
     path('api/immagine/<int:prodotto_id>/', get_immagine_prodotto),
     path('api/immagini/<int:prodotto_id>/', get_immagini_prodotto),

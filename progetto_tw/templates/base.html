@@ -176,23 +176,5 @@
     });
     </script>
     <script src="{% static 'js/base.js' %}"></script>
-
-{% block footer_color %}
-{% if 'moderatori' in user.groups.values_list|join:',' %}
-    <footer class="footer fixed-bottom py-2" style="background-color: {{ADMIN_PRIMARY_COLOR}}; line-height: 1; height: 36px;">
-{% else %}
-    <footer class="footer fixed-bottom py-2" style="background-color: {{PRIMARY_COLOR}}; line-height: 1; height: 36px;">
-{% endif %}
-{% endblock %}
-    <center>
-        <div class="container text-center p-0 m-0">
-            <span class="{% if 'moderatori' in user.groups.values_list|join:',' %}
-    
-{% else %}
-    text-white
-{% endif %}" style="font-size: 0.95rem;">© 2025 Sylvelius. Tutti i diritti riservati.</span>
-        </div>
-    </center>
-</footer>
 </body>
 </html>

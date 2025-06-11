@@ -679,11 +679,41 @@ def elimina_commento(request, commento_id):
 
 @require_POST
 @login_required
-def espelli_utente(request, user_id):
+def espelli_utente(request, is_active, user_id):
     if request.user.groups.filter(name='moderatori').exists():
         user = get_object_or_404(User, id=user_id)
-        user.is_active = False
+        user.is_active = False if is_active=='ban' else True
         user.save()
-        return redirect(f'{reverse("sylvelius:home")}?evento=elimina_ut')
+        return redirect(f'{reverse("sylvelius:profile")}?evento=elimina_ut')
     else:
         return HttpResponseForbidden()
+    
+@require_POST
+@login_required
+def formatta_utente(request, user_id):
+    if request.user.groups.filter(name='moderatori').exists():
+        user = get_object_or_404(User, id=user_id)
+        if(not user.is_active):
+            Ordine.objects.filter(
+                Q(prodotto__annunci__inserzionista=user) &
+                Q(stato_consegna='da spedire')
+            ).update(stato_consegna='annullato')
+            Ordine.objects.filter(utente=user.id).delete()# type: ignore
+            Annuncio.objects.filter(inserzionista=user.id).delete() # type: ignore
+            CommentoAnnuncio.objects.filter(utente=user.id).delete()# type: ignore
+            Notification.objects.filter(recipient=user.id).delete()# type: ignore
+        else:
+            return HttpResponseForbidden()
+        return redirect(f'{reverse("sylvelius:profile")}?evento=formatta_ut')
+    else:
+        return HttpResponseForbidden()
+    
+@require_POST
+@login_required
+def annulla_ordine(request, order_id):
+    ordine = get_object_or_404(Ordine,id=order_id)
+    if(request.user == ordine.utente and ordine.stato_consegna=='da spedire'):
+        ordine.stato_consegna = 'annullato'
+        ordine.save()
+        return JsonResponse({"status": "success"})
+    else: return JsonResponse({"status": "error", "message": "Ordine non trovato o già spedito"}, status=400)

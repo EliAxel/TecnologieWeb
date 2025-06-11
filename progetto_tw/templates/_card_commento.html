@@ -30,7 +30,7 @@
                 }
                 const userId = this.getAttribute("data-user-id");
                 
-                fetch(`/espelli_utente/${userId}/`, { 
+                fetch(`/espelli_utente/ban/${userId}/`, { 
                   method: "POST",
                   headers: {
                     "X-CSRFToken": "{{ csrf_token }}",

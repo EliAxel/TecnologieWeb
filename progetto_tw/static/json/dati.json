@@ -1913,6 +1913,13 @@
     },
     {
       "utente_username": "EliAxel",
+      "prodotto_id": 100,
+      "quantita": 2,
+      "stato_consegna": "consegnato",
+      "data_ordine": "2024-07-29T16:00:00Z"
+    },
+    {
+      "utente_username": "EliAxel",
       "prodotto_id": 99,
       "quantita": 2,
       "stato_consegna": "consegnato",
