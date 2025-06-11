@@ -250,9 +250,10 @@ class ProfiloDeletePageView(CustomLoginRequiredMixin, View):
             stato_consegna='spedito'
             ).exists()):
             return render(request, self.template_name,{"err":"shipd"})
-        if(Ordine.objects.filter(utente=user,stato_consegna="da spedire").exists()):
-            return render(request, self.template_name,{"err":"ship"})
         
+        Ordine.objects.filter(utente=user,stato_consegna="da spedire").update(
+            stato_consegna='annullato'
+        )
         Ordine.objects.filter(
             prodotto__annunci__inserzionista=user,
             stato_consegna='da spedire'
