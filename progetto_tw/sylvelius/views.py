@@ -19,7 +19,7 @@ from django.shortcuts import (
     get_object_or_404
 )
 
-from progetto_tw.purchase.models import Iban
+from purchase.models import Iban
 # Project specific
 from .forms import CustomUserCreationForm
 from progetto_tw.mixins import CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin
