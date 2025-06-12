@@ -229,9 +229,6 @@ def paypal_coa(request):
     except Exception as e:
         return HttpResponse(status=500)
 
-def set_iban(request):
-    pass
-
 class SetupIban(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin,TemplateView):
     template_name = "purchase/setup_iban.html"
     login_url = reverse_lazy('sylvelius:login')

@@ -18,6 +18,8 @@ from django.shortcuts import (
     redirect, 
     get_object_or_404
 )
+
+from progetto_tw.purchase.models import Iban
 # Project specific
 from .forms import CustomUserCreationForm
 from progetto_tw.mixins import CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin
@@ -260,6 +262,7 @@ class ProfiloDeletePageView(CustomLoginRequiredMixin, View):
             ).update(stato_consegna='annullato')
 
         Annuncio.objects.filter(inserzionista=user).delete()
+        Iban.objects.filter(utente=request.user).delete()
         logout(request)  # logout PRIMA di eliminare l'utente per evitare problemi
         user.delete()    # elimina l'utente
         # 2. Reindirizza a una pagina di successo (es: home page)
