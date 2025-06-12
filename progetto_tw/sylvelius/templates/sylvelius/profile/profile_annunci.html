@@ -16,12 +16,23 @@
         "Annuncio eliminato con successo!","good"
     );
 </script>
+{% elif request.GET.evento == "iban_imp" %}
+<script>
+    showBootstrapAlertWithIcon(
+        "IBAN impostato con successo!","good"
+    );
+</script>
 {% endif %}
 <div class="container-fluid mt-5 mb-5">
     <div class="row justify-content-center">
         <div class="col-md-10">
             <h2 class="mb-4">I tuoi annunci</h2>
-            <a href="{% url 'sylvelius:crea_annuncio' %}" class="btn btn-success mb-3">Crea annuncio</a>
+            <a href="{% url 'purchase:setup_iban' %}" class="btn btn-primary mb-3">Imposta IBAN</a>
+            {% if user.iban.iban %}
+                <a href="{% url 'sylvelius:crea_annuncio' %}" class="btn btn-success mb-3">Crea annuncio</a>
+            {% else %}
+                <a class="btn btn-success mb-3 disabled">Crea annuncio</a>
+            {% endif%}
             {% if annunci %}
                 <div class="table-responsive">
                 <table class="table table-striped table-bordered">

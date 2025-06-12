@@ -1,5 +1,5 @@
 from django.db import models
-from progetto_tw.constants import MAX_ORDN_INVOICE_CHARS
+from progetto_tw.constants import MAX_ORDN_INVOICE_CHARS, IBAN_LENGTH
 
 # Create your models here.
 class Invoice(models.Model):
@@ -7,3 +7,7 @@ class Invoice(models.Model):
     user_id = models.PositiveIntegerField()
     quantita = models.PositiveIntegerField()
     prodotto_id = models.PositiveIntegerField()
+
+class Iban(models.Model):
+    utente = models.OneToOneField('auth.User', on_delete=models.CASCADE, related_name='iban')
+    iban = models.CharField(max_length=IBAN_LENGTH,blank=True, null=True)

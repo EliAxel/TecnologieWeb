@@ -20,7 +20,7 @@ from django.shortcuts import (
 )
 # Project specific
 from .forms import CustomUserCreationForm
-from .mixins import CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin
+from progetto_tw.mixins import CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin
 from .models import (
     Annuncio,
     CommentoAnnuncio,

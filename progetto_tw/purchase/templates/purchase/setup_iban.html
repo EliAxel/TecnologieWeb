@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block sign_in_sign_up %}
+    {% include "_btn_toprightbuttons.html" %}
+{% endblock %}
+{% block title %}Imposta IBAN - Sylvelius{% endblock %}
+{% block middle %}
+<div class="container mt-5" style="max-width: 440px;">
+    <div class="card shadow" style="border-color: {{SECONDARY_COLOR}};">
+        <div class="card-header text-white" style="background-color: {{SECONDARY_COLOR}};">
+            <h4 class="mb-0">Imposta IBAN</h4>
+        </div>
+        <div class="card-body">
+            <p style="text-align: justify;">Per garantire l’accredito dei pagamenti relativi alle vendite dei tuoi articoli, è necessario associare un IBAN valido al tuo account. Una volta inserito, gli importi derivanti dalle transazioni verranno trasferiti sul conto corrente indicato.</p>
+            <p style="text-align: justify;">I costi generati dagli acquisti saranno tutti a carico del venditore, di cui:</p>
+            <ul style="text-align: left;">
+                <li>Costi di commissione: {{SYLVELIUS_FEES_PRCNT}}%</li>
+                <li>Costi di trasporto</li>
+            </ul>
+            <form id="iban-form" method="post" autocomplete="off">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="iban">IBAN</label>
+                    <input type="text" class="form-control" value="{% if iban %}{{iban.iban}}{% endif %}" id="iban" name="iban" required maxlength="{{IBAN_LENGTH}}" style="border-color: {{TERTIARY_COLOR}};">
+                    <div id="iban-error" class="invalid-feedback" style="display:none;"></div>
+                </div>
+                <button type="submit" class="btn btn-block text-white" style="background-color: {{SECONDARY_COLOR}};">Imposta</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

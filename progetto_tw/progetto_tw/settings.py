@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-^(!33fx!@!@h)-r6(rq70%qk-c$dh64fojzq*$4hzm$s+0+5$c
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]  # Permette tutte le richieste, da modificare in produzione
-CSRF_TRUSTED_ORIGINS = ["https://legal-malamute-steady.ngrok-free.app",]  # Permette tutte le origini, da modificare in produzione
+CSRF_TRUSTED_ORIGINS = ["https://kite-united-probably.ngrok-free.app",]
 # Application definition
 
 INSTALLED_APPS = [

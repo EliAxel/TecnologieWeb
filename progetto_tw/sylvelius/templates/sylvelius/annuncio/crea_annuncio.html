@@ -166,6 +166,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const MAX_PROD_PREZZO_VALUE = {{MAX_PROD_PREZZO_VALUE}}
     const MAX_PROD_PREZZO_DIGITS_DECIMAL = {{MAX_PROD_PREZZO_DIGITS_DECIMAL.1}}
     const SYLVELIUS_FEES = {{SYLVELIUS_FEES}}
+    const SYLVELIUS_FEES_PRCNT = {{SYLVELIUS_FEES_PRCNT}}
     const PROD_CONDIZIONE_CHOICES_ID = {{PROD_CONDIZIONE_CHOICES_ID|safe}}
 
     prezzoVal = document.getElementById("id_prezzo");
@@ -221,7 +222,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (prezzo >= MIN_PROD_PREZZO_VALUE) {
             prezzo = prezzo * (1.0 - SYLVELIUS_FEES);
             const netto = ivaVal === 0 ? prezzo.toFixed(MAX_PROD_PREZZO_DIGITS_DECIMAL) : (prezzo * (1 - ivaVal / 100)).toFixed(MAX_PROD_PREZZO_DIGITS_DECIMAL);
-            nettoDiv.textContent = `Ricavo netto con IVA al ${ivaVal}% e costi di commissione al ${SYLVELIUS_FEES*100.0}%: €${netto}`;
+            nettoDiv.textContent = `Ricavo netto con IVA al ${ivaVal}% e costi di commissione al ${SYLVELIUS_FEES_PRCNT}%: €${netto}`;
             nettoDiv.classList.remove('d-none');
         } else {
             nettoDiv.classList.add('d-none');

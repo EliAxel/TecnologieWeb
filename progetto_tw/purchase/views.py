@@ -1,9 +1,13 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.urls import reverse, reverse_lazy
+from django.views.generic import TemplateView
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+import re
+from django.core.exceptions import ValidationError
 
 # Project specific
 from django.conf import settings
@@ -13,9 +17,9 @@ from sylvelius.models import (
     Annuncio
 )
 from sylvelius.views import create_notification
-from .models import Invoice
+from .models import Invoice, Iban
 from progetto_tw.constants import MIN_ORDN_QUANTITA_VALUE
-
+from progetto_tw.mixins import CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin
 # Other
 import json
 import uuid
@@ -224,3 +228,54 @@ def paypal_coa(request):
 
     except Exception as e:
         return HttpResponse(status=500)
+
+def set_iban(request):
+    pass
+
+class SetupIban(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin,TemplateView):
+    template_name = "purchase/setup_iban.html"
+    login_url = reverse_lazy('sylvelius:login')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["user"] = self.request.user
+        if hasattr(self.request.user, 'iban') and self.request.user.iban: #type: ignore
+            context["iban"] = self.request.user.iban #type: ignore
+        return context
+
+    def validate_iban(self,iban):
+        # Rimuovi spazi e converti in maiuscolo
+        iban = iban.replace(' ', '').upper()
+        
+        # Verifica la struttura base con regex
+        if not re.match(r'^[A-Z]{2}\d{2}[A-Z0-9]{1,30}$', iban):
+            raise ValidationError('Formato IBAN non valido')
+        
+        # Sposta i primi 4 caratteri alla fine
+        rearranged = iban[4:] + iban[:4]
+        
+        # Converti le lettere in numeri (A=10, B=11, ..., Z=35)
+        digits = []
+        for char in rearranged:
+            if char.isdigit():
+                digits.append(char)
+            else:
+                digits.append(str(10 + ord(char) - ord('A')))
+        
+        # Unisci tutto in una stringa numerica e calcola il modulo 97
+        numeric_iban = int(''.join(digits))
+        if numeric_iban % 97 != 1:
+            raise ValidationError('IBAN non valido: cifra di controllo errata')
+
+    def post(self, request):
+        iban = request.POST.get('iban')
+        
+        try:
+            self.validate_iban(iban)
+            Iban.objects.update_or_create(utente=request.user,defaults={'iban':iban})
+            # Restituisci una risposta di successo
+        except ValidationError as e:
+            # Restituisci una risposta di errore con il messaggio
+            return HttpResponseBadRequest(str(e))
+        return redirect(f'{reverse("sylvelius:profile_annunci")}?evento=iban_imp')
+    

@@ -20,12 +20,12 @@
                 {% csrf_token %}
                 <div class="form-group">
                     <label for="username">Username</label>
-                    <input type="text" class="form-control" id="username" name="username" required maxlength="{{MAX_UNAME_CHARS}}" style="border-color: #a78bfa;">
+                    <input type="text" class="form-control" id="username" name="username" required maxlength="{{MAX_UNAME_CHARS}}" style="border-color: {{TERTIARY_COLOR}};">
                     <div id="username-error" class="invalid-feedback" style="display:none;"></div>
                 </div>
                 <div class="form-group">
                     <label for="password">Password</label>
-                    <input type="password" class="form-control" id="password" name="password" required maxlength="{{MAX_PWD_CHARS}}" style="border-color: #a78bfa;">
+                    <input type="password" class="form-control" id="password" name="password" required maxlength="{{MAX_PWD_CHARS}}" style="border-color:{{TERTIARY_COLOR}};">
                     <div id="password-error" class="invalid-feedback" style="display:none;"></div>
                 </div>
                 <button type="submit" class="btn btn-block text-white" style="background-color: {{SECONDARY_COLOR}};">Accedi</button>
