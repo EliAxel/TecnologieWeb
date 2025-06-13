@@ -18,20 +18,20 @@
     
     {% block head %}{% endblock %}
     {% block nav_color %}
-    {% if 'moderatori' in user.groups.values_list|join:',' %}
-        <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: {{ADMIN_PRIMARY_COLOR}};">
-    {% else %}
-        <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: {{PRIMARY_COLOR}};">
-    {% endif %}
+        {% if 'moderatori' in user.groups.values_list|join:',' %}
+            <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: {{ADMIN_PRIMARY_COLOR}};">
+        {% else %}
+            <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: {{PRIMARY_COLOR}};">
+        {% endif %}
     {% endblock %}
         <div class="container-fluid">
             <!-- Logo (sempre allineato a sinistra) -->
             <a class="navbar-brand text-white d-flex align-items-center mr-auto" href="{% url 'sylvelius:home' %}" style="font-family: 'Copperplate', 'Copperplate Gothic Light', fantasy; font-size: 1.1rem; font-weight: bold;">
                 <img src="{% if 'moderatori' in user.groups.values_list|join:',' %}
-    {% static 'img/splash_art_admin.png' %}
-{% else %}
-    {% static 'img/splash_art.png' %}
-{% endif %}" width="105" height="30" class="d-inline-block align-top mr-2" alt="Favicon">
+                    {% static 'img/splash_art_admin.png' %}
+                {% else %}
+                    {% static 'img/splash_art.png' %}
+                {% endif %}" width="105" height="30" class="d-inline-block align-top mr-2" alt="Favicon">
             </a>
 
             <!-- Pulsanti Login/Signup (a destra su desktop, accanto al logo su mobile) -->
@@ -43,138 +43,139 @@
             </div>
             
             <!-- Barra di ricerca (centrata su desktop, a capo su mobile) -->
-            <div class="order-lg-2 col-12 col-lg-6 px-0 mx-auto d-flex justify-content-center position-relative" style="z-index: 1100;">
-                <form id="search-form" class="form-inline d-flex justify-content-center w-100" method="get" style="max-width: 800px; width: 100%;">
-                    <div class="input-group w-100 position-relative">
-                        <div class="input-group-prepend">
-                            <button class="btn {% if 'moderatori' in user.groups.values_list|join:',' %}
-    btn-outline-dark
-{% else %}
-    btn-outline-light
-{% endif %} mr-1 rounded-left" type="button" id="advanced-search-toggle">Ricerca avanzata</button>
+            {% block search_bar %}
+                <div class="order-lg-2 col-12 col-lg-6 px-0 mx-auto d-flex justify-content-center position-relative" style="z-index: 1100;">
+                    <form id="search-form" class="form-inline d-flex justify-content-center w-100" method="get" style="max-width: 800px; width: 100%;">
+                        <div class="input-group w-100 position-relative">
+                            <div class="input-group-prepend">
+                                <button class="btn {% if 'moderatori' in user.groups.values_list|join:',' %}
+                                    btn-outline-dark
+                                {% else %}
+                                    btn-outline-light
+                                {% endif %} mr-1 rounded-left" type="button" id="advanced-search-toggle">Ricerca avanzata</button>
+                            </div>
+                            <input id="search-input" class="form-control" type="search" placeholder="Cerca..." aria-label="Cerca" name="q" autocomplete="off">
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-light{% if 'moderatori' in user.groups.values_list|join:',' %}
+                                    btn-outline-dark
+                                {% else %}
+                                    btn-outline-light
+                                {% endif %} ml-1 rounded-right" type="submit">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </div>
+                            <div id="search-suggestions" class="list-group position-absolute w-100" style="top: 100%; left: 0; display: none; max-height: 250px; overflow-y: auto; z-index: 1200;"></div>
                         </div>
-                        <input id="search-input" class="form-control" type="search" placeholder="Cerca..." aria-label="Cerca" name="q" autocomplete="off">
-                        <div class="input-group-append">
-                            <button class="btn btn-outline-light{% if 'moderatori' in user.groups.values_list|join:',' %}
-    btn-outline-dark
-{% else %}
-    btn-outline-light
-{% endif %} ml-1 rounded-right" type="submit">
-                                <i class="bi bi-search"></i>
-                            </button>
-                        </div>
-                        <div id="search-suggestions" class="list-group position-absolute w-100" style="top: 100%; left: 0; display: none; max-height: 250px; overflow-y: auto; z-index: 1200;"></div>
-                    </div>
-                </form>
-            </div>
+                    </form>
+                </div>
+                <!-- Scripts -->
+                <script>
+                    // Passa le costanti da Django a JavaScript
+                    window.COSTANTI = {
+                        MAX_WS_QUERIES: "{{ MAX_WS_QUERIES }}",
+                        // Aggiungi altre costanti se necessario
+                    };
+                </script>
+                <script src="{% static 'js/suggestions.js' %}"></script>
+                
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        setupSuggestions({
+                            inputId: 'category-input',
+                            suggestionsId: 'category-suggestions',
+                            wsUrl: '/ws/tags/', 
+                            onSelect: function(item) {},
+                            isMulti: true,
+                            containerId: 'category-tags'
+                        });
+                        // Esempio di utilizzo
+                    });
+                </script>
+                <script src="{% static 'js/base.js' %}"></script>
+            {% endblock %}
         </div>
     </nav>
 
-        <!-- Ricerca avanzata -->
-        <div id="advanced-search-bar" class="container-fluid py-3 bg-light border-bottom" style="display: none; position: relative; z-index: 1050;">
-            <form class="form-row">
-                <div class="form-group col-md-3">
-                    <label for="search-category">Categorie</label>
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="category-input" placeholder="Scrivi una categoria..." maxlength={{MAX_TAGS_CHARS}} autocomplete="off">
-                        <div id="category-suggestions" class="list-group position-absolute w-100" style="top: 100%; left: 0; display: none; max-height: 200px; overflow-y: auto; z-index: 2000;"></div>
-                    </div>
-                    <div id="category-tags" class="mt-2" style="min-height: 38px;"></div>
+    <!-- Ricerca avanzata -->
+    <div id="advanced-search-bar" class="container-fluid py-3 bg-light border-bottom" style="display: none; position: relative; z-index: 1050;">
+        <form class="form-row">
+            <div class="form-group col-md-3">
+                <label for="search-category">Categorie</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="category-input" placeholder="Scrivi una categoria..." maxlength={{MAX_TAGS_CHARS}} autocomplete="off">
+                    <div id="category-suggestions" class="list-group position-absolute w-100" style="top: 100%; left: 0; display: none; max-height: 200px; overflow-y: auto; z-index: 2000;"></div>
                 </div>
-                <style>
-                    .badge-primary {
-                        background-color: {% if 'moderatori' in user.groups.values_list|join:',' %}
-    {{ADMIN_TERTIARY_COLOR}}
-{% else %}
-    {{TERTIARY_COLOR}}
-{% endif %} !important;
-                        color: white !important;
-                        border: none !important;
-                    }
-                    
-                    .badge-primary:hover {
-                        background-color: {% if 'moderatori' in user.groups.values_list|join:',' %}
-    {{ADMIN_SECONDARY_COLOR}}
-{% else %}
-    {{SECONDARY_COLOR}}
-{% endif %} !important;
-                    }
-                </style>
-                <div class="form-group col-md-3">
-                    <label for="condition-type">Condizione</label>
-                    <select class="form-control" id="condition-type">
-                        <option value="all">Tutte</option>
-                        {% for value, label in PROD_CONDIZIONE_CHOICES %}
-                            <option value="{{ value }}">{{ label }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="form-group col-md-3">
-                    <label for="price-min">Prezzo minimo</label>
-                    <input type="number" class="form-control" id="price-min" placeholder="Min €" min="{{MIN_PROD_PREZZO_VALUE}}" max="{{MAX_PROD_PREZZO_VALUE}}" step="1">
-                </div>
-                <div class="form-group col-md-3">
-                    <label for="price-max">Prezzo massimo</label>
-                    <input type="number" class="form-control" id="price-max" placeholder="Max €" min="{{MIN_PROD_PREZZO_VALUE}}" max="{{MAX_PROD_PREZZO_VALUE}}" step="1">
-                </div>
-                <div class="form-group col-md-3">
-                    <label for="sort-order">Ordina per</label>
-                    <select class="form-control" id="sort-order">
-                        <option value="data-desc">Data (più recenti)</option>
-                        <option value="data-asc">Data (meno recenti)</option>
-                        <option value="prezzo-asc">Prezzo crescente</option>
-                        <option value="prezzo-desc">Prezzo decrescente</option>
-                    </select>
-                </div>
-                <div class="form-group col-md-3">
-                    <label for="search_by_rating">Stelle</label>
-                    <select class="form-control" id="search_by_rating">
-                        <option value="all">Tutti i tipi</option>
-                        <option value="starred">Solo con recensioni</option>
-                        <option value="none">Nessuna recensione</option>
-                        {% for i in RANGE_RAV_RATING_STRING %}
-                            {% if forloop.first %}
-                                <option value="{{ i }}">{{ i }}-1 Stelle</option>
-                            {% elif forloop.last %}
-                                <option value="{{ i }}">{{ i }} Stelle</option>
-                            {% else %}
-                                <option value="{{ i }}">{{ i }}-{{ i|add:1 }} Stelle</option>
-                            {% endif %}
-                        {% endfor %}
-                    </select>
-                </div>
-            </form>
-        </div>
+                <div id="category-tags" class="mt-2" style="min-height: 38px;"></div>
+            </div>
+            <style>
+                .badge-primary {
+                    background-color: {% if 'moderatori' in user.groups.values_list|join:',' %}
+                        {{ADMIN_TERTIARY_COLOR}}
+                    {% else %}
+                        {{TERTIARY_COLOR}}
+                    {% endif %} !important;
+                    color: white !important;
+                    border: none !important;
+                }
+                
+                .badge-primary:hover {
+                    background-color: {% if 'moderatori' in user.groups.values_list|join:',' %}
+                        {{ADMIN_SECONDARY_COLOR}}
+                    {% else %}
+                        {{SECONDARY_COLOR}}
+                    {% endif %} !important;
+                }
+            </style>
+            <div class="form-group col-md-3">
+                <label for="condition-type">Condizione</label>
+                <select class="form-control" id="condition-type">
+                    <option value="all">Tutte</option>
+                    {% for value, label in PROD_CONDIZIONE_CHOICES %}
+                        <option value="{{ value }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group col-md-3">
+                <label for="price-min">Prezzo minimo</label>
+                <input type="number" class="form-control" id="price-min" placeholder="Min €" min="{{MIN_PROD_PREZZO_VALUE}}" max="{{MAX_PROD_PREZZO_VALUE}}" step="1">
+            </div>
+            <div class="form-group col-md-3">
+                <label for="price-max">Prezzo massimo</label>
+                <input type="number" class="form-control" id="price-max" placeholder="Max €" min="{{MIN_PROD_PREZZO_VALUE}}" max="{{MAX_PROD_PREZZO_VALUE}}" step="1">
+            </div>
+            <div class="form-group col-md-3">
+                <label for="sort-order">Ordina per</label>
+                <select class="form-control" id="sort-order">
+                    <option value="data-desc">Data (più recenti)</option>
+                    <option value="data-asc">Data (meno recenti)</option>
+                    <option value="prezzo-asc">Prezzo crescente</option>
+                    <option value="prezzo-desc">Prezzo decrescente</option>
+                </select>
+            </div>
+            <div class="form-group col-md-3">
+                <label for="search_by_rating">Stelle</label>
+                <select class="form-control" id="search_by_rating">
+                    <option value="all">Tutti i tipi</option>
+                    <option value="starred">Solo con recensioni</option>
+                    <option value="none">Nessuna recensione</option>
+                    {% for i in RANGE_RAV_RATING_STRING %}
+                        {% if forloop.first %}
+                            <option value="{{ i }}">{{ i }}-1 Stelle</option>
+                        {% elif forloop.last %}
+                            <option value="{{ i }}">{{ i }} Stelle</option>
+                        {% else %}
+                            <option value="{{ i }}">{{ i }}-{{ i|add:1 }} Stelle</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+        </form>
+    </div>
 </head>
 
 <body>
     <div class="text-center">
         {% block middle %}{% endblock %}
     </div>
-
-    <!-- Scripts -->
-    <script>
-        // Passa le costanti da Django a JavaScript
-        window.COSTANTI = {
-            MAX_WS_QUERIES: "{{ MAX_WS_QUERIES }}",
-            // Aggiungi altre costanti se necessario
-        };
-    </script>
-    <script src="{% static 'js/suggestions.js' %}"></script>
-    
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        setupSuggestions({
-            inputId: 'category-input',
-            suggestionsId: 'category-suggestions',
-            wsUrl: '/ws/tags/', 
-            onSelect: function(item) {},
-            isMulti: true,
-            containerId: 'category-tags'
-        });
-        // Esempio di utilizzo
-    });
-    </script>
-    <script src="{% static 'js/base.js' %}"></script>
 </body>
 </html>

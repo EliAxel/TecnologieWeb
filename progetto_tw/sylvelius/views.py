@@ -381,7 +381,7 @@ class ProfiloCreaAnnuncioPageView(CustomLoginRequiredMixin, ModeratoreAccessForb
             context['iva_mod'] = ann_id.prodotto.iva
             context['qta_mod'] = ann_id.qta_magazzino
             context['cond_mod'] = ann_id.prodotto.condizione
-            context['tags_mod'] = ann_id.prodotto.tags
+            context['tags_mod'] = [tag.nome for tag in ann_id.prodotto.tags.all()]
             
             return render(request, self.template_name,context)
         else:
@@ -401,7 +401,9 @@ class ProfiloCreaAnnuncioPageView(CustomLoginRequiredMixin, ModeratoreAccessForb
             immagini = request.FILES.getlist('immagini')
             qta_magazzino = request.POST.get('qta_magazzino', MIN_CREA_ANNUNCIO_QTA_VALUE)
             condizione = request.POST.get('condizione', 'nuovo')
-
+            annuncio = None
+            prodotto = None
+            annuncio_mod = None
             if annuncio_id:
                 annuncio_mod = get_object_or_404(Annuncio,id=annuncio_id,inserzionista=request.user)
 

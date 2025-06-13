@@ -5,7 +5,8 @@ function setupSuggestions({
     onSelect,
     isMulti = false,
     containerId = null,
-    hiddenInputId = null
+    hiddenInputId = null,
+    initialItems = []
 }) {
     const MAX_WS_QUERIES = window.COSTANTI.MAX_WS_QUERIES;
     let ws = null;
@@ -14,7 +15,7 @@ function setupSuggestions({
     const suggestions = document.getElementById(suggestionsId);
     const container = containerId ? document.getElementById(containerId) : null;
     const hiddenInput = hiddenInputId ? document.getElementById(hiddenInputId) : null;
-    let items = [];
+    let items = [...initialItems];
 
     function connectWS() {
         if (ws && ws.readyState === WebSocket.OPEN) return;
@@ -54,7 +55,6 @@ function setupSuggestions({
         };
         ws.onclose = function() { ws = null; };
     }
-
     function renderItems() {
         if (!container) return;
         container.innerHTML = '';
@@ -71,6 +71,7 @@ function setupSuggestions({
         });
         if (hiddenInput) hiddenInput.value = items.join(',');
     }
+    renderItems();
 
     input.addEventListener('input', function() {
         if (timeout) clearTimeout(timeout);

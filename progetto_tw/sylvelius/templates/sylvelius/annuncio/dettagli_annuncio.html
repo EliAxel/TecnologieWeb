@@ -179,6 +179,7 @@
         const unitPriceElement = document.getElementById('unit-price-{{ annuncio.id }}');
         const totalPriceElement = document.getElementById('total-price-{{ annuncio.id }}');
         const totalPriceContainer = document.getElementById('total-price-container-{{ annuncio.id }}');
+        const form = document.getElementById('purchase-form-{{ annuncio.id }}')
         
         const originalPrice = parseFloat("{{ annuncio.prodotto.prezzo }}");
         

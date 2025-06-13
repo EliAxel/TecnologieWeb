@@ -67,7 +67,7 @@
                             </td>
                             <td>{{ annuncio.data_pubblicazione|date:"d/m/Y H:i" }}</td>
                             <td>
-                                <form action="{% url 'sylvelius:crea_annuncio' %}?page={{ page }}" method="post" style="display:inline;" class="save-scroll-form">
+                                <form action="{% url 'sylvelius:crea_annuncio' %}" method="post" style="display:inline;" class="save-scroll-form">
                                     {% csrf_token %}
                                     <input type="hidden" name="annuncio_id" value="{{ annuncio.id }}">
                                     <button type="submit" class="btn btn-primary btn-sm">Modifica</button>

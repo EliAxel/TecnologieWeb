@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %}Crea Annuncio - Sylvelius{% endblock %}
-
+{% block title %}{% if annuncio_mod %}Modifica{%else%}Crea{%endif%} Annuncio - Sylvelius{% endblock %}
+{% block search_bar %}{% endblock %}
 {% block middle %}
 {% if notok %}
     <script src="{% static 'js/toast.js' %}"></script>
@@ -74,6 +74,7 @@
     {% endif %}
 {% endif %}
 {% block sign_in_sign_up %}{% endblock %}
+
 <div class="container mt-5 mb-5" style="max-width: 700px;">
     <div class="card shadow" style="border-color: {{SECONDARY_COLOR}};">
         <div class="card-header text-white" style="background-color: {{SECONDARY_COLOR}};">
@@ -158,7 +159,7 @@
                     <small class="form-text text-muted">Puoi caricare più immagini. (massimo {{MAX_IMGS_PER_ANNU_VALUE}})</small>
                 </div>
 
-                <button type="submit" id='crea-annuncio-btn'class="btn btn-primary" style="background-color: {{SECONDARY_COLOR}}; border: none; ">
+                <button type="submit" id='crea-annuncio-btn' class="btn btn-primary" style="background-color: {{SECONDARY_COLOR}}; border: none; ">
                     {% if annuncio_mod %}Modifica{%else%}Crea{%endif%} Annuncio
                 </button>
             </form>
@@ -166,10 +167,13 @@
     </div>
 </div>
 <script>
+    window.COSTANTI = {
+        MAX_WS_QUERIES: "{{ MAX_WS_QUERIES }}",
+    };
+</script>
+<script src="{% static 'js/suggestions.js' %}"></script>
+<script>
 document.addEventListener('DOMContentLoaded', function () {
-    window.addEventListener('beforeunload', function() {
-        observer.disconnect(); // Interrompi l'observer
-    });
     const MIN_ORDN_QUANTITA_VALUE = {{MIN_ORDN_QUANTITA_VALUE}};
     const MAX_ANNU_QTA_MAGAZZINO_VALUE = {{MAX_ANNU_QTA_MAGAZZINO_VALUE}};
     const MIN_PROD_PREZZO_VALUE = {{MIN_PROD_PREZZO_VALUE}};
@@ -179,6 +183,17 @@ document.addEventListener('DOMContentLoaded', function () {
     const SYLVELIUS_FEES_PRCNT = {{SYLVELIUS_FEES_PRCNT}};
     const PROD_CONDIZIONE_CHOICES_ID = {{PROD_CONDIZIONE_CHOICES_ID|safe}};
     const ALIQUOTE_LIST_VALS = {{ALIQUOTE_LIST_VALS|safe}};
+    const initialTags = {% if tags_mod %}{{ tags_mod|safe }}{% else %}[]{% endif %};
+
+    setupSuggestions({
+        inputId: 'id_tags_input',
+        suggestionsId: 'id_tags_suggestions',
+        wsUrl: '/ws/tags/',
+        containerId: 'id_tags_selected',
+        hiddenInputId: 'id_tags_hidden',
+        isMulti: true,
+        initialItems: initialTags
+    });
 
     prezzoVal = document.getElementById("id_prezzo");
     qtaMagazzinoVal = document.getElementById("id_qta_magazzino");
@@ -240,20 +255,12 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-
     // Aggiorna i prezzi al cambio
     qtaMagazzinoVal.addEventListener('input', updateQtas);
     prezzoVal.addEventListener('input', updatePrices); // Inizializza al caricamento
     document.getElementById('id_iva').addEventListener('change', updatePrices);
 
-    setupSuggestions({
-        inputId: 'id_tags_input',
-        suggestionsId: 'id_tags_suggestions',
-        wsUrl: '/ws/tags/',
-        containerId: 'id_tags_selected',
-        hiddenInputId: 'id_tags_hidden',
-        isMulti: true
-    });
+    
     // Dopo setupSuggestions()
     const tagsContainer = document.getElementById('id_tags_selected');
 
@@ -268,6 +275,9 @@ document.addEventListener('DOMContentLoaded', function () {
         if(checkOthersValidation(qtaMagazzinoVal)){
             creaAnnuncioBtn.disabled = false;
         }
+    });
+    window.addEventListener('beforeunload', function() {
+        observer.disconnect(); // Interrompi l'observer
     });
 
 // Configura l'observer per monitorare aggiunta/rimozione di figli
