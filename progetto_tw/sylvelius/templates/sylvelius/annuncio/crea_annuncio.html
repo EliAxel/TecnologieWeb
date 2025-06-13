@@ -8,7 +8,7 @@
     {% if notok ==  "cond" %}
     <script>
         showBootstrapAlertWithIcon(
-            "Condizioni incorrette","warning"
+            "Condizioni o IVA incorrette","warning"
         );
     </script>
     {% elif notok ==  "noval" %}
@@ -84,40 +84,41 @@
                 {% csrf_token %}
                 <div class="form-group">
                     <label for="id_nome">Titolo</label>
-                    <input type="text" class="form-control" id="id_nome" name="nome" maxlength="{{MAX_PROD_NOME_CHARS}}" required placeholder="Inserisci il titolo dell'annuncio">
+                    <input type="text" class="form-control" id="id_nome" name="nome" maxlength="{{MAX_PROD_NOME_CHARS}}" value="{{titolo_mod}}" required placeholder="Inserisci il titolo dell'annuncio">
                     <div class="invalid-feedback"></div>
                 </div>
 
                 <div class="form-group">
                     <label for="id_descrizione_breve">Descrizione Breve</label>
-                    <input type="text" class="form-control" id="id_descrizione_breve" name="descrizione_breve" required maxlength="{{MAX_PROD_DESC_BR_CHARS}}" placeholder="Una breve descrizione">
+                    <input type="text" class="form-control" id="id_descrizione_breve" name="descrizione_breve" value="{{desc_br_mod}}" required maxlength="{{MAX_PROD_DESC_BR_CHARS}}" placeholder="Una breve descrizione">
                     <div class="invalid-feedback"></div>
                 </div>
 
                 <div class="form-group">
                     <label for="id_descrizione">Descrizione</label>
-                    <textarea class="form-control" id="id_descrizione" name="descrizione" rows="4" maxlength="{{MAX_PROD_DESC_CHARS}}" placeholder="Descrivi il tuo annuncio (opzionale)"></textarea>
+                    <textarea class="form-control" id="id_descrizione" name="descrizione" rows="4" maxlength="{{MAX_PROD_DESC_CHARS}}" placeholder="Descrivi il tuo annuncio (opzionale)">{%if desc_mod %}{{desc_mod}}{%endif%}</textarea>
                     <div class="invalid-feedback"></div>
                 </div>
 
                 <div class="form-group">
                     <label for="id_prezzo">Prezzo (€)</label>
-                    <input type="number" class="form-control" id="id_prezzo" name="prezzo" max="{{MAX_PROD_PREZZO_VALUE}}" step="0.01" min="{{MIN_PROD_PREZZO_VALUE}}" required placeholder="1.00">
+                    <input type="number" class="form-control" id="id_prezzo" name="prezzo" value="{{prezzo_mod}}" max="{{MAX_PROD_PREZZO_VALUE}}" step="0.01" min="{{MIN_PROD_PREZZO_VALUE}}" required placeholder="1.00">
                     <div class="invalid-feedback"></div> <!-- messaggio errore -->
                 </div>
                 <div class="form-group">
                     <label for="id_iva">IVA (IT)</label>
                     <select class="form-control" id="id_iva" name="iva" required>
-                        <option value="{{ALIQUOTA_IVA_ORD}}">{{ALIQUOTA_IVA_ORD}}% - Aliquota ordinaria</option>
-                        <option value="{{ALIQUOTA_IVA_RID}}">{{ALIQUOTA_IVA_RID}}% - Prodotti alimentari / farmaceutici</option>
-                        <option value="{{ALIQUOTA_IVA_URID}}">{{ALIQUOTA_IVA_URID}}% - Dispositivi medici / prima necessità</option>
-                        <option value="{{ALIQUOTA_IVA_ESE}}">{{ALIQUOTA_IVA_ESE}}% - Operazioni esenti</option>
+                        <option value="{{ALIQUOTA_IVA_ORD}}" {%if iva_mod and iva_mod == ALIQUOTA_IVA_ORD %}selected{%endif%}>{{ALIQUOTA_IVA_ORD}}% - Aliquota ordinaria</option>
+                        <option value="{{ALIQUOTA_IVA_RID}}" {%if iva_mod and iva_mod == ALIQUOTA_IVA_RID %}selected{%endif%}>{{ALIQUOTA_IVA_RID}}% - Prodotti alimentari / farmaceutici</option>
+                        <option value="{{ALIQUOTA_IVA_URID}}" {%if iva_mod and iva_mod == ALIQUOTA_IVA_URID %}selected{%endif%}>{{ALIQUOTA_IVA_URID}}% - Dispositivi medici / prima necessità</option>
+                        <option value="{{ALIQUOTA_IVA_ESE}}" {%if iva_mod and iva_mod == ALIQUOTA_IVA_ESE %}selected{%endif%}>{{ALIQUOTA_IVA_ESE}}% - Operazioni esenti</option>
                     </select>
-                    <div id="prezzo-netto-feedback" class="text-success d-none"></div> 
+                    <div class="invalid-feedback"></div>
+                    <div id="prezzo-netto-feedback" class="text-success d-none"></div>
                 </div>
                 <div class="form-group">
                     <label for="id_qta_magazzino">Quantità in Magazzino</label>
-                    <input type="number" class="form-control" id="id_qta_magazzino" required max="{{MAX_ANNU_QTA_MAGAZZINO_VALUE}}" name="qta_magazzino" min="{{MIN_ORDN_QUANTITA_VALUE}}" value="{{MIN_ORDN_QUANTITA_VALUE}}">
+                    <input type="number" class="form-control" id="id_qta_magazzino" value="{{qta_mod}}" required max="{{MAX_ANNU_QTA_MAGAZZINO_VALUE}}" name="qta_magazzino" min="{{MIN_ORDN_QUANTITA_VALUE}}" placeholder="{{MIN_ORDN_QUANTITA_VALUE}}">
                     <div class="invalid-feedback"></div>
                 </div>
 
@@ -125,7 +126,11 @@
                     <label for="id_condizione">Condizione</label>
                     <select name="condizione" id="id_condizione" class="form-control" required>
                         {% for value, label in PROD_CONDIZIONE_CHOICES %}
-                            <option value="{{ value }}">{{ label }}</option>
+                            {% if cond_mod and cond_mod == value%}
+                                <option value="{{ value }}" selected>{{ label }}</option>
+                            {% else %}
+                                <option value="{{ value }}">{{ label }}</option>
+                            {% endif %}
                         {% endfor %}
                     </select>
                     <div class="invalid-feedback"></div>
@@ -146,7 +151,7 @@
                 <div class="form-group">
                     <label for="id_immagini">Immagini</label>
                     <input type="file" class="form-control-file" id="id_immagini" name="immagini" multiple accept="image/*">
-                    <div id="id_immagini_errore" class="invalid-feedback"></div>
+                    <div id="id_immagini_errore" class="d-none invalid-feedback"></div>
                     <small class="form-text text-muted">Puoi caricare più immagini. (massimo {{MAX_IMGS_PER_ANNU_VALUE}})</small>
                 </div>
 
@@ -160,14 +165,15 @@ document.addEventListener('DOMContentLoaded', function () {
     window.addEventListener('beforeunload', function() {
         observer.disconnect(); // Interrompi l'observer
     });
-    const MIN_ORDN_QUANTITA_VALUE = {{MIN_ORDN_QUANTITA_VALUE}}
-    const MAX_ANNU_QTA_MAGAZZINO_VALUE = {{MAX_ANNU_QTA_MAGAZZINO_VALUE}}
-    const MIN_PROD_PREZZO_VALUE = {{MIN_PROD_PREZZO_VALUE}}
-    const MAX_PROD_PREZZO_VALUE = {{MAX_PROD_PREZZO_VALUE}}
-    const MAX_PROD_PREZZO_DIGITS_DECIMAL = {{MAX_PROD_PREZZO_DIGITS_DECIMAL.1}}
-    const SYLVELIUS_FEES = {{SYLVELIUS_FEES}}
-    const SYLVELIUS_FEES_PRCNT = {{SYLVELIUS_FEES_PRCNT}}
-    const PROD_CONDIZIONE_CHOICES_ID = {{PROD_CONDIZIONE_CHOICES_ID|safe}}
+    const MIN_ORDN_QUANTITA_VALUE = {{MIN_ORDN_QUANTITA_VALUE}};
+    const MAX_ANNU_QTA_MAGAZZINO_VALUE = {{MAX_ANNU_QTA_MAGAZZINO_VALUE}};
+    const MIN_PROD_PREZZO_VALUE = {{MIN_PROD_PREZZO_VALUE}};
+    const MAX_PROD_PREZZO_VALUE = {{MAX_PROD_PREZZO_VALUE}};
+    const MAX_PROD_PREZZO_DIGITS_DECIMAL = {{MAX_PROD_PREZZO_DIGITS_DECIMAL.1}};
+    const SYLVELIUS_FEES = {{SYLVELIUS_FEES}};
+    const SYLVELIUS_FEES_PRCNT = {{SYLVELIUS_FEES_PRCNT}};
+    const PROD_CONDIZIONE_CHOICES_ID = {{PROD_CONDIZIONE_CHOICES_ID|safe}};
+    const ALIQUOTE_LIST_VALS = {{ALIQUOTE_LIST_VALS|safe}};
 
     prezzoVal = document.getElementById("id_prezzo");
     qtaMagazzinoVal = document.getElementById("id_qta_magazzino");
@@ -271,6 +277,7 @@ document.addEventListener('DOMContentLoaded', function () {
         descrizione_breve: document.getElementById('id_descrizione_breve'),
         descrizione: document.getElementById('id_descrizione'),
         prezzo: document.getElementById('id_prezzo'),
+        iva: document.getElementById('id_iva'),
         qta_magazzino: document.getElementById('id_qta_magazzino'),
         condizione: document.getElementById('id_condizione'),
         tags: document.getElementById('id_tags_input'),
@@ -310,6 +317,12 @@ document.addEventListener('DOMContentLoaded', function () {
             case 'prezzo':
                 const prezzo = parseFloat(value);
                 if (isNaN(prezzo) || prezzo < MIN_PROD_PREZZO_VALUE) return 'Il prezzo deve essere un numero positivo maggiore di {{MIN_PROD_PREZZO_VALUE}}0€.';
+                break;
+            case 'iva':
+                if (!value) return 'Seleziona un\'aliquota fra quelle presenti.';
+                if(!ALIQUOTE_LIST_VALS.includes(value.toString())){
+                    return 'Seleziona un\'aliquota fra quelle presenti.';
+                }
                 break;
             case 'qta_magazzino':
                 const qta = parseInt(value);
@@ -384,8 +397,8 @@ document.addEventListener('DOMContentLoaded', function () {
         } else if (value === idImmaginiErrore) {
             return !hasPriceError && !hasQuantityError && !hasTagsError;
         }
-    return false;
-}
+        return false;
+    }
     form.addEventListener('submit', function (e) {
         e.preventDefault();
         let isValid = true;

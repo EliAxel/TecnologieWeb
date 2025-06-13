@@ -20,6 +20,7 @@ from progetto_tw.constants import (
     ORDN_STATO_CONSEGNA_CHOICES,
     INVALID_COMMNT_RATING_VALUE,
     MAX_MESSAGE_MESSAGE_VALUE,
+    ALIQUOTE_LIST,
     MAX_MESSAGE_TITLE_VALUE
 )
 
@@ -42,7 +43,8 @@ class Prodotto(models.Model):
     prezzo = models.DecimalField(max_digits=MAX_PROD_PREZZO_DIGITS_DECIMAL[0],
                                   decimal_places=MAX_PROD_PREZZO_DIGITS_DECIMAL[1],
                                   validators=[MinValueValidator(MIN_PROD_PREZZO_VALUE)])
-    condizione = models.CharField(max_length=20, choices=PROD_CONDIZIONE_CHOICES, default='nuovo')
+    iva = models.PositiveIntegerField(choices=ALIQUOTE_LIST, default=22)
+    condizione = models.CharField(choices=PROD_CONDIZIONE_CHOICES, default='nuovo')
     tags = models.ManyToManyField(Tag, related_name='prodotti', blank=True)
 
 class ImmagineProdotto(models.Model):
@@ -100,7 +102,7 @@ class Ordine(models.Model):
                                            validators=[MinValueValidator(MIN_ORDN_QUANTITA_VALUE)])
     data_ordine = models.DateTimeField(auto_now_add=True)
     luogo_consegna = models.JSONField(null=True)
-    stato_consegna = models.CharField(max_length=20, choices=ORDN_STATO_CONSEGNA_CHOICES, default='da spedire')
+    stato_consegna = models.CharField(choices=ORDN_STATO_CONSEGNA_CHOICES, default='da spedire')
 
     def __str__(self):
         return self.utente.username + " - " + self.prodotto.nome

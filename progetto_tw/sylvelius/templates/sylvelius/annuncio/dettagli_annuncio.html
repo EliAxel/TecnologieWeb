@@ -67,6 +67,7 @@
                 </form>
             </div>   
             {% else %}
+            {% if user.is_authenticated %}
             <div class="form-group d-flex justify-content-center align-items-center mt-3 mb-3">
                 <label class="mr-3" for="quantity-select-{{ annuncio.id }}">Quantità:</label>
                 <input type="number" class="form-control w-auto" size="7" id="quantity-select-{{ annuncio.id }}" required max="{{ annuncio.qta_magazzino }}" name="qta_magazzino" min="{{MIN_ORDN_QUANTITA_VALUE}}" step="1" value="{{MIN_ORDN_QUANTITA_VALUE}}">
@@ -88,6 +89,7 @@
                     <button type="submit" class="btn text-white" style="background-color:{{SECONDARY_COLOR}};" id="buy-now">Acquista ora</button>
                 </form>
             </div>
+            {% endif %}
             {% endif %}
         </div>
 

@@ -59,7 +59,7 @@
                             <td>
                                 <img
                                     data-prodotto-id="{{ annuncio.prodotto.id }}"
-                                    class="card-img-top immagine-asincrona"
+                                    class="card-img immagine-asincrona"
                                     alt="{{ annuncio.prodotto.nome }}"
                                     src="{% static 'img/default_loading.png' %}"
                                     style="max-width: 60px; max-height: 60px;"
@@ -67,8 +67,9 @@
                             </td>
                             <td>{{ annuncio.data_pubblicazione|date:"d/m/Y H:i" }}</td>
                             <td>
-                                <form {#action="{% url 'sylvelius:modifica_annuncio' annuncio.id %}?page={{ page }}"#} method="post" style="display:inline;" class="save-scroll-form">
+                                <form action="{% url 'sylvelius:crea_annuncio' %}?page={{ page }}" method="post" style="display:inline;" class="save-scroll-form">
                                     {% csrf_token %}
+                                    <input type="hidden" name="annuncio_id" value="{{ annuncio.id }}">
                                     <button type="submit" class="btn btn-primary btn-sm">Modifica</button>
                                 </form>
                                 <form action="{% url 'sylvelius:nascondi_annuncio' annuncio.id %}?page={{ page }}" method="post" style="display:inline;" class="save-scroll-form">
