@@ -51,6 +51,7 @@ from progetto_tw.constants import (
     MAX_PAGINATOR_ORDINI_VALUE,
     MAX_PAGINATOR_ANNUNCI_VALUE,
     MAX_PAGINATOR_RICERCA_VALUE,
+    MAX_PAGINATOR_BANNED_USERS_VALUE,
     MIN_CREA_ANNUNCIO_QTA_VALUE,
     PROD_CONDIZIONE_CHOICES_ID
 )
@@ -155,44 +156,54 @@ class ProfiloPageView(CustomLoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        utente = self.request.user
-        context['user'] = utente
-        context['annunci'] = Annuncio.objects.filter(inserzionista=utente).order_by('-data_pubblicazione')
-        context['ordini'] = Ordine.objects.filter(utente=utente).order_by('-data_ordine')
-        # Trova tutti gli utenti che hanno fatto ordini su annunci creati dall'utente corrente
-        # e per cui almeno un ordine è "in attesa"
-        miei_annunci = Annuncio.objects.filter(inserzionista=utente).values_list('id', flat=True)
-        prodotti_miei_annunci = Annuncio.objects.filter(
-            id__in=miei_annunci
-        ).values_list('prodotto_id', flat=True)
-
-        ordini_clienti = (
-            Ordine.objects
-            .filter(prodotto_id__in=prodotti_miei_annunci, stato_consegna='da spedire')
-            .select_related('utente', 'prodotto')
-        )
-
         if self.request.user.groups.filter(name='moderatori').exists():
-            user_without_is_active = User.objects.filter(is_active=False).order_by('date_joined')
-            context['user_without_is_active'] = user_without_is_active
+            user_without_is_active_list = User.objects.filter(is_active=False).order_by('username')
+            
+            paginator = Paginator(user_without_is_active_list, MAX_PAGINATOR_BANNED_USERS_VALUE)  # 10 utenti per pagina
+        
+            page_number = self.request.GET.get('page')
+            page_obj = paginator.get_page(page_number)
+            
+            context['user_without_is_active'] = page_obj.object_list
+            context['page'] = page_obj.number
+            context['has_next'] = page_obj.has_next()
+            context['has_previous'] = page_obj.has_previous()
+            context['request'] = self.request
+        else:
+            utente = self.request.user
+            context['user'] = utente
+            context['annunci'] = Annuncio.objects.filter(inserzionista=utente).order_by('-data_pubblicazione')
+            context['ordini'] = Ordine.objects.filter(utente=utente).order_by('-data_ordine')
+            # Trova tutti gli utenti che hanno fatto ordini su annunci creati dall'utente corrente
+            # e per cui almeno un ordine è "in attesa"
+            miei_annunci = Annuncio.objects.filter(inserzionista=utente).values_list('id', flat=True)
+            prodotti_miei_annunci = Annuncio.objects.filter(
+                id__in=miei_annunci
+            ).values_list('prodotto_id', flat=True)
 
-        clienti_dict = {}
-        for ordine in ordini_clienti:
-            cliente = ordine.utente
-            if cliente not in clienti_dict:
-                clienti_dict[cliente] = {
-                    'username': cliente.username,
-                    'ordini_da_rifornire': []
-                }
-            clienti_dict[cliente]['ordini_da_rifornire'].append(ordine)
+            ordini_clienti = (
+                Ordine.objects
+                .filter(prodotto_id__in=prodotti_miei_annunci, stato_consegna='da spedire')
+                .select_related('utente', 'prodotto')
+            )
 
-        # Lista di oggetti utente con attributo aggiunto "ordini_da_rifornire"
-        clienti = []
-        for cliente, data in clienti_dict.items():
-            cliente.ordini_da_rifornire = data['ordini_da_rifornire']
-            clienti.append(cliente)
+            clienti_dict = {}
+            for ordine in ordini_clienti:
+                cliente = ordine.utente
+                if cliente not in clienti_dict:
+                    clienti_dict[cliente] = {
+                        'username': cliente.username,
+                        'ordini_da_rifornire': []
+                    }
+                clienti_dict[cliente]['ordini_da_rifornire'].append(ordine)
 
-        context['clienti'] = clienti
+            # Lista di oggetti utente con attributo aggiunto "ordini_da_rifornire"
+            clienti = []
+            for cliente, data in clienti_dict.items():
+                cliente.ordini_da_rifornire = data['ordini_da_rifornire']
+                clienti.append(cliente)
+
+            context['clienti'] = clienti
 
         return context
 
