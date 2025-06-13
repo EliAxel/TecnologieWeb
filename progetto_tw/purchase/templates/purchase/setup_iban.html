@@ -4,6 +4,23 @@
 {% endblock %}
 {% block title %}Imposta IBAN - Sylvelius{% endblock %}
 {% block middle %}
+{% if notok %}
+    {% load static %}
+    <script src="{% static 'js/toast.js' %}"></script>
+    {% if notok == "['form']" %}
+    <script>
+        showBootstrapAlertWithIcon(
+            "Il valore fornito non sembra essere un IBAN","warning"
+        );
+    </script>
+    {% elif notok == "['contr']" %}
+    <script>
+        showBootstrapAlertWithIcon(
+            "IBAN non valido","warning"
+        );
+    </script>
+    {% endif %}
+{% endif %}
 <div class="container mt-5" style="max-width: 440px;">
     <div class="card shadow" style="border-color: {{SECONDARY_COLOR}};">
         <div class="card-header text-white" style="background-color: {{SECONDARY_COLOR}};">
@@ -23,9 +40,85 @@
                     <input type="text" class="form-control" value="{% if iban %}{{iban.iban}}{% endif %}" id="iban" name="iban" required maxlength="{{IBAN_LENGTH}}" style="border-color: {{TERTIARY_COLOR}};">
                     <div id="iban-error" class="invalid-feedback" style="display:none;"></div>
                 </div>
-                <button type="submit" class="btn btn-block text-white" style="background-color: {{SECONDARY_COLOR}};">Imposta</button>
+                <button id="iban-btn" type="submit" class="btn btn-block text-white" style="background-color: {{SECONDARY_COLOR}};">Imposta</button>
             </form>
         </div>
     </div>
 </div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+    const ibanForm = document.getElementById('iban-form');
+    const ibanInput = document.getElementById('iban');
+    const ibanError = document.getElementById('iban-error');
+    
+    ibanForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        
+        // Reset error state
+        ibanInput.classList.remove('is-invalid');
+        ibanError.style.display = 'none';
+        
+        // Get and clean IBAN value
+        const iban = ibanInput.value.trim().replace(/\s+/g, '').toUpperCase();
+        
+        try {
+            validateIban(iban);
+            ibanForm.submit();
+        } catch (error) {
+            showError(error.message);
+        }
+    });
+    
+    function validateIban(iban) {
+        // Verifica la struttura base con regex
+        if (!/^[A-Z]{2}\d{2}[A-Z0-9]{1,30}$/.test(iban)) {
+            throw new Error('form');
+        }
+        
+        // Sposta i primi 4 caratteri alla fine
+        const rearranged = iban.substring(4) + iban.substring(0, 4);
+        
+        // Converti le lettere in numeri (A=10, B=11, ..., Z=35)
+        let digits = [];
+        for (const char of rearranged) {
+            if (/[0-9]/.test(char)) {
+                digits.push(char);
+            } else {
+                digits.push((10 + char.charCodeAt(0) - 'A'.charCodeAt(0)).toString());
+            }
+        }
+        
+        // Unisci tutto in una stringa numerica e calcola il modulo 97
+        // Usiamo BigInt per gestire numeri molto grandi
+        const numericStr = digits.join('');
+        let remainder = 0n;
+        
+        for (let i = 0; i < numericStr.length; i++) {
+            const digit = BigInt(numericStr[i]);
+            remainder = (remainder * 10n + digit) % 97n;
+        }
+        
+        if (remainder !== 1n) {
+            throw new Error('contr');
+        }
+    }
+    
+    function showError(message) {
+        ibanInput.classList.add('is-invalid');
+        ibanError.textContent = getErrorMessage(message);
+        ibanError.style.display = 'block';
+    }
+    
+    function getErrorMessage(code) {
+        switch(code) {
+            case 'form':
+                return 'Formato IBAN non valido';
+            case 'contr':
+                return 'Codice di controllo IBAN non valido';
+            default:
+                return code || 'Errore sconosciuto';
+        }
+    }
+});
+</script>
 {% endblock %}

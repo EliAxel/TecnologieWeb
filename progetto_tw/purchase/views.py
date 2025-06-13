@@ -246,7 +246,7 @@ class SetupIban(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin,Templat
         
         # Verifica la struttura base con regex
         if not re.match(r'^[A-Z]{2}\d{2}[A-Z0-9]{1,30}$', iban):
-            raise ValidationError('Formato IBAN non valido')
+            raise ValidationError('form')
         
         # Sposta i primi 4 caratteri alla fine
         rearranged = iban[4:] + iban[:4]
@@ -262,7 +262,7 @@ class SetupIban(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin,Templat
         # Unisci tutto in una stringa numerica e calcola il modulo 97
         numeric_iban = int(''.join(digits))
         if numeric_iban % 97 != 1:
-            raise ValidationError('IBAN non valido: cifra di controllo errata')
+            raise ValidationError('contr')
 
     def post(self, request):
         iban = request.POST.get('iban')
@@ -273,6 +273,6 @@ class SetupIban(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin,Templat
             # Restituisci una risposta di successo
         except ValidationError as e:
             # Restituisci una risposta di errore con il messaggio
-            return HttpResponseBadRequest(str(e))
+            return render(request,self.template_name,{'notok':str(e)})
         return redirect(f'{reverse("sylvelius:profile_annunci")}?evento=iban_imp')
     
