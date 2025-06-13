@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 {% block title %}Login - Sylvelius{% endblock %}
+{% block search_bar %}{% endblock %}
 {% block middle %}
 {% if request.GET.auth == "notok" %}
 <script src="{% static 'js/toast.js' %}"></script>

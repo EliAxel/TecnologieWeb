@@ -370,10 +370,10 @@ class ProfiloCreaAnnuncioPageView(CustomLoginRequiredMixin, ModeratoreAccessForb
     login_url = reverse_lazy('sylvelius:login')
 
     def get(self, request):
-        if request.POST.get('annuncio_id'):
-            ann_id = get_object_or_404(Annuncio,id=request.POST.get('annuncio_id'))
+        if request.GET.get('annuncio_id'):
+            ann_id = get_object_or_404(Annuncio,id=request.GET.get('annuncio_id'), inserzionista=request.user)
             context = {}
-            context['annuncio_mod'] = request.POST.get('annuncio_id')
+            context['annuncio_mod'] = request.GET.get('annuncio_id')
             context['titolo_mod'] = ann_id.prodotto.nome
             context['desc_br_mod'] = ann_id.prodotto.descrizione_breve
             context['desc_mod'] = ann_id.prodotto.descrizione
@@ -388,124 +388,131 @@ class ProfiloCreaAnnuncioPageView(CustomLoginRequiredMixin, ModeratoreAccessForb
             return render(request, self.template_name)
 
     def post(self, request):
-        if request.POST.get('annuncio_id'):
-            return self.get(request)
+        annuncio_id = request.POST.get('annuncio_mod')
+        nome = request.POST.get('nome').strip()
+        descrizione = request.POST.get('descrizione', '')
+        descrizione_breve = request.POST.get('descrizione_breve').strip()
+        prezzo = request.POST.get('prezzo')
+        iva = request.POST.get('iva')
+        tag_string = request.POST.get('tags', '')  # è una stringa unica!
+        immagini = request.FILES.getlist('immagini')
+        qta_magazzino = request.POST.get('qta_magazzino', MIN_CREA_ANNUNCIO_QTA_VALUE)
+        condizione = request.POST.get('condizione', 'nuovo')
+        annuncio = None
+        prodotto = None
+        annuncio_mod = None
+        if annuncio_id:
+            annuncio_mod = get_object_or_404(Annuncio,id=annuncio_id,inserzionista=request.user)
+
+        if condizione not in PROD_CONDIZIONE_CHOICES_ID:
+            return render(request, self.template_name, {'notok': 'cond'})
+
+        # Validazione base
+        if not nome or not descrizione_breve or not prezzo:
+            return render(request, self.template_name, {'notok': 'noval'})
+        
+        if (len(nome) > MAX_PROD_NOME_CHARS or
+            len(descrizione_breve) > MAX_PROD_DESC_BR_CHARS or
+            len(descrizione) > MAX_PROD_DESC_CHARS):
+            return render(request, self.template_name, {'notok': 'lentxt'})
+        
+        try:
+            prezzo = float(prezzo)
+        except ValueError:
+            return render(request, self.template_name, {'notok': 'prerr'})
+        
+        if prezzo < MIN_PROD_PREZZO_VALUE or prezzo > MAX_PROD_PREZZO_VALUE:
+            return render(request, self.template_name, {'notok': 'price'})
+        
+        if iva not in ALIQUOTE_LIST_VALS:
+            return render(request, self.template_name, {'notok': 'cond'})
+
+        try:
+            qta_magazzino = int(qta_magazzino)
+        except ValueError:
+            return render(request, self.template_name, {'notok': 'qtaerr'})
+        if qta_magazzino < MIN_CREA_ANNUNCIO_QTA_VALUE or qta_magazzino > MAX_ANNU_QTA_MAGAZZINO_VALUE:
+            return render(request, self.template_name, {'notok': 'qta'})
+        
+         # Gestione dei tag (split manuale)
+        tag_names = [t.strip().lower() for t in tag_string.split(',') if t.strip()]
+        if(len(tag_names)>MAX_TAGS_N_PER_PROD):
+            return render(request, self.template_name, {'notok': 'tagn'})
+        
+        tag_instances = []
+
+        for nome in tag_names:
+            if (len(nome) > MAX_TAGS_CHARS):
+                return render(request, self.template_name, {'notok': 'tagchar'})
+        
+        # Salva immagini
+        if(len(immagini) > MAX_IMGS_PER_ANNU_VALUE):
+            return render(request, self.template_name, {'notok': 'imgn'})
+        
+        for img in immagini:
+            try:
+                Image.open(img).verify()  # Verifica se è immagine valida
+            except Exception:
+                return render(request, self.template_name, {'notok': 'imgtype'})
+
+        if annuncio_mod:
+            prodotto = Prodotto.objects.get(id=annuncio_mod.prodotto.id)  # type:ignore
+            prodotto.nome = nome
+            prodotto.descrizione_breve = descrizione_breve
+            prodotto.descrizione = descrizione
+            prodotto.prezzo = prezzo #type:ignore
+            prodotto.condizione = condizione
+            prodotto.iva = int(iva)
+            prodotto.save()
         else:
-            annuncio_id = request.POST.get('annuncio_mod')
-            nome = request.POST.get('nome').strip()
-            descrizione = request.POST.get('descrizione', '')
-            descrizione_breve = request.POST.get('descrizione_breve').strip()
-            prezzo = request.POST.get('prezzo')
-            iva = request.POST.get('iva')
-            tag_string = request.POST.get('tags', '')  # è una stringa unica!
-            immagini = request.FILES.getlist('immagini')
-            qta_magazzino = request.POST.get('qta_magazzino', MIN_CREA_ANNUNCIO_QTA_VALUE)
-            condizione = request.POST.get('condizione', 'nuovo')
-            annuncio = None
-            prodotto = None
-            annuncio_mod = None
-            if annuncio_id:
-                annuncio_mod = get_object_or_404(Annuncio,id=annuncio_id,inserzionista=request.user)
+            prodotto=Prodotto.objects.create(
+                nome=nome,
+                descrizione_breve=descrizione_breve,
+                descrizione=descrizione,
+                prezzo=prezzo,
+                condizione=condizione,
+                iva=int(iva)
+            )
+        # Creazione dell'annuncio
+        if annuncio_mod:
+            # Approccio alternativo che restituisce l'oggetto aggiornato
+            annuncio = Annuncio.objects.get(id=annuncio_mod.id)  # type:ignore
+            annuncio.uuid = annuncio_mod.uuid
+            annuncio.inserzionista = request.user
+            annuncio.prodotto = prodotto
+            annuncio.data_pubblicazione = annuncio_mod.data_pubblicazione
+            annuncio.qta_magazzino = qta_magazzino
+            annuncio.is_published = annuncio_mod.is_published
+            annuncio.save()
+        else:
+            annuncio = Annuncio.objects.create(
+                uuid=uuid.uuid4(),
+                inserzionista=request.user,
+                prodotto=prodotto,
+                data_pubblicazione=None,
+                qta_magazzino=qta_magazzino,
+                is_published=True
+            )
+            
+        for nome in tag_names:
+            tag, _ = Tag.objects.get_or_create(nome=nome)
+            tag_instances.append(tag)
+            
+        annuncio.prodotto.tags.set(tag_instances) 
 
-            if condizione not in PROD_CONDIZIONE_CHOICES_ID:
-                return render(request, self.template_name, {'notok': 'cond'})
+        # Salva immagini
+        
+        if len(immagini) > 0 and annuncio_mod:
+            ImmagineProdotto.objects.filter(prodotto=prodotto).delete()
 
-            # Validazione base
-            if not nome or not descrizione_breve or not prezzo:
-                return render(request, self.template_name, {'notok': 'noval'})
-            
-            if (len(nome) > MAX_PROD_NOME_CHARS or
-                len(descrizione_breve) > MAX_PROD_DESC_BR_CHARS or
-                len(descrizione) > MAX_PROD_DESC_CHARS):
-                return render(request, self.template_name, {'notok': 'lentxt'})
-            
-            try:
-                prezzo = float(prezzo)
-            except ValueError:
-                return render(request, self.template_name, {'notok': 'prerr'})
-            
-            if prezzo < MIN_PROD_PREZZO_VALUE or prezzo > MAX_PROD_PREZZO_VALUE:
-                return render(request, self.template_name, {'notok': 'price'})
-            
-            if iva not in ALIQUOTE_LIST_VALS:
-                return render(request, self.template_name, {'notok': 'cond'})
+        for img in immagini:
+            ImmagineProdotto.objects.create(prodotto=prodotto, immagine=img)
 
-            try:
-                qta_magazzino = int(qta_magazzino)
-            except ValueError:
-                return render(request, self.template_name, {'notok': 'qtaerr'})
-            if qta_magazzino < MIN_CREA_ANNUNCIO_QTA_VALUE or qta_magazzino > MAX_ANNU_QTA_MAGAZZINO_VALUE:
-                return render(request, self.template_name, {'notok': 'qta'})
-            
-            if annuncio_mod:
-                prodotto = Prodotto.objects.get(id=annuncio_mod.prodotto.id)  # type:ignore
-                prodotto.nome = nome
-                prodotto.descrizione_breve = descrizione_breve
-                prodotto.descrizione = descrizione
-                prodotto.prezzo = prezzo #type:ignore
-                prodotto.condizione = condizione
-                prodotto.iva = int(iva)
-                prodotto.save()
-            else:
-                prodotto=Prodotto.objects.create(
-                    nome=nome,
-                    descrizione_breve=descrizione_breve,
-                    descrizione=descrizione,
-                    prezzo=prezzo,
-                    condizione=condizione,
-                    iva=int(iva)
-                )
-            # Creazione dell'annuncio
-            if annuncio_mod:
-                # Approccio alternativo che restituisce l'oggetto aggiornato
-                annuncio = Annuncio.objects.get(id=annuncio_mod.id)  # type:ignore
-                annuncio.uuid = annuncio_mod.uuid
-                annuncio.inserzionista = request.user
-                annuncio.prodotto = prodotto
-                annuncio.data_pubblicazione = annuncio_mod.data_pubblicazione
-                annuncio.qta_magazzino = qta_magazzino
-                annuncio.is_published = annuncio_mod.is_published
-                annuncio.save()
-            else:
-                annuncio = Annuncio.objects.create(
-                    uuid=uuid.uuid4(),
-                    inserzionista=request.user,
-                    prodotto=prodotto,
-                    data_pubblicazione=None,
-                    qta_magazzino=qta_magazzino,
-                    is_published=True
-                )
-
-            # Gestione dei tag (split manuale)
-            tag_names = [t.strip().lower() for t in tag_string.split(',') if t.strip()]
-            if(len(tag_names)>MAX_TAGS_N_PER_PROD):
-                return render(request, self.template_name, {'notok': 'tagn'})
-            
-            tag_instances = []
-
-            for nome in tag_names:
-                if (len(nome) > MAX_TAGS_CHARS):
-                    return render(request, self.template_name, {'notok': 'tagchar'})
-                
-            for nome in tag_names:
-                tag, _ = Tag.objects.get_or_create(nome=nome)
-                tag_instances.append(tag)
-                
-            annuncio.prodotto.tags.set(tag_instances) 
-
-            # Salva immagini
-            if(len(immagini) > MAX_IMGS_PER_ANNU_VALUE):
-                return render(request, self.template_name, {'notok': 'imgn'})
-            for img in immagini:
-                try:
-                    Image.open(img).verify()  # Verifica se è immagine valida
-                except Exception:
-                    return render(request, self.template_name, {'notok': 'imgtype'})
-                ImmagineProdotto.objects.create(prodotto=prodotto, immagine=img)
-            
-            if annuncio_id:
-                return redirect(f'{reverse("sylvelius:home")}?evento=mod_annuncio')
-            return redirect(f'{reverse("sylvelius:home")}?evento=crea_annuncio')
+        page = request.GET.get('page', 1)
+        
+        if annuncio_id:
+            return redirect(f'{reverse("sylvelius:profile_annunci")}?page={page}&evento=mod_annuncio')
+        return redirect(f'{reverse("sylvelius:home")}?evento=crea_annuncio')
 
 class RicercaAnnunciView(TemplateView):
     template_name = "sylvelius/ricerca.html"

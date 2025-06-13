@@ -16,6 +16,12 @@
         "Annuncio eliminato con successo!","good"
     );
 </script>
+{% elif request.GET.evento == 'mod_annuncio' %}
+    <script>
+        showBootstrapAlertWithIcon(
+            "Annuncio modificato con successo!","good"
+        );
+    </script>
 {% elif request.GET.evento == "iban_imp" %}
 <script>
     showBootstrapAlertWithIcon(
@@ -67,22 +73,18 @@
                             </td>
                             <td>{{ annuncio.data_pubblicazione|date:"d/m/Y H:i" }}</td>
                             <td>
-                                <form action="{% url 'sylvelius:crea_annuncio' %}" method="post" style="display:inline;" class="save-scroll-form">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="annuncio_id" value="{{ annuncio.id }}">
-                                    <button type="submit" class="btn btn-primary btn-sm">Modifica</button>
-                                </form>
+                                <a href="{% url 'sylvelius:crea_annuncio' %}?page={{ page }}&annuncio_id={{ annuncio.id }}" type="submit" class="btn btn-primary btn-sm mb-1">Modifica</a>
                                 <form action="{% url 'sylvelius:nascondi_annuncio' annuncio.id %}?page={{ page }}" method="post" style="display:inline;" class="save-scroll-form">
                                     {% csrf_token %}
                                     {% if annuncio.is_published %}
-                                        <button type="submit" class="btn btn-warning btn-sm" onclick="return confirm('Sei sicuro di voler nascondere questo annuncio? Chiunque abbia ordinato il prodotto avrà comunque il diritto di riceverlo. ');">Nascondi</button>
+                                        <button type="submit" class="btn btn-warning btn-sm mb-1" onclick="return confirm('Sei sicuro di voler nascondere questo annuncio? Chiunque abbia ordinato il prodotto avrà comunque il diritto di riceverlo. ');">Nascondi</button>
                                     {% else %}
-                                        <button type="submit" class="btn btn-success btn-sm" >Pubblica</button>
+                                        <button type="submit" class="btn btn-success btn-sm mb-1" >Pubblica</button>
                                     {% endif %}
                                 </form>
                                 <form action="{% url 'sylvelius:elimina_annuncio' annuncio.id %}?page={{ page }}" method="post" style="display:inline;" class="save-scroll-form">
                                     {% csrf_token %}
-                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Sei sicuro di voler eliminare questo annuncio? Chiunque abbia ordinato il prodotto avrà comunque il diritto di riceverlo.');">Elimina</button>
+                                    <button type="submit" class="btn btn-danger btn-sm mb-1" onclick="return confirm('Sei sicuro di voler eliminare questo annuncio? Chiunque abbia ordinato il prodotto avrà comunque il diritto di riceverlo.');">Elimina</button>
                                 </form>
                             </td>
                         </tr>
