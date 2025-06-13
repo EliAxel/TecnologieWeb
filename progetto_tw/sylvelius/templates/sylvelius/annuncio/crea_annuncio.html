@@ -77,11 +77,14 @@
 <div class="container mt-5 mb-5" style="max-width: 700px;">
     <div class="card shadow" style="border-color: {{SECONDARY_COLOR}};">
         <div class="card-header text-white" style="background-color: {{SECONDARY_COLOR}};">
-            <h4 class="mb-0">Crea un nuovo annuncio</h4>
+            <h4 class="mb-0">{% if annuncio_mod %}Modifica{%else%}Crea un nuovo{%endif%} annuncio</h4>
         </div>
         <div class="card-body">
             <form method="post" enctype="multipart/form-data" autocomplete="off">
                 {% csrf_token %}
+                {% if annuncio_mod %}
+                    <input type="hidden" name="annuncio_mod" value={{annuncio_mod}}>
+                {% endif %}
                 <div class="form-group">
                     <label for="id_nome">Titolo</label>
                     <input type="text" class="form-control" id="id_nome" name="nome" maxlength="{{MAX_PROD_NOME_CHARS}}" value="{{titolo_mod}}" required placeholder="Inserisci il titolo dell'annuncio">
@@ -155,7 +158,9 @@
                     <small class="form-text text-muted">Puoi caricare più immagini. (massimo {{MAX_IMGS_PER_ANNU_VALUE}})</small>
                 </div>
 
-                <button type="submit" id='crea-annuncio-btn'class="btn btn-primary" style="background-color: {{SECONDARY_COLOR}}; border: none; ">Crea Annuncio</button>
+                <button type="submit" id='crea-annuncio-btn'class="btn btn-primary" style="background-color: {{SECONDARY_COLOR}}; border: none; ">
+                    {% if annuncio_mod %}Modifica{%else%}Crea{%endif%} Annuncio
+                </button>
             </form>
         </div>
     </div>

@@ -373,6 +373,7 @@ class ProfiloCreaAnnuncioPageView(CustomLoginRequiredMixin, ModeratoreAccessForb
         if request.POST.get('annuncio_id'):
             ann_id = get_object_or_404(Annuncio,id=request.POST.get('annuncio_id'))
             context = {}
+            context['annuncio_mod'] = request.POST.get('annuncio_id')
             context['titolo_mod'] = ann_id.prodotto.nome
             context['desc_br_mod'] = ann_id.prodotto.descrizione_breve
             context['desc_mod'] = ann_id.prodotto.descrizione
@@ -390,6 +391,7 @@ class ProfiloCreaAnnuncioPageView(CustomLoginRequiredMixin, ModeratoreAccessForb
         if request.POST.get('annuncio_id'):
             return self.get(request)
         else:
+            annuncio_id = request.POST.get('annuncio_mod')
             nome = request.POST.get('nome').strip()
             descrizione = request.POST.get('descrizione', '')
             descrizione_breve = request.POST.get('descrizione_breve').strip()
@@ -399,6 +401,9 @@ class ProfiloCreaAnnuncioPageView(CustomLoginRequiredMixin, ModeratoreAccessForb
             immagini = request.FILES.getlist('immagini')
             qta_magazzino = request.POST.get('qta_magazzino', MIN_CREA_ANNUNCIO_QTA_VALUE)
             condizione = request.POST.get('condizione', 'nuovo')
+
+            if annuncio_id:
+                annuncio_mod = get_object_or_404(Annuncio,id=annuncio_id,inserzionista=request.user)
 
             if condizione not in PROD_CONDIZIONE_CHOICES_ID:
                 return render(request, self.template_name, {'notok': 'cond'})
@@ -429,8 +434,18 @@ class ProfiloCreaAnnuncioPageView(CustomLoginRequiredMixin, ModeratoreAccessForb
                 return render(request, self.template_name, {'notok': 'qtaerr'})
             if qta_magazzino < MIN_CREA_ANNUNCIO_QTA_VALUE or qta_magazzino > MAX_ANNU_QTA_MAGAZZINO_VALUE:
                 return render(request, self.template_name, {'notok': 'qta'})
-
-            prodotto=Prodotto.objects.create(
+            
+            if annuncio_mod:
+                prodotto = Prodotto.objects.get(id=annuncio_mod.prodotto.id)  # type:ignore
+                prodotto.nome = nome
+                prodotto.descrizione_breve = descrizione_breve
+                prodotto.descrizione = descrizione
+                prodotto.prezzo = prezzo #type:ignore
+                prodotto.condizione = condizione
+                prodotto.iva = int(iva)
+                prodotto.save()
+            else:
+                prodotto=Prodotto.objects.create(
                     nome=nome,
                     descrizione_breve=descrizione_breve,
                     descrizione=descrizione,
@@ -438,15 +453,26 @@ class ProfiloCreaAnnuncioPageView(CustomLoginRequiredMixin, ModeratoreAccessForb
                     condizione=condizione,
                     iva=int(iva)
                 )
-            # Creazion dell'annuncio
-            annuncio = Annuncio.objects.create(
-                uuid=uuid.uuid4(),
-                inserzionista=request.user,
-                prodotto=prodotto,
-                data_pubblicazione=None,
-                qta_magazzino=qta_magazzino,
-                is_published=True
-            )
+            # Creazione dell'annuncio
+            if annuncio_mod:
+                # Approccio alternativo che restituisce l'oggetto aggiornato
+                annuncio = Annuncio.objects.get(id=annuncio_mod.id)  # type:ignore
+                annuncio.uuid = annuncio_mod.uuid
+                annuncio.inserzionista = request.user
+                annuncio.prodotto = prodotto
+                annuncio.data_pubblicazione = annuncio_mod.data_pubblicazione
+                annuncio.qta_magazzino = qta_magazzino
+                annuncio.is_published = annuncio_mod.is_published
+                annuncio.save()
+            else:
+                annuncio = Annuncio.objects.create(
+                    uuid=uuid.uuid4(),
+                    inserzionista=request.user,
+                    prodotto=prodotto,
+                    data_pubblicazione=None,
+                    qta_magazzino=qta_magazzino,
+                    is_published=True
+                )
 
             # Gestione dei tag (split manuale)
             tag_names = [t.strip().lower() for t in tag_string.split(',') if t.strip()]
@@ -463,7 +489,7 @@ class ProfiloCreaAnnuncioPageView(CustomLoginRequiredMixin, ModeratoreAccessForb
                 tag, _ = Tag.objects.get_or_create(nome=nome)
                 tag_instances.append(tag)
                 
-            annuncio.prodotto.tags.set(tag_instances)
+            annuncio.prodotto.tags.set(tag_instances) 
 
             # Salva immagini
             if(len(immagini) > MAX_IMGS_PER_ANNU_VALUE):
@@ -474,7 +500,9 @@ class ProfiloCreaAnnuncioPageView(CustomLoginRequiredMixin, ModeratoreAccessForb
                 except Exception:
                     return render(request, self.template_name, {'notok': 'imgtype'})
                 ImmagineProdotto.objects.create(prodotto=prodotto, immagine=img)
-
+            
+            if annuncio_id:
+                return redirect(f'{reverse("sylvelius:home")}?evento=mod_annuncio')
             return redirect(f'{reverse("sylvelius:home")}?evento=crea_annuncio')
 
 class RicercaAnnunciView(TemplateView):

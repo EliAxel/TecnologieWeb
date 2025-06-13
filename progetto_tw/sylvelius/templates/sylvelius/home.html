@@ -17,6 +17,12 @@
             "Annuncio creato con successo!","good"
         );
     </script>
+{% elif request.GET.evento == 'mod_annuncio' %}
+    <script>
+        showBootstrapAlertWithIcon(
+            "Annuncio modificato con successo!","good"
+        );
+    </script>
 {% elif request.GET.evento == 'elimina_pub' %}
     <script>
         showBootstrapAlertWithIcon(
