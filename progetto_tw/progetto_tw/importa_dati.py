@@ -25,13 +25,16 @@ def init_db():
         dati = json.load(file)
 
     for users in dati.get('utenti', []):
-        User.objects.get_or_create(
+        user, created = User.objects.get_or_create(
             id=int(users['id']),
             defaults={
                 'username': users['username'],
-                'password': users['password'],
             }
         )
+
+        if created:
+            user.set_password(users['password'])
+            user.save()
     
     # Importa Prodotti
     for prodotto_data in dati.get('prodotti', []):

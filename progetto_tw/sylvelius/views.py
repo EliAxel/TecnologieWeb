@@ -106,6 +106,20 @@ def create_notification(recipient=None, title="", message="", is_global=False, s
     
     return notifica
 
+def annulla_ordine_free(request, order_id):
+    ordine = get_object_or_404(Ordine,id=order_id)
+    if((request.user == ordine.utente or request.user == ordine.prodotto.annunci.inserzionista) and ordine.stato_consegna=='da spedire'): #type:ignore
+        ordine.stato_consegna = 'annullato'
+        ordine.save()
+        if request.user == ordine.utente:
+            create_notification(recipient=ordine.prodotto.annunci.inserzionista,title="Ordine annullato", sender=request.user, #type:ignore
+                                message=f"Il tuo ordine di {ordine.prodotto.nome} è stato annullato dal compratore")
+        if request.user == ordine.prodotto.annunci.inserzionista:#type:ignore
+            create_notification(recipient=ordine.utente,title="Ordine rifiutato", sender=request.user, #type:ignore
+                                message=f"Il tuo ordine di {ordine.prodotto.nome} è stato rifiutato dal venditore")
+        return JsonResponse({"status": "success"})
+    else: return JsonResponse({"status": "error", "message": "Ordine non trovato o già spedito"}, status=400)
+
 class HomePageView(TemplateView):
     template_name = "sylvelius/home.html"
 
@@ -269,13 +283,17 @@ class ProfiloDeletePageView(CustomLoginRequiredMixin, View):
             ).exists()):
             return render(request, self.template_name,{"err":"shipd"})
         
-        Ordine.objects.filter(utente=user,stato_consegna="da spedire").update(
-            stato_consegna='annullato'
-        )
-        Ordine.objects.filter(
+        ordine_ex=Ordine.objects.filter(utente=user,stato_consegna="da spedire")
+        ordine_in=Ordine.objects.filter(
             prodotto__annunci__inserzionista=user,
             stato_consegna='da spedire'
-            ).update(stato_consegna='annullato')
+            )
+        
+        for ordine in ordine_ex:
+            annulla_ordine_free(request,ordine.id) #type:ignore
+        
+        for ordine in ordine_in:
+            annulla_ordine_free(request,ordine.id)#type:ignore
 
         Annuncio.objects.filter(inserzionista=user).delete()
         Iban.objects.filter(utente=request.user).delete()
@@ -843,18 +861,23 @@ def espelli_utente(request, is_active, user_id):
         return redirect(f'{reverse("sylvelius:profile")}?evento=elimina_ut')
     else:
         return HttpResponseForbidden()
-    
+
 @require_POST
 @login_required
 def formatta_utente(request, user_id):
     if request.user.groups.filter(name='moderatori').exists():
         user = get_object_or_404(User, id=user_id)
         if(not user.is_active):
-            Ordine.objects.filter(
+            ordini_ex = Ordine.objects.filter(
                 Q(prodotto__annunci__inserzionista=user) &
                 Q(stato_consegna='da spedire')
-            ).update(stato_consegna='annullato')
-            Ordine.objects.filter(utente=user.id).delete()# type: ignore
+            )
+            for ordine in ordini_ex:
+                annulla_ordine_free(request,ordine.id)# type: ignore
+            ordine_in = Ordine.objects.filter(utente=user.id)# type: ignore
+            for ordine in ordine_in:
+                annulla_ordine_free(request,ordine.id)# type: ignore
+            ordine_in.delete()
             Annuncio.objects.filter(inserzionista=user.id).delete() # type: ignore
             CommentoAnnuncio.objects.filter(utente=user.id).delete()# type: ignore
             Notification.objects.filter(recipient=user.id).delete()# type: ignore
@@ -863,19 +886,8 @@ def formatta_utente(request, user_id):
         return redirect(f'{reverse("sylvelius:profile")}?evento=formatta_ut')
     else:
         return HttpResponseForbidden()
-    
+
 @require_POST
 @login_required
 def annulla_ordine(request, order_id):
-    ordine = get_object_or_404(Ordine,id=order_id)
-    if((request.user == ordine.utente or request.user == ordine.prodotto.annunci.inserzionista) and ordine.stato_consegna=='da spedire'): #type:ignore
-        ordine.stato_consegna = 'annullato'
-        ordine.save()
-        if request.user == ordine.utente:
-            create_notification(recipient=ordine.prodotto.annunci.inserzionista,title="Ordine annullato", sender=request.user, #type:ignore
-                                message=f"Il tuo ordine di {ordine.prodotto.nome} è stato annullato dal compratore")
-        if request.user == ordine.prodotto.annunci.inserzionista:#type:ignore
-            create_notification(recipient=ordine.utente,title="Ordine rifiutato", sender=request.user, #type:ignore
-                                message=f"Il tuo ordine di {ordine.prodotto.nome} è stato rifiutato dal venditore")
-        return JsonResponse({"status": "success"})
-    else: return JsonResponse({"status": "error", "message": "Ordine non trovato o già spedito"}, status=400)
+    return annulla_ordine_free(request, order_id)
