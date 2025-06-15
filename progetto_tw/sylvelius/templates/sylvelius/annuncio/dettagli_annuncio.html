@@ -76,9 +76,9 @@
             <!-- Azioni -->
             
             <div class="mt-4 mb-4">
-                <button class="btn text-white d-inline-block" id="cart-btn" style="background-color:{{SECONDARY_COLOR}};">
+                <!--<button class="btn text-white d-inline-block" id="cart-btn" style="background-color:{{SECONDARY_COLOR}};">
                     <i class="bi bi-cart"></i>
-                    Aggiungi al carrello</button>
+                    Aggiungi al carrello</button>-->
                 <form action="{% url 'purchase:fake_purchase' %}" method="post" class="d-inline-block" id="purchase-form-{{ annuncio.id }}">
                     {% csrf_token %}
                     <input type="hidden" name="amount" value="{{ annuncio.prodotto.prezzo }}" id="amount-input-{{ annuncio.id }}">
@@ -186,12 +186,12 @@
         function updatePrices() {
             if(quantitySelect.value === ""){
                 document.getElementById("buy-now").disabled = true;
-                document.getElementById("cart-btn").disabled = true;
+                //document.getElementById("cart-btn").disabled = true;
                 totalPriceContainer.style.display = 'none';
                 return;
             } else {
                 document.getElementById("buy-now").disabled = false;
-                document.getElementById("cart-btn").disabled = false;
+                //document.getElementById("cart-btn").disabled = false;
             }
             let quantity = parseInt(quantitySelect.value);
 
