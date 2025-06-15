@@ -1,0 +1,32 @@
+{% extends "sylvelius/profile/profile_ordini.html" %}
+{% block title %}Clienti - Sylvelius{% endblock %}
+{% load static %}
+{% block avvisi %}
+    <script src="{% static 'js/toast.js' %}"></script>
+    {% if request.GET.evento == 'spedito_ordine' %}
+        <script>
+            showBootstrapAlertWithIcon(
+                "Ordine spedito con successo!","good"
+            );
+        </script>
+    {% elif request.GET.evento == 'completato_ordine' %}
+        <script>
+            showBootstrapAlertWithIcon(
+                "Ordine completato con successo!","good"
+            );
+        </script>
+    {% endif %}
+{% endblock %}
+{% block nome %}clienti{% endblock %}
+{% block prezzocad %}Utente{% endblock %}
+{% block nothing %}ricevuto{% endblock %}
+{% block prezzocadtd %}<td>{{ ordine.utente }}</td>{% endblock %}
+{% block annulla %}Rifiuta{% endblock %}
+{% block annullad %}Rifiuta{% endblock %}
+{% block annullare %}rifiutare{% endblock %}
+{% block spedisci %}
+<a href="{% url 'shipping:ship' %}?page={{page}}&ordine={{ordine.id}}" class="btn btn-success btn-sm mb-1">Spedisci</a>
+{% endblock %}
+{% block spediscid %}
+<button class="btn btn-secondary btn-sm mb-1" disabled>Spedisci</button>
+{% endblock %}

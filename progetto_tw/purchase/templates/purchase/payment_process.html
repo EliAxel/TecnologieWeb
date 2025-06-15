@@ -10,12 +10,13 @@
 <div class="container mt-5 mb-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <h2>Pagamento di: €{{ amount|intcomma }}</h2>
-            <p>Stai acquistando: <strong>{{ item_name }}</strong> (Quantità: {{ quantity }})</p>
+            {% block titolo %}<h2>Pagamento di: €{{ amount|intcomma }}</h2>{% endblock %}
+            {% block sottotitolo %}<p>Stai acquistando: <strong>{{ item_name }}</strong> (Quantità: {{ quantity }})</p>{% endblock %}
             
             <!-- PayPal -->
             <div class="card shadow-sm mb-3">
                 <div class="card-body d-flex justify-content-between align-items-center">
+                    {% block paypal %}
                     <div class="d-flex align-items-center">
                         <img src="{% static 'img/paypal_logo.png' %}" alt="PayPal" width="20" class="me-3 mr-2">
                         <strong>PayPal</strong>
@@ -23,6 +24,7 @@
                     <span id="paypal-loading-text">Caricamento...</span>
                     <div id="paypal-button-container" class="text-end w-50" style="display: none;">
                     </div>
+                    {% endblock %}
                 </div>
             </div>
 
@@ -30,13 +32,16 @@
 
             <div class="card shadow-sm mb-3">
                 <div class="card-body d-flex justify-content-between align-items-center">
+                    {% block google %}
                     <div class="d-flex align-items-center">
                         <i class="bi bi-google text-danger fs-3 me-3 mr-2"></i>
                         <strong>Google Pay</strong>
                     </div>
                     <span>Non disponibile</span>
+                    {% endblock %}
                 </div>
             </div>
+            {% block apple %}
             <div class="card shadow-sm mb-3">
                 <div class="card-body d-flex justify-content-between align-items-center">
                     <div class="d-flex align-items-center">
@@ -46,6 +51,7 @@
                     <span>Non disponibile</span>
                 </div>
             </div>
+            {% endblock %}
         </div>
     </div>
 </div>

@@ -7,6 +7,7 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('', include("sylvelius.urls")),
     path('pagamento/', include("purchase.urls")),
+    path('spedizione/', include("shipping.urls")),
     path('admin/', admin.site.urls),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) # DA RIMUOVERE IN PRODUZIONE
 

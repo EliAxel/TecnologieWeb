@@ -1,7 +1,6 @@
 {% extends "sylvelius/home.html" %}
 {% load static %}
-{% block main_header %}{% endblock %}
-{% block title %}Profilo - Sylvelius{% endblock %}
+{% block title %}Annunci - Sylvelius{% endblock %}
 {% block middle %}
 <script src="{% static 'js/toast.js' %}"></script>
 {% if request.GET.evento == "nascondi" %}
@@ -73,7 +72,7 @@
                             </td>
                             <td>{{ annuncio.data_pubblicazione|date:"d/m/Y H:i" }}</td>
                             <td>
-                                <a href="{% url 'sylvelius:crea_annuncio' %}?page={{ page }}&annuncio_id={{ annuncio.id }}" type="submit" class="btn btn-primary btn-sm mb-1">Modifica</a>
+                                <a href="{% url 'sylvelius:modifica_annuncio' annuncio.id %}?page={{ page }}" type="submit" class="btn btn-primary btn-sm mb-1">Modifica</a>
                                 <form action="{% url 'sylvelius:nascondi_annuncio' annuncio.id %}?page={{ page }}" method="post" style="display:inline;" class="save-scroll-form">
                                     {% csrf_token %}
                                     {% if annuncio.is_published %}

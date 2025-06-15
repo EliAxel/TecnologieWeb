@@ -15,8 +15,10 @@ urlpatterns = [
     path("account/profilo/ordini/", views.ProfiloOrdiniPageView.as_view(), name="profile_ordini"),
     path("account/profilo/annunci/", views.ProfiloAnnunciPageView.as_view(), name="profile_annunci"),
     path("account/profilo/annunci/crea/", views.ProfiloCreaAnnuncioPageView.as_view(), name="crea_annuncio"),
+    path("account/profilo/annunci/modifica/<int:annuncio_id>/", views.ProfiloModificaAnnuncioPageView.as_view(), name="modifica_annuncio"),
     path("account/profilo/annunci/nascondi/<int:id>/", views.toggle_pubblicazione , name="nascondi_annuncio"),
     path("account/profilo/annunci/elimina/<int:id>/", views.delete_pubblicazione, name="elimina_annuncio"),
+    path("account/profilo/clienti/",views.ProfiloClientiPageView.as_view(), name="profile_clienti"),
     path("annuncio/<str:uuid>/", views.AnnuncioDetailView.as_view(), name="dettagli_annuncio"),
     path("ricerca/", views.RicercaAnnunciView.as_view(), name="ricerca_annunci"),
     # fbv

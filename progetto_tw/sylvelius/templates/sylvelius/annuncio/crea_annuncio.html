@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %}{% if annuncio_mod %}Modifica{%else%}Crea{%endif%} Annuncio - Sylvelius{% endblock %}
+{% block title %}Crea Annuncio - Sylvelius{% endblock %}
 {% block search_bar %}{% endblock %}
 {% block middle %}
 {% if notok %}
@@ -71,6 +71,18 @@
             "Trovati file non in formati immagine","warning"
         );
     </script>
+    {% elif notok ==  "imgsize" %}
+    <script>
+        showBootstrapAlertWithIcon(
+            "Trovate immagini troppo pesanti","warning"
+        );
+    </script>
+    {% elif notok ==  "imgproportion" %}
+    <script>
+        showBootstrapAlertWithIcon(
+            "Trovate immagini sproporzionate verticalmente od orizzontalmente","warning"
+        );
+    </script>
     {% endif %}
 {% endif %}
 {% block sign_in_sign_up %}{% endblock %}
@@ -78,14 +90,11 @@
 <div class="container mt-5 mb-5" style="max-width: 700px;">
     <div class="card shadow" style="border-color: {{SECONDARY_COLOR}};">
         <div class="card-header text-white" style="background-color: {{SECONDARY_COLOR}};">
-            <h4 class="mb-0">{% if annuncio_mod %}Modifica{%else%}Crea un nuovo{%endif%} annuncio</h4>
+            <h4 class="mb-0">{% block titolo %}Crea un nuovo{% endblock %} annuncio</h4>
         </div>
         <div class="card-body">
             <form method="post" enctype="multipart/form-data" autocomplete="off">
                 {% csrf_token %}
-                {% if annuncio_mod %}
-                    <input type="hidden" name="annuncio_mod" value={{annuncio_mod}}>
-                {% endif %}
                 <div class="form-group">
                     <label for="id_nome">Titolo</label>
                     <input type="text" class="form-control" id="id_nome" name="nome" maxlength="{{MAX_PROD_NOME_CHARS}}" value="{{titolo_mod}}" required placeholder="Inserisci il titolo dell'annuncio">
@@ -112,10 +121,11 @@
                 <div class="form-group">
                     <label for="id_iva">IVA (IT)</label>
                     <select class="form-control" id="id_iva" name="iva" required>
-                        <option value="{{ALIQUOTA_IVA_ORD}}" {%if iva_mod and iva_mod == ALIQUOTA_IVA_ORD %}selected{%endif%}>{{ALIQUOTA_IVA_ORD}}% - Aliquota ordinaria</option>
-                        <option value="{{ALIQUOTA_IVA_RID}}" {%if iva_mod and iva_mod == ALIQUOTA_IVA_RID %}selected{%endif%}>{{ALIQUOTA_IVA_RID}}% - Prodotti alimentari / farmaceutici</option>
-                        <option value="{{ALIQUOTA_IVA_URID}}" {%if iva_mod and iva_mod == ALIQUOTA_IVA_URID %}selected{%endif%}>{{ALIQUOTA_IVA_URID}}% - Dispositivi medici / prima necessità</option>
-                        <option value="{{ALIQUOTA_IVA_ESE}}" {%if iva_mod and iva_mod == ALIQUOTA_IVA_ESE %}selected{%endif%}>{{ALIQUOTA_IVA_ESE}}% - Operazioni esenti</option>
+                        {% for value, label in ALIQUOTE_LIST%}
+                            {% block ivafor %}
+                                <option value="{{ value }}">{{ label }}</option>
+                            {% endblock %}
+                        {% endfor %}
                     </select>
                     <div class="invalid-feedback"></div>
                     <div id="prezzo-netto-feedback" class="text-success d-none"></div>
@@ -130,11 +140,9 @@
                     <label for="id_condizione">Condizione</label>
                     <select name="condizione" id="id_condizione" class="form-control" required>
                         {% for value, label in PROD_CONDIZIONE_CHOICES %}
-                            {% if cond_mod and cond_mod == value%}
-                                <option value="{{ value }}" selected>{{ label }}</option>
-                            {% else %}
+                            {% block condiz %}
                                 <option value="{{ value }}">{{ label }}</option>
-                            {% endif %}
+                            {% endblock %}
                         {% endfor %}
                     </select>
                     <div class="invalid-feedback"></div>
@@ -153,14 +161,17 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="id_immagini">Immagini</label>
+                    <label for="id_immagini">{% block imgs %}Immagini{%endblock%}</label>
                     <input type="file" class="form-control-file" id="id_immagini" name="immagini" multiple accept="image/*">
                     <div id="id_immagini_errore" class="d-none invalid-feedback"></div>
-                    <small class="form-text text-muted">Puoi caricare più immagini. (massimo {{MAX_IMGS_PER_ANNU_VALUE}})</small>
+                    <small class="form-text text-muted">Puoi caricare più immagini:</small>
+                    <small class="form-text text-muted">1. Massimo {{MAX_IMGS_PER_ANNU_VALUE}} immagini</small>
+                    <small class="form-text text-muted">2. Massimo {{MAX_IMG_SIZE_HUMAN}} per immagine</small>
+                    <small class="form-text text-muted">3. Il rapporto d'aspetto è di massimo {{MAX_IMG_ASPECT_RATIO}} e minimo {{MIN_IMG_ASPECT_RATIO}}</small>
                 </div>
 
                 <button type="submit" id='crea-annuncio-btn' class="btn btn-primary" style="background-color: {{SECONDARY_COLOR}}; border: none; ">
-                    {% if annuncio_mod %}Modifica{%else%}Crea{%endif%} Annuncio
+                    {% block button %}Crea{%endblock%} Annuncio
                 </button>
             </form>
         </div>

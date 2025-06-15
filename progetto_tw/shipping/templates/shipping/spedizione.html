@@ -1,0 +1,31 @@
+{% extends "purchase/payment_process.html" %}
+{% block title %}Spedisci - Sylvelius{% endblock %}
+{% block titolo %}<h2>Spedizione di: {{ ordine.prodotto.nome }}</h2>{% endblock %}
+{% block sottotitolo %}<p>A: <strong>{{ ordine.utente }}</strong> (Quantità: {{ ordine.quantita }})</p>{% endblock %}
+{% block apple %}{% endblock %}
+{% block google %}
+    <div class="d-flex align-items-center">
+        <i class="bi bi-truck me-3 mr-2"></i>
+        <strong>Poste Italiane</strong>
+    </div>
+    <span>
+        Tempo previsto: 3 giorni lavorativi
+        <form action="{% url 'shipping:imposta_spedito' ordine.id %}?page={{page}}" method="post" style="display:inline;" class="save-scroll-form">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-warning btn-sm mb-1">Spedisci ordine</button>
+        </form>
+    </span>
+{% endblock %}
+{% block paypal %}
+    <div class="d-flex align-items-center ">
+        <i class="bi bi-lightning-fill text-primary me-3 mr-2"></i>
+        <strong>Teletrasporto</strong>
+    </div>
+    <span>
+        Tempo previsto: immediato
+        <form action="{% url 'shipping:imposta_completato' ordine.id %}?page={{page}}" method="post" style="display:inline;" class="save-scroll-form">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success btn-sm mb-1">Completa ordine</button>
+        </form>
+    </span>
+{% endblock %}

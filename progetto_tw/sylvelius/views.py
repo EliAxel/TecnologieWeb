@@ -1,4 +1,5 @@
 # Django core
+import os
 from django.contrib.auth import update_session_auth_hash, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
@@ -54,6 +55,9 @@ from progetto_tw.constants import (
     MAX_PAGINATOR_BANNED_USERS_VALUE,
     MIN_CREA_ANNUNCIO_QTA_VALUE,
     ALIQUOTE_LIST_VALS,
+    MAX_IMG_SIZE,
+    MAX_IMG_ASPECT_RATIO,
+    MIN_IMG_ASPECT_RATIO,
     PROD_CONDIZIONE_CHOICES_ID
 )
 # Other
@@ -365,30 +369,93 @@ class ProfiloAnnunciPageView(CustomLoginRequiredMixin, ModeratoreAccessForbidden
 
         return context
 
+# non callable
+def check_if_annuncio_is_valid(request):
+    nome = request.POST.get('nome').strip()
+    descrizione = request.POST.get('descrizione', '')
+    descrizione_breve = request.POST.get('descrizione_breve').strip()
+    prezzo = request.POST.get('prezzo')
+    iva = request.POST.get('iva')
+    tag_string = request.POST.get('tags', '')  # è una stringa unica!
+    immagini = request.FILES.getlist('immagini')
+    qta_magazzino = request.POST.get('qta_magazzino', MIN_CREA_ANNUNCIO_QTA_VALUE)
+    condizione = request.POST.get('condizione', 'nuovo')
+
+    if condizione not in PROD_CONDIZIONE_CHOICES_ID:
+        return {'notok': 'cond'}
+
+    # Validazione base
+    if not nome or not descrizione_breve or not prezzo:
+        return {'notok': 'noval'}
+    
+    if (len(nome) > MAX_PROD_NOME_CHARS or
+        len(descrizione_breve) > MAX_PROD_DESC_BR_CHARS or
+        len(descrizione) > MAX_PROD_DESC_CHARS):
+        return {'notok': 'lentxt'}
+    
+    try:
+        prezzo = float(prezzo)
+    except ValueError:
+        return {'notok': 'prerr'}
+    
+    if prezzo < MIN_PROD_PREZZO_VALUE or prezzo > MAX_PROD_PREZZO_VALUE:
+        return {'notok': 'price'}
+    
+    if iva not in ALIQUOTE_LIST_VALS:
+        return {'notok': 'cond'}
+
+    try:
+        qta_magazzino = int(qta_magazzino)
+    except ValueError:
+        return {'notok': 'qtaerr'}
+    if qta_magazzino < MIN_CREA_ANNUNCIO_QTA_VALUE or qta_magazzino > MAX_ANNU_QTA_MAGAZZINO_VALUE:
+        return {'notok': 'qta'}
+    
+        # Gestione dei tag (split manuale)
+    tag_names = [t.strip().lower() for t in tag_string.split(',') if t.strip()]
+    if(len(tag_names)>MAX_TAGS_N_PER_PROD):
+        return {'notok': 'tagn'}
+
+    for nome in tag_names:
+        if (len(nome) > MAX_TAGS_CHARS):
+            return {'notok': 'tagchar'}
+    
+    # Salva immagini
+    if(len(immagini) > MAX_IMGS_PER_ANNU_VALUE):
+        return {'notok': 'imgn'}
+    
+    for img in immagini:
+        immagine = None
+        try:
+            immagine = Image.open(img)
+            immagine.verify()  # Verifica se è immagine valida
+        except Exception:
+            return {'notok': 'imgtype'}
+
+        file_size = img.size
+        if file_size > MAX_IMG_SIZE:
+            return {'notok': 'imgsize'}
+        
+        width, height = immagine.size 
+        aspect_ratio = width / height
+        
+        if aspect_ratio < MIN_IMG_ASPECT_RATIO or aspect_ratio > MAX_IMG_ASPECT_RATIO:
+            return {'notok': 'imgproportion'}
+    
+    return None
+
 class ProfiloCreaAnnuncioPageView(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin, View):
     template_name = "sylvelius/annuncio/crea_annuncio.html"
     login_url = reverse_lazy('sylvelius:login')
 
     def get(self, request):
-        if request.GET.get('annuncio_id'):
-            ann_id = get_object_or_404(Annuncio,id=request.GET.get('annuncio_id'), inserzionista=request.user)
-            context = {}
-            context['annuncio_mod'] = request.GET.get('annuncio_id')
-            context['titolo_mod'] = ann_id.prodotto.nome
-            context['desc_br_mod'] = ann_id.prodotto.descrizione_breve
-            context['desc_mod'] = ann_id.prodotto.descrizione
-            context['prezzo_mod'] = ann_id.prodotto.prezzo
-            context['iva_mod'] = ann_id.prodotto.iva
-            context['qta_mod'] = ann_id.qta_magazzino
-            context['cond_mod'] = ann_id.prodotto.condizione
-            context['tags_mod'] = [tag.nome for tag in ann_id.prodotto.tags.all()]
-            
-            return render(request, self.template_name,context)
-        else:
-            return render(request, self.template_name)
+        return render(request, self.template_name)
 
     def post(self, request):
-        annuncio_id = request.POST.get('annuncio_mod')
+        err = check_if_annuncio_is_valid(request)
+        if err:
+            return render(request, self.template_name, err)
+        
         nome = request.POST.get('nome').strip()
         descrizione = request.POST.get('descrizione', '')
         descrizione_breve = request.POST.get('descrizione_breve').strip()
@@ -398,102 +465,27 @@ class ProfiloCreaAnnuncioPageView(CustomLoginRequiredMixin, ModeratoreAccessForb
         immagini = request.FILES.getlist('immagini')
         qta_magazzino = request.POST.get('qta_magazzino', MIN_CREA_ANNUNCIO_QTA_VALUE)
         condizione = request.POST.get('condizione', 'nuovo')
-        annuncio = None
-        prodotto = None
-        annuncio_mod = None
-        if annuncio_id:
-            annuncio_mod = get_object_or_404(Annuncio,id=annuncio_id,inserzionista=request.user)
-
-        if condizione not in PROD_CONDIZIONE_CHOICES_ID:
-            return render(request, self.template_name, {'notok': 'cond'})
-
-        # Validazione base
-        if not nome or not descrizione_breve or not prezzo:
-            return render(request, self.template_name, {'notok': 'noval'})
         
-        if (len(nome) > MAX_PROD_NOME_CHARS or
-            len(descrizione_breve) > MAX_PROD_DESC_BR_CHARS or
-            len(descrizione) > MAX_PROD_DESC_CHARS):
-            return render(request, self.template_name, {'notok': 'lentxt'})
-        
-        try:
-            prezzo = float(prezzo)
-        except ValueError:
-            return render(request, self.template_name, {'notok': 'prerr'})
-        
-        if prezzo < MIN_PROD_PREZZO_VALUE or prezzo > MAX_PROD_PREZZO_VALUE:
-            return render(request, self.template_name, {'notok': 'price'})
-        
-        if iva not in ALIQUOTE_LIST_VALS:
-            return render(request, self.template_name, {'notok': 'cond'})
-
-        try:
-            qta_magazzino = int(qta_magazzino)
-        except ValueError:
-            return render(request, self.template_name, {'notok': 'qtaerr'})
-        if qta_magazzino < MIN_CREA_ANNUNCIO_QTA_VALUE or qta_magazzino > MAX_ANNU_QTA_MAGAZZINO_VALUE:
-            return render(request, self.template_name, {'notok': 'qta'})
-        
-         # Gestione dei tag (split manuale)
-        tag_names = [t.strip().lower() for t in tag_string.split(',') if t.strip()]
-        if(len(tag_names)>MAX_TAGS_N_PER_PROD):
-            return render(request, self.template_name, {'notok': 'tagn'})
-        
-        tag_instances = []
-
-        for nome in tag_names:
-            if (len(nome) > MAX_TAGS_CHARS):
-                return render(request, self.template_name, {'notok': 'tagchar'})
-        
-        # Salva immagini
-        if(len(immagini) > MAX_IMGS_PER_ANNU_VALUE):
-            return render(request, self.template_name, {'notok': 'imgn'})
-        
-        for img in immagini:
-            try:
-                Image.open(img).verify()  # Verifica se è immagine valida
-            except Exception:
-                return render(request, self.template_name, {'notok': 'imgtype'})
-
-        if annuncio_mod:
-            prodotto = Prodotto.objects.get(id=annuncio_mod.prodotto.id)  # type:ignore
-            prodotto.nome = nome
-            prodotto.descrizione_breve = descrizione_breve
-            prodotto.descrizione = descrizione
-            prodotto.prezzo = prezzo #type:ignore
-            prodotto.condizione = condizione
-            prodotto.iva = int(iva)
-            prodotto.save()
-        else:
-            prodotto=Prodotto.objects.create(
-                nome=nome,
-                descrizione_breve=descrizione_breve,
-                descrizione=descrizione,
-                prezzo=prezzo,
-                condizione=condizione,
-                iva=int(iva)
-            )
+        prodotto=Prodotto.objects.create(
+            nome=nome,
+            descrizione_breve=descrizione_breve,
+            descrizione=descrizione,
+            prezzo=prezzo,
+            condizione=condizione,
+            iva=int(iva)
+        )
         # Creazione dell'annuncio
-        if annuncio_mod:
-            # Approccio alternativo che restituisce l'oggetto aggiornato
-            annuncio = Annuncio.objects.get(id=annuncio_mod.id)  # type:ignore
-            annuncio.uuid = annuncio_mod.uuid
-            annuncio.inserzionista = request.user
-            annuncio.prodotto = prodotto
-            annuncio.data_pubblicazione = annuncio_mod.data_pubblicazione
-            annuncio.qta_magazzino = qta_magazzino
-            annuncio.is_published = annuncio_mod.is_published
-            annuncio.save()
-        else:
-            annuncio = Annuncio.objects.create(
-                uuid=uuid.uuid4(),
-                inserzionista=request.user,
-                prodotto=prodotto,
-                data_pubblicazione=None,
-                qta_magazzino=qta_magazzino,
-                is_published=True
-            )
+        annuncio = Annuncio.objects.create(
+            uuid=uuid.uuid4(),
+            inserzionista=request.user,
+            prodotto=prodotto,
+            data_pubblicazione=None,
+            qta_magazzino=qta_magazzino,
+            is_published=True
+        )
             
+        tag_instances = []
+        tag_names = [t.strip().lower() for t in tag_string.split(',') if t.strip()]
         for nome in tag_names:
             tag, _ = Tag.objects.get_or_create(nome=nome)
             tag_instances.append(tag)
@@ -501,8 +493,75 @@ class ProfiloCreaAnnuncioPageView(CustomLoginRequiredMixin, ModeratoreAccessForb
         annuncio.prodotto.tags.set(tag_instances) 
 
         # Salva immagini
+        for img in immagini:
+            ImmagineProdotto.objects.create(prodotto=prodotto, immagine=img)
         
-        if len(immagini) > 0 and annuncio_mod:
+        return redirect(f'{reverse("sylvelius:home")}?evento=crea_annuncio')
+
+class ProfiloModificaAnnuncioPageView(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin, View):
+    template_name = "sylvelius/annuncio/modifica_annuncio.html"
+    login_url = reverse_lazy('sylvelius:login')
+
+    def get(self, request, annuncio_id):
+        ann_id = get_object_or_404(Annuncio,id=annuncio_id, inserzionista=request.user)
+        context = {}
+        context['titolo_mod'] = ann_id.prodotto.nome
+        context['desc_br_mod'] = ann_id.prodotto.descrizione_breve
+        context['desc_mod'] = ann_id.prodotto.descrizione
+        context['prezzo_mod'] = ann_id.prodotto.prezzo
+        context['iva_mod'] = ann_id.prodotto.iva
+        context['qta_mod'] = ann_id.qta_magazzino
+        context['cond_mod'] = ann_id.prodotto.condizione
+        context['tags_mod'] = [tag.nome for tag in ann_id.prodotto.tags.all()]
+        
+        return render(request, self.template_name,context)
+    
+    def post(self,request,annuncio_id):
+        err = check_if_annuncio_is_valid(request)
+        if err:
+            return render(request, self.template_name, err)
+
+        nome = request.POST.get('nome').strip()
+        descrizione = request.POST.get('descrizione', '')
+        descrizione_breve = request.POST.get('descrizione_breve').strip()
+        prezzo = request.POST.get('prezzo')
+        iva = request.POST.get('iva')
+        tag_string = request.POST.get('tags', '')  # è una stringa unica!
+        immagini = request.FILES.getlist('immagini')
+        qta_magazzino = request.POST.get('qta_magazzino', MIN_CREA_ANNUNCIO_QTA_VALUE)
+        condizione = request.POST.get('condizione', 'nuovo')
+
+        annuncio_mod=get_object_or_404(Annuncio,id=annuncio_id, inserzionista=request.user)
+
+        prodotto = Prodotto.objects.get(id=annuncio_mod.prodotto.id)  # type:ignore
+        prodotto.nome = nome
+        prodotto.descrizione_breve = descrizione_breve
+        prodotto.descrizione = descrizione
+        prodotto.prezzo = prezzo #type:ignore
+        prodotto.condizione = condizione
+        prodotto.iva = int(iva)
+        prodotto.save()
+
+        annuncio = Annuncio.objects.get(id=annuncio_mod.id)  # type:ignore
+        annuncio.uuid = annuncio_mod.uuid
+        annuncio.inserzionista = request.user
+        annuncio.prodotto = prodotto
+        annuncio.data_pubblicazione = annuncio_mod.data_pubblicazione
+        annuncio.qta_magazzino = qta_magazzino
+        annuncio.is_published = annuncio_mod.is_published
+        annuncio.save()
+
+        tag_instances = []
+        tag_names = [t.strip().lower() for t in tag_string.split(',') if t.strip()]
+        for nome in tag_names:
+            tag, _ = Tag.objects.get_or_create(nome=nome)
+            tag_instances.append(tag)
+            
+        annuncio.prodotto.tags.set(tag_instances)
+
+        # Salva immagini
+        
+        if len(immagini) > 0:
             ImmagineProdotto.objects.filter(prodotto=prodotto).delete()
 
         for img in immagini:
@@ -510,9 +569,31 @@ class ProfiloCreaAnnuncioPageView(CustomLoginRequiredMixin, ModeratoreAccessForb
 
         page = request.GET.get('page', 1)
         
-        if annuncio_id:
-            return redirect(f'{reverse("sylvelius:profile_annunci")}?page={page}&evento=mod_annuncio')
-        return redirect(f'{reverse("sylvelius:home")}?evento=crea_annuncio')
+        return redirect(f'{reverse("sylvelius:profile_annunci")}?page={page}&evento=mod_annuncio')
+    
+class ProfiloClientiPageView(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin, TemplateView):
+    template_name = "sylvelius/profile/profile_clienti.html"
+    login_url = reverse_lazy('sylvelius:login')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        utente = self.request.user
+        context['user'] = utente
+        
+        ordini_list = Ordine.objects.filter(prodotto__annunci__inserzionista=utente).select_related('prodotto', 'utente').order_by('-data_ordine')
+        
+        paginator = Paginator(ordini_list, MAX_PAGINATOR_ORDINI_VALUE)  # 20 ordini per pagina
+        
+        page_number = self.request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        
+        context['ordini'] = page_obj.object_list
+        context['page'] = page_obj.number
+        context['has_next'] = page_obj.has_next()
+        context['has_previous'] = page_obj.has_previous()
+        context['request'] = self.request
+
+        return context
 
 class RicercaAnnunciView(TemplateView):
     template_name = "sylvelius/ricerca.html"
@@ -787,8 +868,14 @@ def formatta_utente(request, user_id):
 @login_required
 def annulla_ordine(request, order_id):
     ordine = get_object_or_404(Ordine,id=order_id)
-    if(request.user == ordine.utente and ordine.stato_consegna=='da spedire'):
+    if((request.user == ordine.utente or request.user == ordine.prodotto.annunci.inserzionista) and ordine.stato_consegna=='da spedire'): #type:ignore
         ordine.stato_consegna = 'annullato'
         ordine.save()
+        if request.user == ordine.utente:
+            create_notification(recipient=ordine.prodotto.annunci.inserzionista,title="Ordine annullato", sender=request.user, #type:ignore
+                                message=f"Il tuo ordine di {ordine.prodotto.nome} è stato annullato dal compratore")
+        if request.user == ordine.prodotto.annunci.inserzionista:#type:ignore
+            create_notification(recipient=ordine.utente,title="Ordine rifiutato", sender=request.user, #type:ignore
+                                message=f"Il tuo ordine di {ordine.prodotto.nome} è stato rifiutato dal venditore")
         return JsonResponse({"status": "success"})
     else: return JsonResponse({"status": "error", "message": "Ordine non trovato o già spedito"}, status=400)

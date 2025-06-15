@@ -25,11 +25,14 @@ import json
 import uuid
 import requests
 from requests.auth import HTTPBasicAuth
+from django.core.exceptions import PermissionDenied
 
 # Create your views here.
 @require_POST
 @login_required
-def fake_purchase(request):    
+def fake_purchase(request):
+    if request.user.groups.filter(name='moderatori').exists():
+        raise PermissionDenied
     amount = request.POST.get("amount", "0.00")
     item_name = request.POST.get("item_name", "Prodotto sconosciuto")
     product_id = request.POST.get("product_id", "")
@@ -220,6 +223,7 @@ def paypal_coa(request):
                 ordine.luogo_consegna = address
                 ordine.save()
                 invoice_obj.delete()
+                create_notification(recipient=ordine.prodotto.annunci.inserzionista,title="Un utente ha acquistato!",message=f"Un utente ha acquistato {ordine.quantita} unità di {ordine.prodotto.nome}!") #type:ignore
             else:
                 return HttpResponse(status=102)
 

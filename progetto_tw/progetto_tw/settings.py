@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.humanize',
     'sylvelius.apps.SylveliusConfig',
     'purchase.apps.PurchaseConfig',
+    'shipping.apps.ShippingConfig',
     'channels',
 ]
 

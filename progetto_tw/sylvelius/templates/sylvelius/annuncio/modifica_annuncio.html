@@ -1,0 +1,20 @@
+{% extends "sylvelius/annuncio/crea_annuncio.html" %}
+{% block title %}Modifica Annuncio - Sylvelius{% endblock %}
+{% block titolo %}Modifica{% endblock %}
+
+{% block ivafor %}
+    {% if iva_mod and iva_mod == value%}
+        <option value="{{ value }}" selected>{{ label }}</option>
+    {% else %}
+        <option value="{{ value }}">{{ label }}</option>
+    {% endif %}
+{% endblock %}
+{% block condiz %}
+    {% if cond_mod and cond_mod == value%}
+        <option value="{{ value }}" selected>{{ label }}</option>
+    {% else %}
+        <option value="{{ value }}">{{ label }}</option>
+    {% endif %}
+{% endblock %}
+{% block imgs %}Seleziona nuove immagini o lasciale invariate{%endblock%}
+{% block button %}Modifica{%endblock%}
