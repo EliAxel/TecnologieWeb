@@ -91,9 +91,7 @@ def verify_paypal_webhook(request,body):
     event_type = webhook_event.get("event_type")
 
     # Scegli il webhook_id corretto in base all'evento
-    if event_type == "PAYMENT.CAPTURE.COMPLETED":
-        webhook_id = settings.PAYPAL_PCC_ID
-    elif event_type == "CHECKOUT.ORDER.APPROVED":
+    if event_type == "CHECKOUT.ORDER.APPROVED":
         webhook_id = settings.PAYPAL_COA_ID
     else:
         return False
@@ -140,21 +138,15 @@ def paypal_coa(request):
 
         pu = purchase_units[0]  # prendi il primo purchase unit
         invoice = pu.get('invoice_id')
-        if not invoice:
-            return HttpResponse(status=400)
 
-        invoice_obj = Invoice.objects.get(invoice_id=invoice)
-        if not invoice_obj:
+        try:
+            invoice_obj = Invoice.objects.get(invoice_id=invoice)
+        except Invoice.DoesNotExist:
             return HttpResponse(status=404)
         
         product_id = invoice_obj.prodotto_id
         user_id = invoice_obj.user_id
         quantita = invoice_obj.quantita
-
-        try:
-            prodotto = Prodotto.objects.get(id=product_id)
-        except Prodotto.DoesNotExist:
-            return HttpResponse(status=404)
         
         try:
             user = User.objects.get(id=user_id)
@@ -162,9 +154,18 @@ def paypal_coa(request):
             return HttpResponse(status=404)
         
         try:
+            prodotto = Prodotto.objects.get(id=product_id)
+        except Prodotto.DoesNotExist:
+            create_notification(recipient=user,title="Acquisto Annullato",
+                                message=f"Purtroppo l'acquisto non è andato a buon fine, il prodotto comprato è stato rimosso dalla piattaforma. Le arriverà un rimborso completo il prima possibile.")
+            return HttpResponse(status=200)
+
+        try:
             annuncio=Annuncio.objects.get(prodotto=prodotto)
         except Annuncio.DoesNotExist:
-            return HttpResponse(status=404)
+            create_notification(recipient=user,title="Acquisto Annullato",
+                                message=f"Purtroppo l'acquisto non è andato a buon fine, il prodotto {prodotto.nome} è stato rimosso dalla piattaforma. Le arriverà un rimborso completo il prima possibile.")
+            return HttpResponse(status=200)
         
         if(annuncio.qta_magazzino < quantita):
             create_notification(recipient=user,title="Acquisto Annullato",

@@ -148,5 +148,4 @@ MEDIA_URL = '/media/'
 PAYPAL_TEST = True  # Usa l'ambiente sandbox per i test
 xxx= os.getenv('xxx')
 xxx= os.getenv('xxx')
-PAYPAL_PCC_ID = os.getenv('PAYPAL_PCC_ID')
 PAYPAL_COA_ID = os.getenv('PAYPAL_COA_ID')
