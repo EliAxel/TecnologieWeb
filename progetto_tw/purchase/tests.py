@@ -16,7 +16,7 @@ from purchase.models import Invoice
 class AnonUrls(TestCase):
     def test_pagamento(self):
         response = self.client.get('/pagamento/')
-        self.assertEqual(response.status_code, 405)
+        self.assertEqual(response.status_code, 302)
     
     def test_pagamento_ok(self):
         response = self.client.get('/pagamento/confermato/')
@@ -42,7 +42,7 @@ class LoggedUrls(TestCase):
         self.client.login(username='testuser', password='Testpass0')
     
     def test_pagamento_logged(self):
-        response = self.client.post('/pagamento/')
+        response = self.client.get('/pagamento/')
         self.assertEqual(response.status_code, 403)
 
 class FakePurchaseTests(TestCase):

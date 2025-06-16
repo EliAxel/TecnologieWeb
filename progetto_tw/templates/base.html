@@ -38,6 +38,10 @@
             <div class="ml-auto order-lg-3 d-flex">
                 {% if user.is_authenticated %}
                     {% include "_btn_bell.html" %}
+                {% else %}
+                <button class="btn position-relative" disabled>
+                    <i class="bi bi-bell text-white" style="visibility: hidden; font-size: 1.5rem;"></i>
+                </button>
                 {% endif%}
                 {% block sign_in_sign_up %}{% endblock %}
             </div>

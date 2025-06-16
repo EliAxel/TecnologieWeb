@@ -132,7 +132,7 @@
                 </div>
                 <div class="form-group">
                     <label for="id_qta_magazzino">Quantità in Magazzino</label>
-                    <input type="number" class="form-control" id="id_qta_magazzino" value="{{qta_mod}}" required max="{{MAX_ANNU_QTA_MAGAZZINO_VALUE}}" name="qta_magazzino" min="{{MIN_ORDN_QUANTITA_VALUE}}" placeholder="{{MIN_ORDN_QUANTITA_VALUE}}">
+                    <input type="number" class="form-control" id="id_qta_magazzino" value="{{qta_mod}}" required max="{{MAX_ANNU_QTA_MAGAZZINO_VALUE}}" name="qta_magazzino" min="{{MIN_CREA_ANNUNCIO_QTA_VALUE}}" placeholder="{{MIN_CREA_ANNUNCIO_QTA_VALUE}}">
                     <div class="invalid-feedback"></div>
                 </div>
 
@@ -185,7 +185,7 @@
 <script src="{% static 'js/suggestions.js' %}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const MIN_ORDN_QUANTITA_VALUE = {{MIN_ORDN_QUANTITA_VALUE}};
+    const MIN_CREA_ANNUNCIO_QTA_VALUE = {{MIN_CREA_ANNUNCIO_QTA_VALUE}};
     const MAX_ANNU_QTA_MAGAZZINO_VALUE = {{MAX_ANNU_QTA_MAGAZZINO_VALUE}};
     const MIN_PROD_PREZZO_VALUE = {{MIN_PROD_PREZZO_VALUE}};
     const MAX_PROD_PREZZO_VALUE = {{MAX_PROD_PREZZO_VALUE}};
@@ -222,8 +222,8 @@ document.addEventListener('DOMContentLoaded', function () {
         let quantity = parseInt(qtaMagazzinoVal.value);
 
         // Se il valore è invalido o fuori range, correggilo
-        if (isNaN(quantity) || quantity < MIN_ORDN_QUANTITA_VALUE) {
-            quantity = MIN_ORDN_QUANTITA_VALUE;
+        if (isNaN(quantity) || quantity < MIN_CREA_ANNUNCIO_QTA_VALUE) {
+            quantity = MIN_CREA_ANNUNCIO_QTA_VALUE;
         } else if (quantity > MAX_ANNU_QTA_MAGAZZINO_VALUE){
             quantity = MAX_ANNU_QTA_MAGAZZINO_VALUE;
         }
@@ -352,7 +352,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 break;
             case 'qta_magazzino':
                 const qta = parseInt(value);
-                if (isNaN(qta) || qta < MIN_ORDN_QUANTITA_VALUE) return 'La quantità deve essere un numero intero positivo maggiore di {{MIN_ORDN_QUANTITA_VALUE}}.';
+                if (isNaN(qta) || qta < MIN_CREA_ANNUNCIO_QTA_VALUE) return 'La quantità deve essere un numero intero positivo maggiore di {{MIN_CREA_ANNUNCIO_QTA_VALUE}}.';
                 break;
             case 'condizione':
                 if (!value) return 'Seleziona una condizione fra quelle presenti.';
