@@ -93,7 +93,7 @@
                 <!--<button class="btn text-white d-inline-block" id="cart-btn" style="background-color:{{SECONDARY_COLOR}};">
                     <i class="bi bi-cart"></i>
                     Aggiungi al carrello</button>-->
-                <form action="{% url 'purchase:fake_purchase' %}" method="get" class="d-inline-block" id="purchase-form-{{ annuncio.id }}">
+                <form action="{% url 'purchase:purchase' %}" method="get" class="d-inline-block" id="purchase-form-{{ annuncio.id }}">
                     <input type="hidden" name="annuncio_id" value="{{ annuncio.uuid }}">
                     <input type="hidden" name="quantita" value="{{MIN_ORDN_QUANTITA_VALUE}}" id="quantity-input-{{ annuncio.id }}">
                     <button type="submit" class="btn text-white" style="background-color:{{SECONDARY_COLOR}};" id="buy-now">Acquista ora</button>

@@ -29,7 +29,7 @@ from requests.auth import HTTPBasicAuth
 from django.core.exceptions import PermissionDenied
 
 # Create your views here.
-class FakePurchasePageView(CustomLoginRequiredMixin,ModeratoreAccessForbiddenMixin,View):
+class PurchasePageView(CustomLoginRequiredMixin,ModeratoreAccessForbiddenMixin,View):
     template_name="purchase/payment_process.html"
     login_url = reverse_lazy('sylvelius:login')
 
