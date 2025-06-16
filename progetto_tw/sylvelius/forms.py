@@ -23,19 +23,3 @@ class CustomUserCreationForm(UserCreationForm):
     class Meta:
         model = User
         fields = ("username", "password1", "password2")
-
-    def clean_username(self):
-        username = self.cleaned_data.get('username')
-        if username is None:
-            raise forms.ValidationError("L'username è obbligatorio.")
-        if len(username) > MAX_UNAME_CHARS:
-            raise forms.ValidationError(f"L'username non può superare i {MAX_PWD_CHARS} caratteri.")
-        return username
-
-    def clean_password1(self):
-        password1 = self.cleaned_data.get('password1')
-        if password1 is None:
-            raise forms.ValidationError("La password è obbligatoria.")
-        if len(password1) > MAX_PWD_CHARS:
-            raise forms.ValidationError(f"La password non può superare i {MAX_PWD_CHARS} caratteri.")
-        return password1

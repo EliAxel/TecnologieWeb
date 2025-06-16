@@ -120,6 +120,80 @@ def annulla_ordine_free(request, order_id):
         return JsonResponse({"status": "success"})
     else: return JsonResponse({"status": "error", "message": "Ordine non trovato o già spedito"}, status=400)
 
+def check_if_annuncio_is_valid(request):
+    nome = request.POST.get('nome').strip()
+    descrizione = request.POST.get('descrizione', '')
+    descrizione_breve = request.POST.get('descrizione_breve').strip()
+    prezzo = request.POST.get('prezzo')
+    iva = request.POST.get('iva')
+    tag_string = request.POST.get('tags', '')  # è una stringa unica!
+    immagini = request.FILES.getlist('immagini')
+    qta_magazzino = request.POST.get('qta_magazzino', MIN_CREA_ANNUNCIO_QTA_VALUE)
+    condizione = request.POST.get('condizione', 'nuovo')
+
+    if condizione not in PROD_CONDIZIONE_CHOICES_ID:
+        return {'notok': 'cond'}
+
+    # Validazione base
+    if not nome or not descrizione_breve or not prezzo:
+        return {'notok': 'noval'}
+    
+    if (len(nome) > MAX_PROD_NOME_CHARS or
+        len(descrizione_breve) > MAX_PROD_DESC_BR_CHARS or
+        len(descrizione) > MAX_PROD_DESC_CHARS):
+        return {'notok': 'lentxt'}
+    
+    try:
+        prezzo = float(prezzo)
+    except ValueError:
+        return {'notok': 'prerr'}
+    
+    if prezzo < MIN_PROD_PREZZO_VALUE or prezzo > MAX_PROD_PREZZO_VALUE:
+        return {'notok': 'price'}
+    
+    if iva not in ALIQUOTE_LIST_VALS:
+        return {'notok': 'cond'}
+
+    try:
+        qta_magazzino = int(qta_magazzino)
+    except ValueError:
+        return {'notok': 'qtaerr'}
+    if qta_magazzino < MIN_CREA_ANNUNCIO_QTA_VALUE or qta_magazzino > MAX_ANNU_QTA_MAGAZZINO_VALUE:
+        return {'notok': 'qta'}
+    
+        # Gestione dei tag (split manuale)
+    tag_names = [t.strip().lower() for t in tag_string.split(',') if t.strip()]
+    if(len(tag_names)>MAX_TAGS_N_PER_PROD):
+        return {'notok': 'tagn'}
+
+    for nome in tag_names:
+        if (len(nome) > MAX_TAGS_CHARS):
+            return {'notok': 'tagchar'}
+    
+    # Salva immagini
+    if(len(immagini) > MAX_IMGS_PER_ANNU_VALUE):
+        return {'notok': 'imgn'}
+    
+    for img in immagini:
+        immagine = None
+        try:
+            immagine = Image.open(img)
+            immagine.verify()  # Verifica se è immagine valida
+        except Exception:
+            return {'notok': 'imgtype'}
+
+        file_size = img.size
+        if file_size > MAX_IMG_SIZE:
+            return {'notok': 'imgsize'}
+        
+        width, height = immagine.size 
+        aspect_ratio = width / height
+        
+        if aspect_ratio < MIN_IMG_ASPECT_RATIO or aspect_ratio > MAX_IMG_ASPECT_RATIO:
+            return {'notok': 'imgproportion'}
+    
+    return None
+
 class HomePageView(TemplateView):
     template_name = "sylvelius/home.html"
 
@@ -386,81 +460,6 @@ class ProfiloAnnunciPageView(CustomLoginRequiredMixin, ModeratoreAccessForbidden
         context['request'] = self.request
 
         return context
-
-# non callable
-def check_if_annuncio_is_valid(request):
-    nome = request.POST.get('nome').strip()
-    descrizione = request.POST.get('descrizione', '')
-    descrizione_breve = request.POST.get('descrizione_breve').strip()
-    prezzo = request.POST.get('prezzo')
-    iva = request.POST.get('iva')
-    tag_string = request.POST.get('tags', '')  # è una stringa unica!
-    immagini = request.FILES.getlist('immagini')
-    qta_magazzino = request.POST.get('qta_magazzino', MIN_CREA_ANNUNCIO_QTA_VALUE)
-    condizione = request.POST.get('condizione', 'nuovo')
-
-    if condizione not in PROD_CONDIZIONE_CHOICES_ID:
-        return {'notok': 'cond'}
-
-    # Validazione base
-    if not nome or not descrizione_breve or not prezzo:
-        return {'notok': 'noval'}
-    
-    if (len(nome) > MAX_PROD_NOME_CHARS or
-        len(descrizione_breve) > MAX_PROD_DESC_BR_CHARS or
-        len(descrizione) > MAX_PROD_DESC_CHARS):
-        return {'notok': 'lentxt'}
-    
-    try:
-        prezzo = float(prezzo)
-    except ValueError:
-        return {'notok': 'prerr'}
-    
-    if prezzo < MIN_PROD_PREZZO_VALUE or prezzo > MAX_PROD_PREZZO_VALUE:
-        return {'notok': 'price'}
-    
-    if iva not in ALIQUOTE_LIST_VALS:
-        return {'notok': 'cond'}
-
-    try:
-        qta_magazzino = int(qta_magazzino)
-    except ValueError:
-        return {'notok': 'qtaerr'}
-    if qta_magazzino < MIN_CREA_ANNUNCIO_QTA_VALUE or qta_magazzino > MAX_ANNU_QTA_MAGAZZINO_VALUE:
-        return {'notok': 'qta'}
-    
-        # Gestione dei tag (split manuale)
-    tag_names = [t.strip().lower() for t in tag_string.split(',') if t.strip()]
-    if(len(tag_names)>MAX_TAGS_N_PER_PROD):
-        return {'notok': 'tagn'}
-
-    for nome in tag_names:
-        if (len(nome) > MAX_TAGS_CHARS):
-            return {'notok': 'tagchar'}
-    
-    # Salva immagini
-    if(len(immagini) > MAX_IMGS_PER_ANNU_VALUE):
-        return {'notok': 'imgn'}
-    
-    for img in immagini:
-        immagine = None
-        try:
-            immagine = Image.open(img)
-            immagine.verify()  # Verifica se è immagine valida
-        except Exception:
-            return {'notok': 'imgtype'}
-
-        file_size = img.size
-        if file_size > MAX_IMG_SIZE:
-            return {'notok': 'imgsize'}
-        
-        width, height = immagine.size 
-        aspect_ratio = width / height
-        
-        if aspect_ratio < MIN_IMG_ASPECT_RATIO or aspect_ratio > MAX_IMG_ASPECT_RATIO:
-            return {'notok': 'imgproportion'}
-    
-    return None
 
 class ProfiloCreaAnnuncioPageView(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin, View):
     template_name = "sylvelius/annuncio/crea_annuncio.html"

@@ -1,4 +1,16 @@
 from django.test import TestCase
+from django.contrib.auth.models import User, Group
+from django.urls import reverse
+import uuid
+from sylvelius.models import (
+    Ordine,
+    Prodotto,
+    Annuncio,
+    CommentoAnnuncio,
+    Tag,
+    ImmagineProdotto
+)
+from purchase.models import Invoice
 
 # Create your tests here.
 class AnonUrls(TestCase):
@@ -21,3 +33,15 @@ class AnonUrls(TestCase):
     def test_paypal_coa(self):
         response = self.client.get('/pagamento/paypal/coa/')
         self.assertEqual(response.status_code, 405)
+
+class LoggedUrls(TestCase):
+    def setUp(self):
+        user = User.objects.create_user(username='testuser', password='Testpass0')
+        group, created = Group.objects.get_or_create(name='moderatori')
+        user.groups.add(group)
+        self.client.login(username='testuser', password='Testpass0')
+    
+    def test_pagamento_logged(self):
+        response = self.client.post('/pagamento/')
+        self.assertEqual(response.status_code, 403)
+
