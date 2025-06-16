@@ -45,3 +45,11 @@ class LoggedUrls(TestCase):
         response = self.client.post('/pagamento/')
         self.assertEqual(response.status_code, 403)
 
+class FakePurchaseTests(TestCase):
+
+    def setUp(self):
+       self.post_data = {
+           'amount': 1.0,
+           'item_name': ''
+       } 
+        

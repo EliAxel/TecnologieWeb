@@ -46,17 +46,14 @@ def fake_purchase(request):
                     prodotto_id=product_id
                 )
     invoice_obj.save()
-
-
-    if request.method == 'POST':        
-        return render(request, "purchase/payment_process.html", {
-            "amount": amount,
-            "item_name": item_name,
-            "invoice_id": invoice_id,
-            "quantity": quantity,
-            "paypal_client_id": settings.xxx,
-        })
-    return HttpResponseBadRequest("Metodo non supportato")
+    
+    return render(request, "purchase/payment_process.html", {
+        "amount": amount,
+        "item_name": item_name,
+        "invoice_id": invoice_id,
+        "quantity": quantity,
+        "paypal_client_id": settings.xxx,
+    })
 
 def payment_done(request):
     return render(request, 'purchase/payment_done.html')
