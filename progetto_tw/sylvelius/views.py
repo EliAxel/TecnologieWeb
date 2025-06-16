@@ -200,7 +200,7 @@ class HomePageView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        annunci = Annuncio.objects.filter(is_published=True).order_by('-data_pubblicazione')
+        annunci = Annuncio.objects.filter(is_published=True,qta_magazzino__gt=0).order_by('-data_pubblicazione')
 
         paginator = Paginator(annunci, MAX_PAGINATOR_HOME_VALUE)
 
@@ -624,6 +624,7 @@ class RicercaAnnunciView(TemplateView):
         sort_order = self.request.GET.get('sort', 'data-desc')
         condizione = self.request.GET.get('condition')
         rating = self.request.GET.get('search_by_rating')
+        qta_mag = self.request.GET.get('qta_mag')
 
         annunci = Annuncio.objects.filter(is_published=True)
 
@@ -644,7 +645,12 @@ class RicercaAnnunciView(TemplateView):
         if condizione in PROD_CONDIZIONE_CHOICES_ID:
             annunci = annunci.filter(prodotto__condizione=condizione)
         # Se condizione == 'all' o non valida, non filtrare
-            
+        
+        if qta_mag == 'qta-pres':
+            annunci = annunci.filter(qta_magazzino__gt=0)
+        elif qta_mag == 'qta-manc':
+            annunci = annunci.filter(qta_magazzino=0)
+        
         if rating:
             try:
                 rating_value = int(rating)
@@ -795,7 +801,7 @@ def aggiungi_commento(request, annuncio_id):
         len(testo) > MAX_COMMNT_TESTO_CHARS):
         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
             return JsonResponse({"status": "error", "message": "Dati non validi"}, status=400)
-        return redirect(reverse('sylvelius:dettagli_annuncio', args=[annuncio_id]) + '?comment=notok')
+        return redirect(reverse('sylvelius:dettagli_annuncio', args=[annuncio_id]) + '?evento=commento_bad')
 
     # Salva il commento
     commento = CommentoAnnuncio.objects.create(

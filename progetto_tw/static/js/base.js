@@ -79,6 +79,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let priceMin = document.getElementById('price-min').value.trim();
         let priceMax = document.getElementById('price-max').value.trim();
         let sortOrder = document.getElementById('sort-order').value;
+        let qtaMag = document.getElementById('qta-m-order').value;
         let conditions = document.getElementById('condition-type').value;
         let rating = document.getElementById('search_by_rating').value;
 
@@ -106,6 +107,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         if (rating) {
             params.set('search_by_rating', rating);
+        }
+        if (qtaMag){
+            params.set('qta_mag', qtaMag);
         }
 
         // Modifica l'URL di ricerca

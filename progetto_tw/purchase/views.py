@@ -1,11 +1,12 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.urls import reverse, reverse_lazy
+from django.views import View
 from django.views.generic import TemplateView
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 import re
 from django.core.exceptions import ValidationError
 
@@ -28,32 +29,39 @@ from requests.auth import HTTPBasicAuth
 from django.core.exceptions import PermissionDenied
 
 # Create your views here.
-@require_POST
-@login_required
-def fake_purchase(request):
-    if request.user.groups.filter(name='moderatori').exists():
-        raise PermissionDenied
-    amount = request.POST.get("amount", "0.00")
-    item_name = request.POST.get("item_name", "Prodotto sconosciuto")
-    product_id = request.POST.get("product_id", "")
-    quantity = request.POST.get("quantity", f"{MIN_ORDN_QUANTITA_VALUE}")
-    user_id = request.POST.get("user_id")
-    invoice_id = str(uuid.uuid4())
-    invoice_obj =Invoice.objects.create(
-                    invoice_id = invoice_id,
-                    user_id=user_id,
-                    quantita=quantity,
-                    prodotto_id=product_id
-                )
-    invoice_obj.save()
-    
-    return render(request, "purchase/payment_process.html", {
-        "amount": amount,
-        "item_name": item_name,
-        "invoice_id": invoice_id,
-        "quantity": quantity,
-        "paypal_client_id": settings.xxx,
-    })
+class FakePurchasePageView(CustomLoginRequiredMixin,ModeratoreAccessForbiddenMixin,View):
+    template_name="purchase/payment_process.html"
+    login_url = reverse_lazy('sylvelius:login')
+
+    def get(self, request):
+        context = {}
+        annuncio_id = self.request.GET.get("annuncio_id")
+        annuncio = get_object_or_404(Annuncio,uuid=annuncio_id,is_published=True)
+        amount = annuncio.prodotto.prezzo
+        item_name = annuncio.prodotto.nome
+        product_id = annuncio.prodotto.id #type:ignore
+        quantita = self.request.GET.get("quantita", f"{MIN_ORDN_QUANTITA_VALUE}") 
+        user_id = self.request.user.id#type:ignore
+        invoice_id = str(uuid.uuid4())
+        if int(quantita) > annuncio.qta_magazzino:
+            return redirect(f'{reverse("sylvelius:dettagli_annuncio",kwargs={"uuid": annuncio_id})}?evento=ordine_grosso')
+        elif int(quantita) < 1:
+            return redirect(f'{reverse("sylvelius:dettagli_annuncio",kwargs={"uuid": annuncio_id})}?evento=ordine_piccolo')
+        
+        invoice_obj =Invoice.objects.create(
+                        invoice_id = invoice_id,
+                        user_id=user_id,
+                        quantita=quantita,
+                        prodotto_id=product_id
+                    )
+        invoice_obj.save()
+        
+        context["amount"] = amount * int(quantita)
+        context["item_name"] = item_name
+        context["invoice_id"] = invoice_id
+        context["quantity"] = quantita
+        context["paypal_client_id"] = settings.xxx
+        return render(request, self.template_name,context)
 
 def payment_done(request):
     return render(request, 'purchase/payment_done.html')

@@ -7,13 +7,27 @@
 {% block title %}{{ annuncio.prodotto.nome }} - Sylvelius{% endblock %}
 
 {% block middle %}
-{% if request.GET.comment == "notok" %}
-<script src="{% static 'js/toast.js' %}"></script>
-<script>
-    showBootstrapAlertWithIcon(
-        "Errore nella gestione dei commenti.","bad"
-    );
-</script>
+{% if request.GET.evento %}
+    <script src="{% static 'js/toast.js' %}"></script>
+    {% if request.GET.evento == "commento_bad" %}
+    <script>
+        showBootstrapAlertWithIcon(
+            "Errore nella gestione dei commenti.","bad"
+        );
+    </script>
+    {% elif request.GET.evento == 'ordine_grosso'%}
+    <script>
+        showBootstrapAlertWithIcon(
+            "Le scorte del prodotto sono diminuite!","bad"
+        );
+    </script>
+    {% elif request.GET.evento == 'ordine_piccolo'%}
+    <script>
+        showBootstrapAlertWithIcon(
+            "Le scorte del prodotto sono finite!","bad"
+        );
+    </script>
+    {% endif %}
 {% endif %}
 <div class="container mt-5 mb-5">
     <div class="row">
@@ -67,7 +81,7 @@
                 </form>
             </div>   
             {% else %}
-            {% if user.is_authenticated %}
+            {% if user.is_authenticated and annuncio.qta_magazzino > 0 %}
             <div class="form-group d-flex justify-content-center align-items-center mt-3 mb-3">
                 <label class="mr-3" for="quantity-select-{{ annuncio.id }}">Quantità:</label>
                 <input type="number" class="form-control w-auto" size="7" id="quantity-select-{{ annuncio.id }}" required max="{{ annuncio.qta_magazzino }}" name="qta_magazzino" min="{{MIN_ORDN_QUANTITA_VALUE}}" step="1" value="{{MIN_ORDN_QUANTITA_VALUE}}">
@@ -79,13 +93,9 @@
                 <!--<button class="btn text-white d-inline-block" id="cart-btn" style="background-color:{{SECONDARY_COLOR}};">
                     <i class="bi bi-cart"></i>
                     Aggiungi al carrello</button>-->
-                <form action="{% url 'purchase:fake_purchase' %}" method="post" class="d-inline-block" id="purchase-form-{{ annuncio.id }}">
-                    {% csrf_token %}
-                    <input type="hidden" name="amount" value="{{ annuncio.prodotto.prezzo }}" id="amount-input-{{ annuncio.id }}">
-                    <input type="hidden" name="item_name" value="{{ annuncio.prodotto.nome }}">
-                    <input type="hidden" name="product_id" value="{{ annuncio.prodotto.id }}">
-                    <input type="hidden" name="quantity" value="{{MIN_ORDN_QUANTITA_VALUE}}" id="quantity-input-{{ annuncio.id }}">
-                    <input type="hidden" name="user_id" value="{{ request.user.id }}">
+                <form action="{% url 'purchase:fake_purchase' %}" method="get" class="d-inline-block" id="purchase-form-{{ annuncio.id }}">
+                    <input type="hidden" name="annuncio_id" value="{{ annuncio.uuid }}">
+                    <input type="hidden" name="quantita" value="{{MIN_ORDN_QUANTITA_VALUE}}" id="quantity-input-{{ annuncio.id }}">
                     <button type="submit" class="btn text-white" style="background-color:{{SECONDARY_COLOR}};" id="buy-now">Acquista ora</button>
                 </form>
             </div>
@@ -175,7 +185,6 @@
         const MAX_PROD_PREZZO_DIGITS_DECIMAL = {{MAX_PROD_PREZZO_DIGITS_DECIMAL.1}}
         const quantitySelect = document.getElementById('quantity-select-{{ annuncio.id }}');
         const quantityInput = document.getElementById('quantity-input-{{ annuncio.id }}');
-        const amountInput = document.getElementById('amount-input-{{ annuncio.id }}');
         const unitPriceElement = document.getElementById('unit-price-{{ annuncio.id }}');
         const totalPriceElement = document.getElementById('total-price-{{ annuncio.id }}');
         const totalPriceContainer = document.getElementById('total-price-container-{{ annuncio.id }}');
@@ -206,7 +215,6 @@
             quantityInput.value = quantity;
 
             const totalPrice = originalPrice * quantity;
-            amountInput.value = totalPrice.toFixed(MAX_PROD_PREZZO_DIGITS_DECIMAL);
             totalPriceElement.textContent = totalPrice.toLocaleString('it-IT', { minimumFractionDigits: MAX_PROD_PREZZO_DIGITS_DECIMAL, maximumFractionDigits: MAX_PROD_PREZZO_DIGITS_DECIMAL });
 
             if (quantity === 1) {
