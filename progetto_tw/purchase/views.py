@@ -123,120 +123,76 @@ def verify_paypal_webhook(request,body):
 
 @csrf_exempt
 @require_POST
-def paypal_pcc(request):    
-    body = request.body
-
-    if not verify_paypal_webhook(request,body):
-        return HttpResponse(status=401)
-    
-    try:
-        payload = json.loads(body)
-        event_type = payload.get('event_type')
-        resource = payload.get('resource', {})
-
-        if event_type == 'PAYMENT.CAPTURE.COMPLETED':
-            invoice = resource.get('invoice_id')
-            
-            if not invoice:
-                return HttpResponse(status=400)
-
-            invoice_obj = Invoice.objects.get(invoice_id=invoice)
-            if not invoice_obj:
-                return HttpResponse(status=404)
-            
-            product_id = invoice_obj.prodotto_id
-            user_id = invoice_obj.user_id
-            quantita = invoice_obj.quantita
-
-            try:
-                prodotto = Prodotto.objects.get(id=product_id)
-            except Prodotto.DoesNotExist:
-                return HttpResponse(status=404)
-            
-            try:
-                user = User.objects.get(id=user_id)
-            except User.DoesNotExist:
-                return HttpResponse(status=404)
-            
-            try:
-                annuncio=Annuncio.objects.get(prodotto=prodotto)
-            except Annuncio.DoesNotExist:
-                return HttpResponse(status=404)
-            
-            if(annuncio.qta_magazzino < quantita):
-                create_notification(recipient=user,title="Acquisto Annullato",
-                                    message=f"Purtroppo l'acquisto non è andato a buon fine, le scorte del prodotto {prodotto.nome} in magazzino sono finite. Le arriverà un rimborso completo il prima possibile.")
-                stato="annullato"
-            else:
-                annuncio.qta_magazzino = annuncio.qta_magazzino-quantita
-                annuncio.save()
-                stato="da spedire"
-            
-            # Cerchiamo l'ordine completato
-            ordine = Ordine.objects.create(
-                utente=user,
-                prodotto=prodotto,
-                quantita=quantita,
-                invoice=invoice,
-                stato_consegna=stato
-            )
-            ordine.save()
-            create_notification(recipient=user,title="Acquisto Confermato!",message=f"L'acquisto di {prodotto.nome} è andato a buon fine!")
-            return HttpResponse(status=200)
-        return HttpResponse(status=400)
-    except Exception as e:
-        return HttpResponse(status=500)
-    
-@csrf_exempt
-@require_POST
 def paypal_coa(request):    
     body = request.body
 
     if not verify_paypal_webhook(request,body):
         return HttpResponse(status=401)
     
-    try:
-        payload = json.loads(body)
-        event_type = payload.get('event_type')
-        resource = payload.get('resource', {})
+    payload = json.loads(body)
+    event_type = payload.get('event_type')
+    resource = payload.get('resource', {})
 
-        if event_type == 'CHECKOUT.ORDER.APPROVED':
-            purchase_units = resource.get('purchase_units', [])
-            if not purchase_units:
-                return HttpResponse(status=400)
+    if event_type == 'CHECKOUT.ORDER.APPROVED':
+        purchase_units = resource.get('purchase_units', [])
+        if not purchase_units:
+            return HttpResponse(status=400)
 
-            pu = purchase_units[0]  # prendi il primo purchase unit
-            invoice = pu.get('invoice_id')
-            invoice_obj = Invoice.objects.filter(invoice_id=invoice).first()
-            if not invoice_obj:
-                return HttpResponse(status=404)
-            product_id = invoice_obj.prodotto_id
+        pu = purchase_units[0]  # prendi il primo purchase unit
+        invoice = pu.get('invoice_id')
+        if not invoice:
+            return HttpResponse(status=400)
 
-            if not invoice or not product_id:
-                return HttpResponse(status=400)
+        invoice_obj = Invoice.objects.get(invoice_id=invoice)
+        if not invoice_obj:
+            return HttpResponse(status=404)
+        
+        product_id = invoice_obj.prodotto_id
+        user_id = invoice_obj.user_id
+        quantita = invoice_obj.quantita
 
-            try:
-                prodotto = Prodotto.objects.get(id=product_id)
-            except Prodotto.DoesNotExist:
-                return HttpResponse(status=404)
+        try:
+            prodotto = Prodotto.objects.get(id=product_id)
+        except Prodotto.DoesNotExist:
+            return HttpResponse(status=404)
+        
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return HttpResponse(status=404)
+        
+        try:
+            annuncio=Annuncio.objects.get(prodotto=prodotto)
+        except Annuncio.DoesNotExist:
+            return HttpResponse(status=404)
+        
+        if(annuncio.qta_magazzino < quantita):
+            create_notification(recipient=user,title="Acquisto Annullato",
+                                message=f"Purtroppo l'acquisto non è andato a buon fine, le scorte del prodotto {prodotto.nome} in magazzino sono finite. Le arriverà un rimborso completo il prima possibile.")
+            stato="annullato"
+        else:
+            annuncio.qta_magazzino = annuncio.qta_magazzino-quantita
+            annuncio.save()
+            stato="da spedire"
 
-            ordine = Ordine.objects.filter(invoice=invoice, prodotto=prodotto).first()
+        ordine = Ordine.objects.create(
+            utente=user,
+            prodotto=prodotto,
+            quantita=quantita,
+            invoice=invoice,
+            stato_consegna=stato
+        )
 
-            if ordine:
-                shipping = pu.get('shipping', {})
-                address = shipping.get('address', {})
-                ordine.luogo_consegna = address
-                ordine.save()
-                invoice_obj.delete()
-                create_notification(recipient=ordine.prodotto.annunci.inserzionista,title="Un utente ha acquistato!",message=f"Un utente ha acquistato {ordine.quantita} unità di {ordine.prodotto.nome}!") #type:ignore
-            else:
-                return HttpResponse(status=102)
-
+        shipping = pu.get('shipping', {})
+        address = shipping.get('address', {})
+        if address:
+            ordine.luogo_consegna = address
+            ordine.save()
+            invoice_obj.delete()
+            create_notification(recipient=user,title="Acquisto Confermato!",message=f"L'acquisto di {prodotto.nome} è andato a buon fine!")
+            create_notification(recipient=ordine.prodotto.annunci.inserzionista,title="Un utente ha acquistato!",message=f"Un utente ha acquistato {ordine.quantita} unità di {ordine.prodotto.nome}!") #type:ignore
             return HttpResponse(status=200)
-        return HttpResponse(status=400)
-
-    except Exception as e:
-        return HttpResponse(status=500)
+    return HttpResponse(status=400)
 
 class SetupIban(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin,TemplateView):
     template_name = "purchase/setup_iban.html"
