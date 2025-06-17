@@ -1,5 +1,6 @@
-from django.test import TestCase, Client
+from django.test import TestCase, Client, RequestFactory
 from django.contrib.auth.models import User, Group
+from django.core.exceptions import ValidationError
 from django.urls import reverse
 import uuid
 from sylvelius.models import (
@@ -10,6 +11,8 @@ from sylvelius.models import (
     Tag,
     ImmagineProdotto
 )
+from .models import Iban
+from .views import SetupIban
 from purchase.models import Invoice
 from progetto_tw.t_ests_constants import NEXT_PROD_ID
 import json
@@ -108,7 +111,7 @@ class PurchaseTests(TestCase):
             target_status_code=200 
         )
 
-class PayPalCOATestCase(TestCase):
+class PayPalCOATests(TestCase):
     def setUp(self):
         Ordine.objects.all().delete()
         self.client = Client()
@@ -316,3 +319,109 @@ class PayPalCOATestCase(TestCase):
         )
 
         self.assertEqual(response.status_code, 404)
+
+class SetUpIBANTests(TestCase):
+    def setUp(self):
+        self.factory = RequestFactory()
+        self.user = User.objects.create_user(
+            username='testuser',
+            password='testpass123'
+        )
+        self.url = reverse('purchase:setup_iban')
+        self.view = SetupIban.as_view()
+        self.template_name = 'purchase/setup_iban.html'
+
+    def test_get_context_data_authenticated_user_without_iban(self):
+        """Test that context contains user but no iban when user has no iban"""
+        request = self.factory.get(self.url)
+        request.user = self.user
+        
+        response = self.view(request)
+        context = response.context_data #type:ignore
+        
+        self.assertEqual(context['user'], self.user)
+        self.assertNotIn('iban', context)
+
+    def test_get_context_data_authenticated_user_with_iban(self):
+        """Test that context contains both user and iban when user has iban"""
+        # Create an IBAN for the user
+        iban_obj = Iban.objects.create(utente=self.user, iban='GB82WEST12345698765432')
+        
+        request = self.factory.get(self.url)
+        request.user = self.user
+        
+        response = self.view(request)
+        context = response.context_data #type:ignore
+        
+        self.assertEqual(context['user'], self.user)
+        # Check that we're getting the iban string, not the object
+        self.assertEqual(context['iban'].iban, iban_obj.iban)
+
+    def test_validate_iban_valid_ibans(self):
+        """Test that valid IBANs pass validation"""
+        view = SetupIban()
+        valid_ibans = [
+            'GB82 WEST 1234 5698 7654 32',  # With spaces
+            'GB82WEST12345698765432',        # Without spaces
+            'DE89370400440532013000',        # German IBAN
+            'FR1420041010050500013M02606',   # French IBAN
+        ]
+        
+        for iban in valid_ibans:
+            try:
+                view.validate_iban(iban)
+            except ValidationError:
+                self.fail(f"validate_iban() raised ValidationError unexpectedly for {iban}")
+
+    def test_post_valid_iban(self):
+        """Test that a valid IBAN is saved and redirects"""
+        self.client.force_login(self.user)
+        valid_iban = 'GB82WEST12345698765432'
+        
+        response = self.client.post(self.url, {'iban': valid_iban})
+        
+        # Check IBAN was saved
+        self.assertTrue(Iban.objects.filter(utente=self.user, iban=valid_iban).exists())
+        # Check redirect
+        self.assertRedirects(response, f"{reverse('sylvelius:profile_annunci')}?evento=iban_imp")
+
+    def test_post_invalid_iban_format(self):
+        """Test that invalid IBAN format returns error message"""
+        self.client.force_login(self.user)
+        invalid_iban = 'INVALID_IBAN'
+        
+        response = self.client.post(self.url, {'iban': invalid_iban})
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, self.template_name)
+        self.assertIn('evento', response.context)
+        # Expecting a list now
+        self.assertEqual(response.context['evento'], 'iban_form')
+
+    def test_post_invalid_iban_checksum(self):
+        """Test that IBAN with invalid checksum returns error message"""
+        self.client.force_login(self.user)
+        invalid_checksum_iban = 'GB82WEST12345698765433'  # Changed last digit
+        
+        response = self.client.post(self.url, {'iban': invalid_checksum_iban})
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, self.template_name)
+        self.assertIn('evento', response.context)
+        # Expecting a list now
+        self.assertEqual(response.context['evento'], 'iban_contr')
+
+    def test_post_updates_existing_iban(self):
+        """Test that posting updates existing IBAN"""
+        # Create initial IBAN
+        Iban.objects.create(utente=self.user, iban='GB82WEST12345698765432')
+        self.client.force_login(self.user)
+        new_iban = 'DE89370400440532013000'
+        
+        response = self.client.post(self.url, {'iban': new_iban})
+        
+        # Check only one IBAN exists (updated)
+        self.assertEqual(Iban.objects.filter(utente=self.user).count(), 1)
+        self.assertEqual(Iban.objects.get(utente=self.user).iban, new_iban)
+        # Check redirect
+        self.assertRedirects(response, f"{reverse('sylvelius:profile_annunci')}?evento=iban_imp")

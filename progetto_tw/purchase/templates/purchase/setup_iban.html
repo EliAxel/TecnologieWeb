@@ -4,16 +4,16 @@
 {% endblock %}
 {% block title %}Imposta IBAN - Sylvelius{% endblock %}
 {% block middle %}
-{% if notok %}
+{% if evento %}
     {% load static %}
     <script src="{% static 'js/toast.js' %}"></script>
-    {% if notok == "['form']" %}
+    {% if evento == "iban_form" %}
     <script>
         showBootstrapAlertWithIcon(
             "Il valore fornito non sembra essere un IBAN","warning"
         );
     </script>
-    {% elif notok == "['contr']" %}
+    {% elif evento == "iban_contr" %}
     <script>
         showBootstrapAlertWithIcon(
             "IBAN non valido","warning"
