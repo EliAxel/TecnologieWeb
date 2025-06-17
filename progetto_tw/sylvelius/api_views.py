@@ -24,14 +24,19 @@ async def get_immagini_prodotto(request, prodotto_id):
         
     return JsonResponse({'urls': immagini_urls})
 
-def notifications_api(request):
-    if not request.user.is_authenticated:
+async def notifications_api(request):
+    # Verifica l'autenticazione in modo asincrono
+    is_authenticated = await sync_to_async(lambda: request.user.is_authenticated)()
+    if not is_authenticated:
         return JsonResponse([], safe=False)
     
-    notifications = Notification.objects.filter(
-        Q(recipient=request.user) | 
-        Q(is_global=True)
-    ).order_by('created_at')[:MAX_MESSAGES_PER_PAGE]
+    # Ottieni le notifiche in modo asincrono
+    notifications = await sync_to_async(list)(
+        Notification.objects.filter(
+            Q(recipient=request.user) | 
+            Q(is_global=True)
+        ).order_by('created_at')[:MAX_MESSAGES_PER_PAGE]
+    )
     
     data = [{
         'title': n.title,

@@ -14,7 +14,6 @@ from purchase.models import Invoice
 from progetto_tw.t_ests_constants import NEXT_PROD_ID
 import json
 from unittest.mock import patch, MagicMock
-import unittest
 import requests
 
 # Create your tests here.
@@ -319,7 +318,7 @@ class PayPalCOATests(TestCase):
 
         self.assertEqual(response.status_code, 404)
 
-class TestPaypalFunctions(unittest.TestCase):
+class TestPaypalFunctions(TestCase):
     
     @patch('requests.post')
     def test_get_paypal_access_token_success(self, mock_post):

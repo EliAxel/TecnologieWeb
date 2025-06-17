@@ -299,3 +299,4 @@ class LoggedUrls2(TestCase):
         self.assertFalse(form.is_valid())
         form = CustomUserCreationForm(data={'username':'testuser3', 'password1': 'A12345678912345678901234567890123', 'password2': 'A12345678912345678901234567890123'})
         self.assertFalse(form.is_valid())
+
