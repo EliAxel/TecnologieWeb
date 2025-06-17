@@ -84,9 +84,6 @@ def get_paypal_access_token():
     return response.json()["access_token"]
 # non callable
 def verify_paypal_webhook(request,body):
-    PAYPAL_API_BASE = "https://api-m.sandbox.paypal.com" 
-    access_token = get_paypal_access_token()
-    headers = request.headers
     webhook_event = json.loads(body)
     event_type = webhook_event.get("event_type")
 
@@ -95,6 +92,10 @@ def verify_paypal_webhook(request,body):
         webhook_id = settings.PAYPAL_COA_ID
     else:
         return False
+    
+    PAYPAL_API_BASE = "https://api-m.sandbox.paypal.com" 
+    access_token = get_paypal_access_token()
+    headers = request.headers
     
     verification_data = {
         "auth_algo": headers.get("PAYPAL-AUTH-ALGO"),
