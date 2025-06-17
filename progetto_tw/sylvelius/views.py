@@ -107,7 +107,13 @@ def create_notification(recipient=None, title="", message="", is_global=False, s
     return notifica
 
 def annulla_ordine_free(request, order_id):
-    ordine = get_object_or_404(Ordine,id=order_id)
+    try:
+        ordine = Ordine.objects.get(id=order_id)
+    except Ordine.DoesNotExist:
+        return JsonResponse({
+            "status": "error",
+            "message": "Ordine non trovato o già spedito"
+        }, status=400)
     if((request.user == ordine.utente or request.user == ordine.prodotto.annunci.inserzionista) and ordine.stato_consegna=='da spedire'): #type:ignore
         ordine.stato_consegna = 'annullato'
         ordine.save()
