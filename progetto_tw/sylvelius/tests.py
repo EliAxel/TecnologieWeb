@@ -1,22 +1,38 @@
-from decimal import Decimal
-import json
-from django.test import TestCase
+# Django imports
+from django.test import TestCase, RequestFactory, Client
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User, Group
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
-import uuid
+from django.conf import settings
+from django.http import JsonResponse
 
-from sylvelius.forms import CustomUserCreationForm
+# Standard library imports
+import tempfile
+import shutil
+import json
+import uuid
+from decimal import Decimal
+from unittest.mock import patch
+
+# Local imports
 from .models import (
-    Ordine,
-    Prodotto,
-    Annuncio,
-    CommentoAnnuncio,
-    Tag,
-    ImmagineProdotto
+    Annuncio, CommentoAnnuncio, ImmagineProdotto,
+    Ordine, Tag, Prodotto, Notification
 )
+from .views import (
+    RicercaAnnunciView, send_notification, 
+    mark_notifications_read, create_notification, annulla_ordine_free, 
+    check_if_annuncio_is_valid, annulla_ordine
+)
+from sylvelius.forms import CustomUserCreationForm
 from purchase.models import Invoice
 from progetto_tw.t_ests_constants import NEXT_PROD_ID
-
+from progetto_tw.constants import (
+    MAX_UNAME_CHARS, 
+    MAX_PWD_CHARS,
+    MAX_PAGINATOR_RICERCA_VALUE
+)
 class AnonUrls(TestCase):
 
     def test_home_page(self):
@@ -302,25 +318,6 @@ class LoggedUrls2(TestCase):
         form = CustomUserCreationForm(data={'username':'testuser3', 'password1': 'A12345678912345678901234567890123', 'password2': 'A12345678912345678901234567890123'})
         self.assertFalse(form.is_valid())
 
-from django.test import TestCase, RequestFactory, Client
-from django.contrib.auth.models import User, Group
-from django.core.files.uploadedfile import SimpleUploadedFile
-from django.urls import reverse
-from django.core.files import File
-from django.conf import settings
-import tempfile
-import shutil
-import os
-
-from .models import (
-    Annuncio, CommentoAnnuncio, ImmagineProdotto, 
-    Ordine, Tag, Prodotto, Notification
-)
-from .views import (
-    send_notification, mark_notifications_read, create_notification,
-    annulla_ordine_free, check_if_annuncio_is_valid
-)
-
 class UtilityFunctionsTests(TestCase):
     def setUp(self):
         self.factory = RequestFactory()
@@ -396,6 +393,9 @@ class UtilityFunctionsTests(TestCase):
         venditore = User.objects.create_user(
             username='venditore', password='testpass123'
         )
+        user2 = User.objects.create_user(
+            username='user2', password='testpass123'
+        )
         prodotto = Prodotto.objects.create(
             nome="Prodotto Test",
             descrizione_breve="Descrizione breve",
@@ -450,6 +450,15 @@ class UtilityFunctionsTests(TestCase):
         
         # Testa il caso in cui l'ordine non esiste
         response = annulla_ordine_free(request, 9999)
+        response_data = json.loads(response.content.decode())
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response_data, {
+            "status": "error", 
+            "message": "Ordine non trovato o già spedito"
+        })
+        
+        request.user = user2
+        response = annulla_ordine_free(request, ordine_venditore.id) #type:ignore
         response_data = json.loads(response.content.decode())
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response_data, {
@@ -517,6 +526,41 @@ class UtilityFunctionsTests(TestCase):
         result = check_if_annuncio_is_valid(request)
         self.assertEqual(result, {'notok': 'imgtype'})
         
+        request = self.factory.post('/', data={**post_data, 'immagini': [image]*11})
+        result = check_if_annuncio_is_valid(request)
+        self.assertEqual(result, {'notok': 'imgn'})
+
+        image3x1 = SimpleUploadedFile(
+            name='test_image.jpg',
+            content=(
+                b'\x47\x49\x46\x38\x39\x61\x03\x00\x01\x00\x80\x00\x00'
+                b'\x00\x00\x00\xff\xff\xff\x21\xf9\x04\x00\x00\x00\x00\x00'
+                b'\x2c\x00\x00\x00\x00\x03\x00\x01\x00\x00\x02\x02\x4c\x01\x00\x3b'
+            ),
+            content_type='image/jpeg'
+        )
+
+        request = self.factory.post('/', post_data)
+        request.FILES['immagini'] = image3x1
+        result = check_if_annuncio_is_valid(request)
+        self.assertEqual(result, {'notok': 'imgproportion'})
+
+        imagehuge = SimpleUploadedFile(
+            name='test_image.jpg',
+            content=(
+                b'\x47\x49\x46\x38\x39\x61\x03\x00\x01\x00\x80\x00\x00'
+                b'\x00\x00\x00\xff\xff\xff\x21\xf9\x04\x00\x00\x00\x00\x00'
+                b'\x2c\x00\x00\x00\x00\x03\x00\x01\x00\x00\x02\x02\x4c\x01\x00\x3b'
+            ) + b'\x00' * (5 * 1024 * 1024),
+            content_type='image/jpeg'
+        )
+
+        request = self.factory.post('/', post_data)
+        request.FILES['immagini'] = imagehuge
+        result = check_if_annuncio_is_valid(request)
+        self.assertEqual(result, {'notok': 'imgsize'})
+
+
         # Testa troppe immagini (dovresti creare MAX_IMGS_PER_ANNU_VALUE + 1 immagini)
         # Questo dipende dalla tua implementazione specifica
 
@@ -583,6 +627,10 @@ class ViewTests(TestCase):
             )
         
         response = self.client.get(reverse('sylvelius:home') + '?page=2')
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(reverse('sylvelius:home') + '?page=0')
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(reverse('sylvelius:home') + '?page=err')
         self.assertEqual(response.status_code, 200)
     
     def test_registrazione_page_view(self):
@@ -658,7 +706,128 @@ class ViewTests(TestCase):
         response = self.client.get(reverse('sylvelius:profile'))
         self.assertEqual(response.status_code, 200)
         self.assertIn('user_without_is_active', response.context)
-    
+
+    def test_profilo_delete_page_view(self):
+        self.client.login(username='testuser', password='testpass123')
+        
+        # Test GET request
+        response = self.client.get(reverse('sylvelius:profile_delete'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'sylvelius/profile/profile_delete.html')
+        self.assertEqual(response.context['user'], self.user)
+        
+        # Test case 1: No orders - should delete successfully
+        response = self.client.post(reverse('sylvelius:profile_delete'))
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(User.objects.filter(username='testuser').exists())
+        
+        # Recreate user and product for next tests
+        self.user = User.objects.create_user(
+            username='testuser', password='testpass123'
+        )
+        self.prodotto = Prodotto.objects.create(
+            nome="Test Product",
+            descrizione_breve="Test description",
+            prezzo=10.00
+        )
+        Annuncio.objects.create(
+            inserzionista=self.user,
+            uuid=uuid.uuid4(),
+            prodotto=self.prodotto,
+            qta_magazzino=5,
+            is_published=True
+        )
+        self.client.login(username='testuser', password='testpass123')
+        
+        # Test case 2: User has "da spedire" orders as buyer and seller
+        order_as_buyer = Ordine.objects.create(
+            utente=self.user,
+            prodotto=self.prodotto,
+            stato_consegna='da spedire'
+        )
+        
+        another_user = User.objects.create_user(
+            username='anotheruser', password='testpass123'
+        )
+        another_product = Prodotto.objects.create(
+            nome="Another Product",
+            descrizione_breve="Descrizione breve",
+            prezzo=20.00
+        )
+        Annuncio.objects.create(
+            inserzionista=self.user,
+            uuid=uuid.uuid4(),
+            prodotto=another_product,
+            qta_magazzino=3,
+            is_published=True
+        )
+        order_as_seller = Ordine.objects.create(
+            utente=another_user,
+            prodotto=another_product,
+            stato_consegna='da spedire'
+        )
+        
+        response = self.client.post(reverse('sylvelius:profile_delete'))
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(User.objects.filter(username='testuser').exists())
+        
+        # Recreate user and product for next tests
+        self.user = User.objects.create_user(
+            username='testuser', password='testpass123'
+        )
+        self.prodotto = Prodotto.objects.create(
+            nome="Test Product",
+            descrizione_breve="Test description",
+            prezzo=10.00
+        )
+        Annuncio.objects.create(
+            inserzionista=self.user,
+            uuid=uuid.uuid4(),
+            prodotto=self.prodotto,
+            qta_magazzino=5,
+            is_published=True
+        )
+        self.client.login(username='testuser', password='testpass123')
+        
+        # Test case 3: User has "spedito" order as buyer - should prevent deletion
+        Ordine.objects.create(
+            utente=self.user,
+            prodotto=self.prodotto,
+            stato_consegna='spedito'
+        )
+        response = self.client.post(reverse('sylvelius:profile_delete'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'sylvelius/profile/profile_delete.html')
+        self.assertIn('err', response.context)
+        self.assertEqual(response.context['err'], 'ship')
+        self.assertTrue(User.objects.filter(username='testuser').exists())
+        
+        # Test case 4: User has "spedito" order as seller - should prevent deletion
+        Ordine.objects.all().delete()  # Clear previous orders
+        another_product = Prodotto.objects.create(
+            nome="Another Product",
+            descrizione_breve="Descrizione breve",
+            prezzo=20.00
+        )
+        Annuncio.objects.create(
+            inserzionista=self.user,
+            uuid=uuid.uuid4(),
+            prodotto=another_product,
+            qta_magazzino=3,
+            is_published=True
+        )
+        Ordine.objects.create(
+            utente=another_user,
+            prodotto=another_product,
+            stato_consegna='spedito'
+        )
+        response = self.client.post(reverse('sylvelius:profile_delete'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'sylvelius/profile/profile_delete.html')
+        self.assertIn('err', response.context)
+        self.assertEqual(response.context['err'], 'shipd')
+        self.assertTrue(User.objects.filter(username='testuser').exists())
+
     def test_annuncio_detail_view(self):
         url = reverse('sylvelius:dettagli_annuncio', args=[self.annuncio.uuid])
         response = self.client.get(url)
@@ -758,6 +927,7 @@ class FunctionBasedViewTests(TestCase):
         )
         self.annuncio = Annuncio.objects.create(
             inserzionista=self.user,
+            uuid=uuid.uuid4(),
             prodotto=self.prodotto,
             qta_magazzino=5,
             is_published=True
@@ -800,6 +970,7 @@ class FunctionBasedViewTests(TestCase):
         self.assertTrue(self.annuncio.is_published)
     
     def test_delete_pubblicazione(self):
+        # Test per utente normale che elimina il proprio annuncio
         self.client.login(username='testuser', password='testpass123')
         
         # Crea un annuncio da eliminare
@@ -820,7 +991,36 @@ class FunctionBasedViewTests(TestCase):
         )
         self.assertEqual(response.status_code, 302)
         self.assertFalse(Annuncio.objects.filter(id=annuncio.id).exists()) #type:ignore
-    
+        
+        # Test per moderatore che elimina un annuncio
+        # Crea un utente moderatore
+        moderator = User.objects.create_user(username='moderator', password='modpass123')
+        moderator.groups.add(self.groups)
+        
+        # Crea un annuncio di un altro utente
+        another_user = User.objects.create_user(username='anotheruser', password='testpass123')
+        another_prodotto = Prodotto.objects.create(
+            nome="Prodotto di altro utente",
+            descrizione_breve="Descrizione",
+            prezzo=15.00
+        )
+        another_annuncio = Annuncio.objects.create(
+            inserzionista=another_user,
+            prodotto=another_prodotto,
+            qta_magazzino=3
+        )
+        
+        # Login come moderatore
+        self.client.login(username='moderator', password='modpass123')
+        
+        response = self.client.post(
+            reverse('sylvelius:elimina_annuncio', args=[another_annuncio.id]), #type:ignore
+            HTTP_REFERER=reverse('sylvelius:home')
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(Annuncio.objects.filter(id=another_annuncio.id).exists()) #type:ignore
+        self.assertRedirects(response, f'{reverse("sylvelius:home")}?evento=elimina_pub')
+
     def test_check_old_password(self):
         self.client.login(username='testuser', password='testpass123')
         
@@ -930,6 +1130,26 @@ class FunctionBasedViewTests(TestCase):
             HTTP_X_REQUESTED_WITH='XMLHttpRequest'
         )
         self.assertEqual(response.status_code, 400)
+
+        response = self.client.post(
+            reverse('sylvelius:aggiungi_commento', args=[self.annuncio.id]), #type:ignore
+            {
+                'testo': 'Nuovo commento',
+                'rating': '5'
+            },
+            HTTP_X_REQUESTED_WITH='err',follow=True
+        )
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.post(
+            reverse('sylvelius:aggiungi_commento', args=[self.annuncio.id]), #type:ignore
+            {
+                'testo': '',  # Testo vuoto
+                'rating': '6'  # Rating fuori range
+            },
+            HTTP_X_REQUESTED_WITH='err',follow=True
+        )
+        self.assertEqual(response.status_code, 200)
     
     def test_modifica_commento(self):
         self.client.login(username='testuser', password='testpass123')
@@ -959,11 +1179,31 @@ class FunctionBasedViewTests(TestCase):
             HTTP_X_REQUESTED_WITH='XMLHttpRequest'
         )
         self.assertEqual(response.status_code, 400)
+
+        response = self.client.post(
+            reverse('sylvelius:modifica_commento', args=[self.commento.id]), #type:ignore
+            {
+                'testo': 'Nuovo commento',
+                'rating': '5'
+            },
+            HTTP_X_REQUESTED_WITH='err',follow=True
+        )
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.post(
+            reverse('sylvelius:modifica_commento', args=[self.commento.id]), #type:ignore
+            {
+                'testo': '',  # Testo vuoto
+                'rating': '6'  # Rating fuori range
+            },
+            HTTP_X_REQUESTED_WITH='err',follow=True
+        )
+        self.assertEqual(response.status_code, 200)
     
     def test_elimina_commento(self):
         self.client.login(username='testuser', password='testpass123')
         
-        # Testa l'eliminazione da parte dell'utente
+        # Test deletion by regular user
         commento = CommentoAnnuncio.objects.create(
             annuncio=self.annuncio,
             utente=self.user,
@@ -978,7 +1218,35 @@ class FunctionBasedViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), {"status": "success"})
         self.assertFalse(CommentoAnnuncio.objects.filter(id=commento.id).exists()) #type:ignore
-    
+
+    def test_elimina_commento_moderatore(self):
+        # Create a moderator user and group
+        moderator_user = User.objects.create_user(
+            username='moderator',
+            password='modpass123'
+        )
+        moderator_user.groups.add(self.groups)
+        
+        # Create a comment by another user
+        commento = CommentoAnnuncio.objects.create(
+            annuncio=self.annuncio,
+            utente=self.user,  # different user from moderator
+            testo="Commento da eliminare da moderatore",
+            rating=4
+        )
+        
+        # Login as moderator
+        self.client.login(username='moderator', password='modpass123')
+        
+        # Test deletion by moderator
+        response = self.client.post(
+            reverse('sylvelius:elimina_commento', args=[commento.id]), #type:ignore
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"status": "success"})
+        self.assertFalse(CommentoAnnuncio.objects.filter(id=commento.id).exists()) #type:ignore  
+  
     def test_espelli_utente(self):
         # Crea un moderatore
         moderator = User.objects.create_user(
@@ -1021,6 +1289,14 @@ class FunctionBasedViewTests(TestCase):
         self.assertEqual(response.status_code, 403)
     
     def test_formatta_utente(self):
+        User.objects.create_user(
+            username='user2', password='modpass123'
+        )
+        self.client.login(username='user2', password='modpass123')
+        response = self.client.post(
+                reverse('sylvelius:formatta_utente', args=[1234]) #type:ignore
+            )
+        self.assertEqual(response.status_code, 403)
         # Crea un moderatore
         moderator = User.objects.create_user(
             username='moderator', password='modpass123'
@@ -1053,41 +1329,85 @@ class FunctionBasedViewTests(TestCase):
             testo="Commento bannato",
             rating=2
         )
-        ordine = Ordine.objects.create(
+        
+        # Crea un utente acquirente
+        buyer = User.objects.create_user(
+            username='buyer', password='testpass123'
+        )
+        
+        # Crea ordini associati all'utente bannato (sia come inserzionista che come acquirente)
+        ordine_inserzionista = Ordine.objects.create(
+            utente=buyer,
+            prodotto=prodotto,
+            stato_consegna='da spedire'
+        )
+        ordine_utente = Ordine.objects.create(
             utente=banned_user,
             prodotto=self.prodotto,
             stato_consegna='da spedire'
         )
         
-        # Testa la formattazione
-        response = self.client.post(
-            reverse('sylvelius:formatta_utente', args=[banned_user.id]) #type:ignore
-        )
-        self.assertEqual(response.status_code, 302)
+        # Mock della funzione annulla_ordine_free
+        with patch('sylvelius.views.annulla_ordine_free') as mock_annulla:
+            # Testa la formattazione
+            banned_user.is_active = True
+            banned_user.save()
+            response = self.client.post(
+                reverse('sylvelius:formatta_utente', args=[banned_user.id]) #type:ignore
+            )
+            self.assertEqual(response.status_code, 403)
+            banned_user.is_active = False
+            banned_user.save()
+            response = self.client.post(
+                reverse('sylvelius:formatta_utente', args=[banned_user.id]) #type:ignore
+            )
+            self.assertEqual(response.status_code, 302)
+            
+            # Ottieni la request passata alla funzione mock
+            args, _ = mock_annulla.call_args_list[0]
+            request_passed = args[0]
+            ordine_id_passed = args[1]
+            
+            # Verifica che la request sia corretta e che l'ID ordine sia quello atteso
+            self.assertEqual(request_passed.user, moderator)
+            self.assertEqual(ordine_id_passed, ordine_inserzionista.id)#type:ignore
+            
+            # Verifica il secondo ordine
+            args, _ = mock_annulla.call_args_list[1]
+            request_passed = args[0]
+            ordine_id_passed = args[1]
+            
+            self.assertEqual(request_passed.user, moderator)
+            self.assertEqual(ordine_id_passed, ordine_utente.id)#type:ignore
+            
+            # Verifica che i dati siano stati eliminati
+            self.assertFalse(Annuncio.objects.filter(inserzionista=banned_user).exists())
+            self.assertFalse(CommentoAnnuncio.objects.filter(utente=banned_user).exists())
+            self.assertFalse(Ordine.objects.filter(utente=banned_user).exists())
+            self.assertFalse(Ordine.objects.filter(prodotto__annunci__inserzionista=banned_user).exists())
+    @patch('sylvelius.views.annulla_ordine_free')
+    def test_annulla_ordine(self, mock_annulla_ordine_free):
+        # Configure the mock to return a JsonResponse
+        mock_annulla_ordine_free.return_value = JsonResponse({"status": "success"})
         
-        # Verifica che i dati siano stati eliminati
-        self.assertFalse(Annuncio.objects.filter(inserzionista=banned_user).exists())
-        self.assertFalse(CommentoAnnuncio.objects.filter(utente=banned_user).exists())
-        self.assertFalse(Ordine.objects.filter(utente=banned_user).exists())
-        
-        # Testa che non si possa formattare un utente non bannato
-        active_user = User.objects.create_user(
-            username='activeuser', password='testpass123'
+        request = self.factory.post('/')
+        request.user = self.user
+        prodotto = Prodotto.objects.create(
+            nome="Prodotto Test",
+            descrizione_breve="Descrizione breve",
+            prezzo=10.00
+        )        
+        # Crea un ordine
+        ordine = Ordine.objects.create(
+            utente=self.user,
+            prodotto=prodotto,
+            stato_consegna='da spedire'
         )
-        response = self.client.post(
-            reverse('sylvelius:formatta_utente', args=[active_user.id]) #type:ignore
-        )
-        self.assertEqual(response.status_code, 403)
-        
-        # Testa che un utente normale non possa formattare
-        normal_user = User.objects.create_user(
-            username='normaluser', password='testpass123'
-        )
-        self.client.login(username='normaluser', password='testpass123')
-        response = self.client.post(
-            reverse('sylvelius:formatta_utente', args=[banned_user.id]) #type:ignore
-        )
-        self.assertEqual(response.status_code, 403)
+        response = annulla_ordine(request, ordine.id) #type:ignore
+
+        self.assertEqual(response.status_code, 200)
+        # You might also want to verify the mock was called
+        mock_annulla_ordine_free.assert_called_once_with(request, ordine.id)#type:ignore
 
 class AnnuncioCreationTests(TestCase):
     def setUp(self):
@@ -1341,3 +1661,574 @@ class AnnuncioCreationTests(TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertIn(error_code, response.context['notok'])
 
+class ProfiloEditTests(TestCase):
+
+    def setUp(self):
+        Annuncio.objects.all().delete()
+        self.factory = RequestFactory()
+        self.user = User.objects.create_user(
+            username='testuser', password='testpass123'
+        )
+        self.group = Group.objects.create(name='moderatori')
+        self.client = Client()
+        
+        # Crea un prodotto e un annuncio per i test
+        self.tag = Tag.objects.create(nome='test')
+        self.prodotto = Prodotto.objects.create(
+            nome="Prodotto Test",
+            descrizione_breve="Descrizione breve",
+            prezzo=10.00
+        )
+        self.prodotto.tags.add(self.tag)
+        self.ann_uuid = uuid.uuid4()
+        self.annuncio = Annuncio.objects.create(
+            inserzionista=self.user,
+            uuid=self.ann_uuid,
+            prodotto=self.prodotto,
+            qta_magazzino=5,
+            is_published=True
+        )
+        
+        # Crea un commento
+        self.commento = CommentoAnnuncio.objects.create(
+            annuncio=self.annuncio,
+            utente=self.user,
+            testo="Commento di test",
+            rating=4
+        )
+        
+        # Crea un ordine
+        self.ordine = Ordine.objects.create(
+            utente=self.user,
+            prodotto=self.prodotto,
+            stato_consegna='da spedire'
+        )
+ 
+    def test_profilo_edit_page_view_get(self):
+        # Test GET request usando Client invece di RequestFactory
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.get(reverse('sylvelius:profile_edit'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'sylvelius/profile/profile_edit.html')
+
+    def test_profilo_edit_page_view_post_valid_username(self):
+        # Test POST request con solo cambio username valido
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.post(reverse('sylvelius:profile_edit'), {
+            'username': 'newusername',
+            'old_password': 'testpass123',
+            'new_password1': '',
+            'new_password2': ''
+        })
+        self.assertEqual(response.status_code, 302)  # Redirect dopo successo
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.username, 'newusername')
+
+    def test_profilo_edit_page_view_post_valid_password(self):
+        # Test POST request con cambio password valido
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.post(reverse('sylvelius:profile_edit'), {
+            'username': 'testuser',
+            'old_password': 'testpass123',
+            'new_password1': 'newpass123',
+            'new_password2': 'newpass123'
+        })
+        self.assertEqual(response.status_code, 302)  # Redirect dopo successo
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password('newpass123'))
+
+    def test_profilo_edit_page_view_post_wrong_old_password(self):
+        # Test POST request con vecchia password errata
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.post(reverse('sylvelius:profile_edit'), {
+            'username': 'testuser',
+            'old_password': 'wrongpass',
+            'new_password1': 'newpass123',
+            'new_password2': 'newpass123'
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('pwd', response.context)
+        self.assertEqual(response.context['pwd'], 'bad')
+
+    def test_profilo_edit_page_view_post_missing_old_password(self):
+        # Test POST request senza vecchia password
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.post(reverse('sylvelius:profile_edit'), {
+            'username': 'testuser',
+            'old_password': '',
+            'new_password1': 'newpass123',
+            'new_password2': 'newpass123'
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('pwd', response.context)
+        self.assertEqual(response.context['pwd'], 'bad')
+
+    def test_profilo_edit_page_view_post_existing_username(self):
+        # Test POST request con username già esistente
+        User.objects.create_user(username='existinguser', password='testpass123')
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.post(reverse('sylvelius:profile_edit'), {
+            'username': 'existinguser',
+            'old_password': 'testpass123',
+            'new_password1': '',
+            'new_password2': ''
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('usr', response.context)
+        self.assertEqual(response.context['usr'], 'bad')
+
+    def test_profilo_edit_page_view_post_long_username(self):
+        # Test POST request con username troppo lungo
+        long_username = 'a' * (MAX_UNAME_CHARS + 1)
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.post(reverse('sylvelius:profile_edit'), {
+            'username': long_username,
+            'old_password': 'testpass123',
+            'new_password1': '',
+            'new_password2': ''
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('usr', response.context)
+        self.assertEqual(response.context['usr'], 'bad')
+
+    def test_profilo_edit_page_view_post_long_password(self):
+        # Test POST request con password troppo lunga
+        long_password = 'a' * (MAX_PWD_CHARS + 1)
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.post(reverse('sylvelius:profile_edit'), {
+            'username': 'testuser',
+            'old_password': 'testpass123',
+            'new_password1': long_password,
+            'new_password2': long_password
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('pwd', response.context)
+        self.assertEqual(response.context['pwd'], 'bad')
+
+    def test_profilo_edit_page_view_post_password_mismatch(self):
+        # Test POST request con password non coincidenti
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.post(reverse('sylvelius:profile_edit'), {
+            'username': 'testuser',
+            'old_password': 'testpass123',
+            'new_password1': 'newpass123',
+            'new_password2': 'differentpass'
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('pwd', response.context)
+        self.assertEqual(response.context['pwd'], 'bad')
+
+    def test_profilo_edit_page_view_login_required(self):
+        # Test che la view richieda l'accesso
+        response = self.client.get(reverse('sylvelius:profile_edit'))
+        self.assertEqual(response.status_code, 302)  # Redirect al login
+        self.assertTrue(response.url.startswith(reverse('sylvelius:login'))) #type:ignore
+
+class RicercaAnnunciViewTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.factory = RequestFactory()
+        cls.user = get_user_model().objects.create_user(username='testuser', password='12345')
+        Annuncio.objects.all().delete()
+        Tag.objects.all().delete()
+        Prodotto.objects.all().delete()
+        CommentoAnnuncio.objects.all().delete()
+        # Creazione tags
+        cls.tag1 = Tag.objects.create(nome='elettronica')
+        cls.tag2 = Tag.objects.create(nome='abbigliamento')
+        cls.tag3 = Tag.objects.create(nome='casa')
+        
+        # Creazione prodotti e annunci
+        cls.prod1 = Prodotto.objects.create(
+            nome='Smartphone XYZ',
+            descrizione_breve='Smartphone di ultima generazione',
+            prezzo=599.99,
+            condizione='nuovo'
+        )
+        cls.prod1.tags.add(cls.tag1)
+        cls.annuncio1 = Annuncio.objects.create(
+            prodotto=cls.prod1,
+            inserzionista=cls.user,
+            qta_magazzino=5,
+            is_published=True
+        )
+        
+        cls.prod2 = Prodotto.objects.create(
+            nome='Maglione invernale',
+            descrizione_breve='Maglione caldo per l\'inverno',
+            prezzo=49.99,
+            condizione='usato'
+        )
+        cls.prod2.tags.add(cls.tag2)
+        cls.annuncio2 = Annuncio.objects.create(
+            prodotto=cls.prod2,
+            inserzionista=cls.user,
+            qta_magazzino=0,
+            is_published=True
+        )
+        
+        cls.prod3 = Prodotto.objects.create(
+            nome='Tavolo da pranzo',
+            descrizione_breve='Tavolo in legno massello',
+            prezzo=199.99
+        )
+        cls.prod3.tags.add(cls.tag3)
+        cls.annuncio3 = Annuncio.objects.create(
+            prodotto=cls.prod3,
+            inserzionista=cls.user,
+            qta_magazzino=2,
+            is_published=True
+        )
+        
+        # Creazione commenti con rating
+        cls.commento1 = CommentoAnnuncio.objects.create(
+            annuncio=cls.annuncio1,
+            utente=cls.user,
+            rating=4,
+            testo='Ottimo prodotto'
+        )
+        cls.commento2 = CommentoAnnuncio.objects.create(
+            annuncio=cls.annuncio1,
+            utente=cls.user,
+            rating=5,
+            testo='Eccellente'
+        )
+        cls.commento3 = CommentoAnnuncio.objects.create(
+            annuncio=cls.annuncio3,
+            utente=cls.user,
+            rating=2,
+            testo='Discreto'
+        )
+
+    def test_ricerca_base(self):
+        request = self.factory.get(reverse('sylvelius:ricerca_annunci'))
+        view = RicercaAnnunciView()
+        view.request = request
+        
+        context = view.get_context_data()
+        
+        # Verifica che tutti gli annunci pubblicati siano presenti
+        self.assertEqual(len(context['annunci']), 3)
+        self.assertIn(self.annuncio1, context['annunci'])
+        self.assertIn(self.annuncio2, context['annunci'])
+        self.assertIn(self.annuncio3, context['annunci'])
+        
+        # Verifica paginazione
+        self.assertEqual(context['page'], 1)
+        self.assertFalse(context['has_next'])
+        self.assertFalse(context['has_previous'])
+
+    def test_ricerca_per_testo(self):
+        # Ricerca per nome prodotto
+        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'q': 'Smartphone'})
+        view = RicercaAnnunciView()
+        view.request = request
+        
+        context = view.get_context_data()
+        self.assertEqual(len(context['annunci']), 1)
+        self.assertIn(self.annuncio1, context['annunci'])
+        
+        # Ricerca per descrizione breve
+        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'q': 'caldo'})
+        view.request = request
+        
+        context = view.get_context_data()
+        self.assertEqual(len(context['annunci']), 1)
+        self.assertIn(self.annuncio2, context['annunci'])
+        
+        # Ricerca per tag (senza usare il filtro categorie)
+        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'q': 'elettronica'})
+        view.request = request
+        
+        context = view.get_context_data()
+        self.assertEqual(len(context['annunci']), 1)
+        self.assertIn(self.annuncio1, context['annunci'])
+
+    def test_filtro_categoria(self):
+        # Filtro per singola categoria
+        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'categoria': 'elettronica'})
+        view = RicercaAnnunciView()
+        view.request = request
+        
+        context = view.get_context_data()
+        self.assertEqual(len(context['annunci']), 1)
+        self.assertIn(self.annuncio1, context['annunci'])
+        
+        # Filtro per multiple categorie
+        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'categoria': 'elettronica,casa'})
+        view = RicercaAnnunciView()
+        view.request = request
+        
+        context = view.get_context_data()
+        self.assertEqual(len(context['annunci']), 0)
+        
+        # Categoria inesistente
+        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'categoria': 'Inesistente'})
+        view.request = request
+        
+        context = view.get_context_data()
+        self.assertEqual(len(context['annunci']), 0)
+
+    def test_filtro_condizione(self):
+        # Filtro per condizione NU (Nuovo)
+        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'condition': 'nuovo'})
+        view = RicercaAnnunciView()
+        view.request = request
+        
+        context = view.get_context_data()
+        self.assertEqual(len(context['annunci']), 2)
+        self.assertIn(self.annuncio1, context['annunci'])
+        
+        # Filtro per condizione US (Usato)
+        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'condition': 'usato'})
+        view.request = request
+        
+        context = view.get_context_data()
+        self.assertEqual(len(context['annunci']), 1)
+        self.assertIn(self.annuncio2, context['annunci'])
+        
+        # Condizione non valida (dovrebbe mostrare tutti gli annunci)
+        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'condition': 'INVALID'})
+        view.request = request
+        
+        context = view.get_context_data()
+        self.assertEqual(len(context['annunci']), 3)
+
+    def test_filtro_qta_magazzino(self):
+        # Solo prodotti disponibili
+        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'qta_mag': 'qta-pres'})
+        view = RicercaAnnunciView()
+        view.request = request
+        
+        context = view.get_context_data()
+        self.assertEqual(len(context['annunci']), 2)
+        self.assertIn(self.annuncio1, context['annunci'])
+        self.assertIn(self.annuncio3, context['annunci'])
+        
+        # Solo prodotti non disponibili
+        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'qta_mag': 'qta-manc'})
+        view.request = request
+        
+        context = view.get_context_data()
+        self.assertEqual(len(context['annunci']), 1)
+        self.assertIn(self.annuncio2, context['annunci'])
+
+    def test_filtro_rating(self):
+        # Rating specifico (4-5 stelle)
+        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'search_by_rating': '4'})
+        view = RicercaAnnunciView()
+        view.request = request
+        
+        context = view.get_context_data()
+        self.assertEqual(len(context['annunci']), 1)
+        self.assertIn(self.annuncio1, context['annunci'])
+        
+        # Rating specifico (2 stelle)
+        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'search_by_rating': '2'})
+        view.request = request
+        
+        context = view.get_context_data()
+        self.assertEqual(len(context['annunci']), 1)
+        self.assertIn(self.annuncio3, context['annunci'])
+        
+        # Solo annunci con almeno un rating
+        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'search_by_rating': 'starred'})
+        view.request = request
+        
+        context = view.get_context_data()
+        self.assertEqual(len(context['annunci']), 2)
+        self.assertIn(self.annuncio1, context['annunci'])
+        self.assertIn(self.annuncio3, context['annunci'])
+        
+        # Solo annunci senza rating
+        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'search_by_rating': 'none'})
+        view.request = request
+        
+        context = view.get_context_data()
+        self.assertEqual(len(context['annunci']), 1)
+        self.assertIn(self.annuncio2, context['annunci'])
+        
+        # Rating non valido (dovrebbe mostrare tutti)
+        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'search_by_rating': 'invalid'})
+        view.request = request
+        
+        context = view.get_context_data()
+        self.assertEqual(len(context['annunci']), 3)
+
+        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'search_by_rating': '100'})
+        view.request = request
+        
+        context = view.get_context_data()
+        self.assertEqual(len(context['annunci']), 3)
+
+    def test_filtro_prezzo(self):
+        # Prezzo minimo
+        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'prezzo_min': '100'})
+        view = RicercaAnnunciView()
+        view.request = request
+        
+        context = view.get_context_data()
+        self.assertEqual(len(context['annunci']), 2)
+        self.assertIn(self.annuncio1, context['annunci'])
+        self.assertIn(self.annuncio3, context['annunci'])
+        
+        # Prezzo massimo
+        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'prezzo_max': '100'})
+        view.request = request
+        
+        context = view.get_context_data()
+        self.assertEqual(len(context['annunci']), 1)
+        self.assertIn(self.annuncio2, context['annunci'])
+        
+        # Range di prezzo
+        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'prezzo_min': '50', 'prezzo_max': '200'})
+        view.request = request
+        
+        context = view.get_context_data()
+        self.assertEqual(len(context['annunci']), 1)
+        self.assertIn(self.annuncio3, context['annunci'])
+        
+        # Prezzo non valido (dovrebbe essere ignorato)
+        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'prezzo_min': 'invalid', 'prezzo_max': 'invalid'})
+        view.request = request
+        
+        context = view.get_context_data()
+        self.assertEqual(len(context['annunci']), 3)
+
+    def test_ordinamento_risultati(self):
+        # Ordinamento per data decrescente (default)
+        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'sort': 'data-desc'})
+        view = RicercaAnnunciView()
+        view.request = request
+        
+        context = view.get_context_data()
+        self.assertEqual(context['annunci'][0], self.annuncio3)
+        self.assertEqual(context['annunci'][1], self.annuncio2)
+        self.assertEqual(context['annunci'][2], self.annuncio1)
+        
+        # Ordinamento per data crescente
+        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'sort': 'data-asc'})
+        view.request = request
+        
+        context = view.get_context_data()
+        self.assertEqual(context['annunci'][0], self.annuncio1)
+        self.assertEqual(context['annunci'][1], self.annuncio2)
+        self.assertEqual(context['annunci'][2], self.annuncio3)
+        
+        # Ordinamento per prezzo crescente
+        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'sort': 'prezzo-asc'})
+        view.request = request
+        
+        context = view.get_context_data()
+        self.assertEqual(context['annunci'][0], self.annuncio2)
+        self.assertEqual(context['annunci'][1], self.annuncio3)
+        self.assertEqual(context['annunci'][2], self.annuncio1)
+        
+        # Ordinamento per prezzo decrescente
+        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'sort': 'prezzo-desc'})
+        view.request = request
+        
+        context = view.get_context_data()
+        self.assertEqual(context['annunci'][0], self.annuncio1)
+        self.assertEqual(context['annunci'][1], self.annuncio3)
+        self.assertEqual(context['annunci'][2], self.annuncio2)
+
+    def test_paginazione(self):
+        # Creiamo più annunci per testare la paginazione
+        for i in range(MAX_PAGINATOR_RICERCA_VALUE + 5):
+            prod = Prodotto.objects.create(
+                nome=f'Prodotto {i}',
+                descrizione_breve=f'Descrizione {i}',
+                prezzo=10 + i,
+                condizione='NU'
+            )
+            Annuncio.objects.create(
+                prodotto=prod,
+                inserzionista=self.user,
+                qta_magazzino=1,
+                is_published=True
+            )
+        
+        # Pagina 1 (default)
+        request = self.factory.get(reverse('sylvelius:ricerca_annunci'))
+        view = RicercaAnnunciView()
+        view.request = request
+        
+        context = view.get_context_data()
+        self.assertEqual(len(context['annunci']), MAX_PAGINATOR_RICERCA_VALUE)
+        self.assertEqual(context['page'], 1)
+        self.assertTrue(context['has_next'])
+        self.assertFalse(context['has_previous'])
+        
+        # Pagina 2
+        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'page': '2'})
+        view.request = request
+        
+        context = view.get_context_data()
+        self.assertEqual(len(context['annunci']), 5 + 3)  # 5 nuovi + 3 originali - MAX_PAGINATOR_RICERCA_VALUE
+        self.assertEqual(context['page'], 2)
+        self.assertFalse(context['has_next'])
+        self.assertTrue(context['has_previous'])
+        
+        # Pagina non valida (dovrebbe tornare alla prima pagina)
+        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'page': 'invalid'})
+        view.request = request
+        
+        context = view.get_context_data()
+        self.assertEqual(context['page'], 1)
+
+        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'page': '0'})
+        view.request = request
+        
+        context = view.get_context_data()
+        self.assertEqual(context['page'], 1)
+
+    def test_combinazione_filtri(self):
+        # Combinazione di più filtri
+        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {
+            'q': 'Smartphone',
+            'condition': 'NU',
+            'prezzo_min': '500',
+            'prezzo_max': '600',
+            'qta_mag': 'qta-pres',
+            'search_by_rating': 'starred'
+        })
+        view = RicercaAnnunciView()
+        view.request = request
+        
+        context = view.get_context_data()
+        self.assertEqual(len(context['annunci']), 1)
+        self.assertIn(self.annuncio1, context['annunci'])
+        
+        # Combinazione che non dovrebbe restituire risultati
+        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {
+            'q': 'Smartphone',
+            'condition': 'US',
+            'prezzo_min': '1000'
+        })
+        view.request = request
+        
+        context = view.get_context_data()
+        self.assertEqual(len(context['annunci']), 0)
+
+    def test_annunci_non_pubblicati(self):
+        # Creiamo un annuncio non pubblicato
+        prod = Prodotto.objects.create(
+            nome='Prodotto Privato',
+            descrizione_breve='Non dovrebbe apparire',
+            prezzo=100,
+            condizione='NU'
+        )
+        annuncio_privato = Annuncio.objects.create(
+            prodotto=prod,
+            inserzionista=self.user,
+            qta_magazzino=1,
+            is_published=False
+        )
+        
+        request = self.factory.get(reverse('sylvelius:ricerca_annunci'))
+        view = RicercaAnnunciView()
+        view.request = request
+        
+        context = view.get_context_data()
+        self.assertNotIn(annuncio_privato, context['annunci'])

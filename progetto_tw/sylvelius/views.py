@@ -67,7 +67,7 @@ from PIL import Image
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 
-# Create your views here.
+#non callable
 def send_notification(user_id=None,title="", message="", global_notification=False):
     channel_layer = get_channel_layer()
 
@@ -79,12 +79,11 @@ def send_notification(user_id=None,title="", message="", global_notification=Fal
         async_to_sync(channel_layer.group_send)( #type: ignore
             f"user_{user_id}", {"type": "send_notification", "title":title, "message": message}
         )
-
 @require_POST
 def mark_notifications_read(request):
     Notification.objects.filter(recipient=request.user, read=False).update(read=True)
     return JsonResponse({'status': 'ok'})
-
+#non callable
 def create_notification(recipient=None, title="", message="", is_global=False, sender=None):
     # Salva nel database
     notifica = Notification.objects.create(
@@ -105,7 +104,7 @@ def create_notification(recipient=None, title="", message="", is_global=False, s
     )
     
     return notifica
-
+#non callable
 def annulla_ordine_free(request, order_id):
     try:
         ordine = Ordine.objects.get(id=order_id)
@@ -125,7 +124,7 @@ def annulla_ordine_free(request, order_id):
                                 message=f"Il tuo ordine di {ordine.prodotto.nome} è stato rifiutato dal venditore")
         return JsonResponse({"status": "success"})
     else: return JsonResponse({"status": "error", "message": "Ordine non trovato o già spedito"}, status=400)
-
+#non callable
 def check_if_annuncio_is_valid(request):
     nome = request.POST.get('nome').strip()
     descrizione = request.POST.get('descrizione', '')
@@ -315,7 +314,14 @@ class ProfiloEditPageView(CustomLoginRequiredMixin, View):
     
     def post(self, request):
         username = request.POST.get('username').strip()
-        old_password = request.POST.get('old_password').strip()
+        old_password = request.POST.get('old_password')
+        if not old_password:
+            return render(request, self.template_name, {'pwd': 'bad'})
+        else:
+            old_password=old_password.strip()
+            if not request.user.check_password(old_password):
+                return render(request, self.template_name, {'pwd': 'bad'})
+                
         new_password1 = request.POST.get('new_password1').strip()
         new_password2 = request.POST.get('new_password2').strip()
 
@@ -334,8 +340,14 @@ class ProfiloEditPageView(CustomLoginRequiredMixin, View):
             if password_change_form_valid: password_change_form.save()
 
         if username != request.user.username:
-            request.user.username = username
-            request.user.save()
+            # Verifica se l'username esiste già (escludendo l'utente corrente)
+            if User.objects.filter(username=username).exclude(pk=request.user.pk).exists():
+                # Username già esistente, gestisci l'errore (es. mostra un messaggio)
+                return render(request, self.template_name, {'usr': 'bad'})
+            else:
+                # Username disponibile, procedi con l'aggiornamento
+                request.user.username = username
+                request.user.save()
 
         if password_change_form_valid:
             update_session_auth_hash(request, request.user)
@@ -373,7 +385,7 @@ class ProfiloDeletePageView(CustomLoginRequiredMixin, View):
             annulla_ordine_free(request,ordine.id) #type:ignore
         
         for ordine in ordine_in:
-            annulla_ordine_free(request,ordine.id)#type:ignore
+            annulla_ordine_free(request,ordine.id) #type:ignore
 
         Annuncio.objects.filter(inserzionista=user).delete()
         Iban.objects.filter(utente=request.user).delete()
@@ -674,9 +686,7 @@ class RicercaAnnunciView(TemplateView):
                 else:
                     raise ValueError("Rating fuori range")
             except (ValueError, TypeError):
-                if rating == 'all':
-                    pass
-                elif rating == 'none':
+                if rating == 'none':
                     # Se 'none', escludi gli annunci con commenti
                     annunci = annunci.exclude(commenti__isnull=False)
                 elif rating == 'starred':
@@ -807,7 +817,7 @@ def aggiungi_commento(request, annuncio_id):
         len(testo) > MAX_COMMNT_TESTO_CHARS):
         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
             return JsonResponse({"status": "error", "message": "Dati non validi"}, status=400)
-        return redirect(reverse('sylvelius:dettagli_annuncio', args=[annuncio_id]) + '?evento=commento_bad')
+        return redirect(reverse('sylvelius:dettagli_annuncio', args=[annuncio.uuid]) + '?evento=commento_bad')
 
     # Salva il commento
     commento = CommentoAnnuncio.objects.create(
@@ -823,7 +833,7 @@ def aggiungi_commento(request, annuncio_id):
         return JsonResponse({"status": "success"})
 
     # Altrimenti redirect classico
-    return redirect(reverse('sylvelius:dettagli_annuncio', args=[annuncio_id]))
+    return redirect(reverse('sylvelius:dettagli_annuncio', args=[annuncio.uuid]) + '?evento=commento_bad')
 
 @require_POST
 @login_required
@@ -839,7 +849,9 @@ def modifica_commento(request, commento_id):
         int(rating) < MIN_COMMNT_RATING_VALUE or
         int(rating) > MAX_COMMNT_RATING_VALUE or
         len(testo) > MAX_COMMNT_TESTO_CHARS):
-        return JsonResponse({"status": "error", "message": "Dati non validi"}, status=400)
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({"status": "error", "message": "Dati non validi"}, status=400)
+        return redirect(reverse('sylvelius:dettagli_annuncio', args=[commento.annuncio.uuid]) + '?evento=commento_bad')
 
     # Aggiorna il commento
     commento.testo = testo
@@ -849,7 +861,7 @@ def modifica_commento(request, commento_id):
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         return JsonResponse({"status": "success"})
 
-    return render(request, "sylvelius/annuncio/dettagli_annuncio.html", {"commento": commento})
+    return redirect(reverse('sylvelius:dettagli_annuncio', args=[commento.annuncio.uuid]) + '?evento=commento_bad')
 
 @require_POST
 @login_required
