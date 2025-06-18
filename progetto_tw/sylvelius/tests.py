@@ -1,11 +1,12 @@
 # Django imports
 from django.test import TestCase, RequestFactory, Client
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import User, Group,AnonymousUser
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from django.conf import settings
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
+from django.core.exceptions import PermissionDenied
 
 # Standard library imports
 import tempfile
@@ -14,6 +15,8 @@ import json
 import uuid
 from decimal import Decimal
 from unittest.mock import patch
+
+from django.views import View
 
 # Local imports
 from .models import (
@@ -25,7 +28,9 @@ from .views import (
     mark_notifications_read, create_notification, annulla_ordine_free, 
     check_if_annuncio_is_valid, annulla_ordine
 )
+from .api_views import notifications_api
 from sylvelius.forms import CustomUserCreationForm
+from progetto_tw.mixins import ModeratoreAccessForbiddenMixin
 from purchase.models import Invoice
 from progetto_tw.t_ests_constants import NEXT_PROD_ID
 from progetto_tw.constants import (
@@ -297,9 +302,9 @@ class ModelsTestingStringsCoverage(TestCase):
 
 class LoggedUrls2(TestCase):
     def setUp(self):
-        user = User.objects.create_user(username='testuser', password='Testpass0')
-        group, created = Group.objects.get_or_create(name='moderatori')
-        user.groups.add(group)
+        self.user = User.objects.create_user(username='testuser', password='Testpass0')
+        self.group, created = Group.objects.get_or_create(name='moderatori')
+        self.user.groups.add(self.group)
         self.client.login(username='testuser', password='Testpass0')
     
     def test_pagamento_logged(self):
@@ -317,6 +322,27 @@ class LoggedUrls2(TestCase):
         self.assertFalse(form.is_valid())
         form = CustomUserCreationForm(data={'username':'testuser3', 'password1': 'A12345678912345678901234567890123', 'password2': 'A12345678912345678901234567890123'})
         self.assertFalse(form.is_valid())
+
+    def test_api_notifications(self):
+        Notification.objects.create(
+            recipient=self.user,
+            title='title',
+            message='message',
+            is_global=True,
+            read=False
+        )
+        response = self.client.get(reverse('sylvelius:notifications_api'))
+        self.assertEqual(response.status_code,200)
+        response_data = json.loads(response.content.decode())[0]
+        self.assertEqual(response_data['title'], 'title')
+        self.assertEqual(response_data['message'], 'message')
+        self.assertEqual(response_data['read'], False)
+
+        self.client.logout()
+        response = self.client.get(reverse('sylvelius:notifications_api'))
+        self.assertEqual(response.status_code,200)
+        response_data = json.loads(response.content.decode())
+        self.assertEqual(response_data, [])
 
 class UtilityFunctionsTests(TestCase):
     def setUp(self):
@@ -343,6 +369,9 @@ class UtilityFunctionsTests(TestCase):
         
         # Testa l'invio di una notifica a un utente specifico
         response = send_notification(user_id=self.user.id, title="Test", message="User message") #type:ignore
+        self.assertIsNone(response)
+
+        response = send_notification(title="Test", message="User message")
         self.assertIsNone(response)
     
     def test_mark_notifications_read(self):
@@ -601,6 +630,12 @@ class ViewTests(TestCase):
         
         # Crea un ordine
         self.ordine = Ordine.objects.create(
+            utente=self.user,
+            prodotto=self.prodotto,
+            stato_consegna='da spedire'
+        )
+
+        self.ordine2 = Ordine.objects.create(
             utente=self.user,
             prodotto=self.prodotto,
             stato_consegna='da spedire'
@@ -1610,6 +1645,13 @@ class AnnuncioCreationTests(TestCase):
         self.assertIn('newtag1', tag_names)
         self.assertIn('newtag2', tag_names)
         self.assertIn('newtag3', tag_names)
+
+        response = self.client.post(
+            reverse('sylvelius:modifica_annuncio', args=[annuncio.id]), #type:ignore
+            data=post_data,
+            follow=True
+        )
+        self.assertEqual(response.status_code, 200)
     
     def test_profilo_modifica_annuncio_page_view_post_invalid(self):
         self.client.login(username='testuser', password='testpass123')
@@ -1969,6 +2011,19 @@ class RicercaAnnunciViewTest(TestCase):
         context = view.get_context_data()
         self.assertEqual(len(context['annunci']), 0)
 
+        # Categoria inesistente
+        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'categoria': ' '})
+        view.request = request
+        
+        context = view.get_context_data()
+        self.assertEqual(len(context['annunci']), 3)
+
+        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'categoria': '  , , ,, ,   ,elettronica,, ,  ,'})
+        view.request = request
+        
+        context = view.get_context_data()
+        self.assertEqual(len(context['annunci']), 1)
+
     def test_filtro_condizione(self):
         # Filtro per condizione NU (Nuovo)
         request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'condition': 'nuovo'})
@@ -1989,6 +2044,18 @@ class RicercaAnnunciViewTest(TestCase):
         
         # Condizione non valida (dovrebbe mostrare tutti gli annunci)
         request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'condition': 'INVALID'})
+        view.request = request
+        
+        context = view.get_context_data()
+        self.assertEqual(len(context['annunci']), 3)
+
+        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'condition': '  '})
+        view.request = request
+        
+        context = view.get_context_data()
+        self.assertEqual(len(context['annunci']), 3)
+
+        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'condition': ' , ,, '})
         view.request = request
         
         context = view.get_context_data()
@@ -2133,6 +2200,14 @@ class RicercaAnnunciViewTest(TestCase):
         self.assertEqual(context['annunci'][1], self.annuncio3)
         self.assertEqual(context['annunci'][2], self.annuncio2)
 
+        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'sort': 'err'})
+        view.request = request
+        
+        context = view.get_context_data()
+        self.assertEqual(context['annunci'][0], self.annuncio3)
+        self.assertEqual(context['annunci'][1], self.annuncio2)
+        self.assertEqual(context['annunci'][2], self.annuncio1)
+
     def test_paginazione(self):
         # Creiamo più annunci per testare la paginazione
         for i in range(MAX_PAGINATOR_RICERCA_VALUE + 5):
@@ -2232,3 +2307,55 @@ class RicercaAnnunciViewTest(TestCase):
         
         context = view.get_context_data()
         self.assertNotIn(annuncio_privato, context['annunci'])
+
+class TestModeratoreAccessForbiddenMixin(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        # Creazione utenti e gruppi per i test
+        cls.normal_user = User.objects.create_user(username='normale', password='test123')
+        cls.moderatore_user = User.objects.create_user(username='moderatore', password='test123')
+        
+        # Creazione gruppo moderatori
+        moderatori_group = Group.objects.create(name='moderatori')
+        cls.moderatore_user.groups.add(moderatori_group)
+        
+        # View di test che usa il mixin
+        class TestView(ModeratoreAccessForbiddenMixin, View):
+            def get(self, request, *args, **kwargs):
+                return HttpResponse("Accesso consentito")
+        
+        cls.test_view = TestView.as_view()
+        cls.factory = RequestFactory()
+
+    def test_utente_anonimo_può_accedere(self):
+        """Verifica che un utente anonimo possa accedere"""
+        request = self.factory.get('/')
+        request.user = AnonymousUser()
+        response = self.test_view(request)
+        self.assertEqual(response.status_code, 200)
+
+    def test_utente_normale_può_accedere(self):
+        """Verifica che un utente normale (non moderatore) possa accedere"""
+        request = self.factory.get('/')
+        request.user = self.normal_user
+        response = self.test_view(request)
+        self.assertEqual(response.status_code, 200)
+
+    def test_utente_moderatore_non_può_accedere(self):
+        """Verifica che un utente moderatore riceva PermissionDenied"""
+        request = self.factory.get('/')
+        request.user = self.moderatore_user
+        with self.assertRaises(PermissionDenied):
+            self.test_view(request)
+
+    def test_controllo_gruppo_moderatori(self):
+        """Verifica che il controllo funzioni solo per il gruppo 'moderatori'"""
+        # Creiamo un altro gruppo e utente
+        altro_group = Group.objects.create(name='altro_gruppo')
+        user = User.objects.create_user(username='altro', password='test123')
+        user.groups.add(altro_group)
+        
+        request = self.factory.get('/')
+        request.user = user
+        response = self.test_view(request)
+        self.assertEqual(response.status_code, 200)

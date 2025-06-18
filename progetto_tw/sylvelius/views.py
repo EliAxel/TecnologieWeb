@@ -655,9 +655,8 @@ class RicercaAnnunciView(TemplateView):
 
         if categoria_str:
             tag_list = [tag.strip() for tag in categoria_str.split(',') if tag.strip()]
-            if tag_list:
-                for tag in tag_list:
-                    annunci = annunci.filter(prodotto__tags__nome=tag)
+            for tag in tag_list:
+                annunci = annunci.filter(prodotto__tags__nome=tag)
         
 
         if condizione in PROD_CONDIZIONE_CHOICES_ID:

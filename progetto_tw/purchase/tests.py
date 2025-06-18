@@ -318,6 +318,30 @@ class PayPalCOATests(TestCase):
 
         self.assertEqual(response.status_code, 404)
 
+    @patch('purchase.views.verify_paypal_webhook', return_value=True)
+    def test_checkout_address_missing(self, mock_verify):
+        payload = {
+            "event_type": "CHECKOUT.ORDER.APPROVED",
+            "resource": {
+                "purchase_units": [
+                    {
+                        "invoice_id": "INV-123",
+                        "shipping": {
+                        }
+                    }
+                ]
+            }
+        }
+
+        response = self.client.post(
+            '/pagamento/paypal/coa/',
+            data=json.dumps(payload),
+            content_type='application/json',
+            HTTP_X_PAYPAL_SIGNATURE='dummy-signature'
+        )
+
+        self.assertEqual(response.status_code, 400)
+
 class TestPaypalFunctions(TestCase):
     
     @patch('requests.post')

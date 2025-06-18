@@ -71,6 +71,9 @@ class Annuncio(models.Model):
     def __str__(self):
         return self.prodotto.nome
     
+    class Meta:
+        ordering = ['-data_pubblicazione']
+
     @property
     def rating_medio(self):
         commenti = self.commenti.all() # type: ignore
