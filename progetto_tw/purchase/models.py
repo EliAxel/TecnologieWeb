@@ -1,4 +1,3 @@
-import uuid
 from django.db import models
 from progetto_tw.constants import MAX_ORDN_INVOICE_CHARS, IBAN_LENGTH
 from sylvelius.models import Prodotto

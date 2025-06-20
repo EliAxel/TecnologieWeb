@@ -1,6 +1,4 @@
-from decimal import Decimal
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
 from django.urls import reverse, reverse_lazy
 from django.views import View
 from django.views.generic import TemplateView
@@ -8,24 +6,23 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.shortcuts import get_object_or_404, render, redirect
-import re
 from django.core.exceptions import ValidationError
 
 # Project specific
 from django.conf import settings
 from sylvelius.models import (
     Ordine,
-    Prodotto,
     Annuncio
 )
 from sylvelius.views import create_notification
 from .models import Invoice, Iban, Cart
-from progetto_tw.constants import MIN_ORDN_QUANTITA_VALUE
 from progetto_tw.mixins import CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin
 # Other
 import json
 import uuid
+import re
 import requests
+from decimal import Decimal
 from requests.auth import HTTPBasicAuth
 
 #non callable
@@ -34,8 +31,6 @@ from django.urls import reverse, reverse_lazy
 from django.views import View
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
-from django.conf import settings
-import uuid
 
 def validate_quantity(quantity, annuncio):
     """Valida la quantità e restituisce un redirect in caso di errore o None se tutto ok."""
@@ -108,24 +103,6 @@ class PurchasePageView(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin,
         }
         return render(request, self.template_name, context)
 
-@require_POST
-@login_required
-def add_to_cart(request):
-    annuncio, quantity, error_redirect = get_invoice_data(request)
-    if error_redirect:
-        return error_redirect
-    
-    carrello, created = Cart.objects.get_or_create(utente=request.user)
-    if created:
-        carrello.invoice = f'{uuid.uuid4()}' 
-    carrello.save()
-    create_invoice(request, annuncio, quantity, cart=carrello)
-    
-    return redirect(
-        reverse("sylvelius:dettagli_annuncio", kwargs={"uuid": annuncio.uuid}) +  # type: ignore
-        "?evento=carrello"
-    )
-
 def payment_done(request):
     return render(request, 'purchase/payment_done.html')
 
@@ -188,24 +165,6 @@ def invoice_validation(invoice_obj, pu):
     prodotto = invoice_obj.prodotto
     quantita = invoice_obj.quantita
 
-    if not user or not prodotto:
-        return HttpResponse(status=404)
-
-    try:
-        user = User.objects.get(id=user.id)
-    except User.DoesNotExist:
-        return HttpResponse(status=404)
-    
-    try:
-        prodotto = Prodotto.objects.get(id=prodotto.id) # type: ignore
-    except Prodotto.DoesNotExist:
-        create_notification(
-            recipient=user,
-            title="Acquisto Annullato",
-            message="Purtroppo l'acquisto non è andato a buon fine, il prodotto comprato è stato rimosso dalla piattaforma. Le arriverà un rimborso completo il prima possibile."
-        )
-        return HttpResponse(status=200)
-
     try:
         annuncio = Annuncio.objects.get(prodotto=prodotto)
     except Annuncio.DoesNotExist:
@@ -220,7 +179,7 @@ def invoice_validation(invoice_obj, pu):
         create_notification(
             recipient=user,
             title="Acquisto Annullato",
-            message=f"Purtroppo l'acquisto non è andato a buon fine, le scorte del prodotto {prodotto.nome} in magazzino sono finite. Le arriverà un rimborso completo il prima possibile."
+            message=f"Purtroppo l'acquisto non è andato a buon fine, le scorte del prodotto {prodotto.nome} in magazzino sono finite o inferiori alla sua richiesta. Le arriverà un rimborso completo il prima possibile."
         )
         stato = "annullato"
     else:
@@ -254,6 +213,8 @@ def invoice_validation(invoice_obj, pu):
                 title="Un utente ha acquistato!",
                 message=f"Un utente ha acquistato {ordine.quantita} unità di {ordine.prodotto.nome}!"
             )
+    else:
+        return HttpResponse(status=400)
     return HttpResponse(status=200)
 
 @csrf_exempt
@@ -346,6 +307,24 @@ class SetupIban(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin,Templat
             # Restituisci una risposta di errore con il messaggio
             return render(request, self.template_name, {'evento': error_message})
         return redirect(f'{reverse("sylvelius:profile_annunci")}?evento=iban_imp')
+
+@require_POST
+@login_required
+def add_to_cart(request):
+    annuncio, quantity, error_redirect = get_invoice_data(request)
+    if error_redirect:
+        return error_redirect
+    
+    carrello, created = Cart.objects.get_or_create(utente=request.user)
+    if created:
+        carrello.invoice = f'{uuid.uuid4()}' 
+    carrello.save()
+    create_invoice(request, annuncio, quantity, cart=carrello)
+    
+    return redirect(
+        reverse("sylvelius:dettagli_annuncio", kwargs={"uuid": annuncio.uuid}) +  # type: ignore
+        "?evento=carrello"
+    )
 
 class CarrelloPageView(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin,TemplateView):
     template_name = "purchase/carrello.html"

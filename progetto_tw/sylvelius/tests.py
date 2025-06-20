@@ -282,8 +282,8 @@ class ModelsTestingStringsCoverage(TestCase):
         Ordine.objects.create(
             id=NEXT_PROD_ID,
             invoice = invoice.invoice_id,
-            utente = User.objects.get(id=invoice.user_id), 
-            prodotto = Prodotto.objects.get(id=invoice.prodotto_id),
+            utente = invoice.user, 
+            prodotto = invoice.prodotto,
             quantita = invoice.quantita,
             stato_consegna = "consegnato",
             luogo_consegna = mock
