@@ -109,6 +109,14 @@ class PurchaseTests(TestCase):
             target_status_code=200 
         )
 
+        response = self.client.get(f'/pagamento/?annuncio_id={self.uuid1}&quantita=err')
+        self.assertRedirects(
+            response,
+            expected_url=f'{reverse("sylvelius:dettagli_annuncio",kwargs={"uuid": self.uuid1})}?evento=non_intero', 
+            status_code=302,
+            target_status_code=200 
+        )
+
 class PayPalCOATests(TestCase):
     def setUp(self):
         Ordine.objects.all().delete()

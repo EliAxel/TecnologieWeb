@@ -7,7 +7,11 @@ class Invoice(models.Model):
     user_id = models.PositiveIntegerField()
     quantita = models.PositiveIntegerField()
     prodotto_id = models.PositiveIntegerField()
+    cart = models.ForeignKey('Cart', on_delete=models.CASCADE, related_name='invoices', null=True)
 
 class Iban(models.Model):
     utente = models.OneToOneField('auth.User', on_delete=models.CASCADE, related_name='iban')
     iban = models.CharField(max_length=IBAN_LENGTH,blank=True, null=True)
+
+class Cart(models.Model):
+    utente  = models.OneToOneField('auth.User', on_delete=models.CASCADE, related_name='cart')

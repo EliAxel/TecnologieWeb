@@ -9,4 +9,5 @@ urlpatterns = [
     path('annullato/', views.payment_cancelled, name='payment_cancelled'),
     path('paypal/coa/', views.paypal_coa, name='paypal_webhook'),
     path('setup_iban/', views.SetupIban.as_view(), name='setup_iban'),
+    path('add_to_cart/', views.add_to_cart, name='add_to_cart')
 ]

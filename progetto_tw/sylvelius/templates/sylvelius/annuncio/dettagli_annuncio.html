@@ -27,6 +27,12 @@
             "Le scorte del prodotto sono finite!","bad"
         );
     </script>
+    {% elif request.GET.evento == 'non_intero'%}
+    <script>
+        showBootstrapAlertWithIcon(
+            "La quantità non è un numero","bad"
+        );
+    </script>
     {% endif %}
 {% endif %}
 <div class="container mt-5 mb-5">
@@ -63,7 +69,7 @@
             <h4 class="text-primary mt-4">€ <span id="unit-price-{{ annuncio.id }}">{{ annuncio.prodotto.prezzo|intcomma }}</span> 
                 <small class="text-muted">/unità</small>
             </h4>
-            <h5 id="total-price-container-{{ annuncio.id }}" style="display: none;">Totale: <span id="total-price-{{ annuncio.id }}" class="text-success">{{ annuncio.prodotto.prezzo }}</span> €</h5>
+            <h5 id="total-price-container-{{ annuncio.id }}" style="visibility: hidden;">Totale: <span id="total-price-{{ annuncio.id }}" class="text-success">{{ annuncio.prodotto.prezzo }}</span> €</h5>
             <p class="text-muted">Disponibilità: {{ annuncio.qta_magazzino }} unità</p>
 
             <!-- Selezione quantità -->
@@ -90,9 +96,15 @@
             <!-- Azioni -->
             
             <div class="mt-4 mb-4">
-                <!--<button class="btn text-white d-inline-block" id="cart-btn" style="background-color:{{SECONDARY_COLOR}};">
-                    <i class="bi bi-cart"></i>
-                    Aggiungi al carrello</button>-->
+                <form action="{% url 'purchase:add_to_cart' %}" method="post" class="d-inline-block" id="cart-form-{{ annuncio.id }}">
+                    {% csrf_token %}
+                    <input type="hidden" name="annuncio_id_cart" value="{{ annuncio.uuid }}">
+                    <input type="hidden" name="quantita_cart" value="{{MIN_ORDN_QUANTITA_VALUE}}" id="cart-quantity-input-{{ annuncio.id }}">
+                    <button type="submit" class="btn text-white d-inline-block" id="cart-btn" style="background-color:{{SECONDARY_COLOR}};">
+                        <i class="bi bi-cart"></i>
+                        Aggiungi al carrello
+                    </button>
+                </form>
                 <form action="{% url 'purchase:purchase' %}" method="get" class="d-inline-block" id="purchase-form-{{ annuncio.id }}">
                     <input type="hidden" name="annuncio_id" value="{{ annuncio.uuid }}">
                     <input type="hidden" name="quantita" value="{{MIN_ORDN_QUANTITA_VALUE}}" id="quantity-input-{{ annuncio.id }}">
@@ -185,22 +197,24 @@
         const MAX_PROD_PREZZO_DIGITS_DECIMAL = {{MAX_PROD_PREZZO_DIGITS_DECIMAL.1}}
         const quantitySelect = document.getElementById('quantity-select-{{ annuncio.id }}');
         const quantityInput = document.getElementById('quantity-input-{{ annuncio.id }}');
+        const quantityInputCart = document.getElementById('cart-quantity-input-{{ annuncio.id }}');
         const unitPriceElement = document.getElementById('unit-price-{{ annuncio.id }}');
         const totalPriceElement = document.getElementById('total-price-{{ annuncio.id }}');
         const totalPriceContainer = document.getElementById('total-price-container-{{ annuncio.id }}');
         const form = document.getElementById('purchase-form-{{ annuncio.id }}')
+        const formCart = document.getElementById('cart-form-{{ annuncio.id }}')
         
         const originalPrice = parseFloat("{{ annuncio.prodotto.prezzo }}");
         
         function updatePrices() {
             if(quantitySelect.value === ""){
                 document.getElementById("buy-now").disabled = true;
-                //document.getElementById("cart-btn").disabled = true;
-                totalPriceContainer.style.display = 'none';
+                document.getElementById("cart-btn").disabled = true;
+                totalPriceContainer.style.visibility = 'hidden';
                 return;
             } else {
                 document.getElementById("buy-now").disabled = false;
-                //document.getElementById("cart-btn").disabled = false;
+                document.getElementById("cart-btn").disabled = false;
             }
             let quantity = parseInt(quantitySelect.value);
 
@@ -213,14 +227,15 @@
 
             quantitySelect.value = quantity;
             quantityInput.value = quantity;
+            quantityInputCart.value = quantity;
 
             const totalPrice = originalPrice * quantity;
             totalPriceElement.textContent = totalPrice.toLocaleString('it-IT', { minimumFractionDigits: MAX_PROD_PREZZO_DIGITS_DECIMAL, maximumFractionDigits: MAX_PROD_PREZZO_DIGITS_DECIMAL });
 
             if (quantity === 1) {
-                totalPriceContainer.style.display = 'none';
+                totalPriceContainer.style.visibility = 'hidden';
             } else {
-                totalPriceContainer.style.display = 'block';
+                totalPriceContainer.style.visibility = '';
             }
         }
 
@@ -230,8 +245,10 @@
         form.addEventListener('submit', function(e) {
             const quantity = parseInt(quantitySelect.value);
             quantityInput.value = quantity;
-            const totalPrice = originalPrice * quantity;
-            amountInput.value = totalPrice.toFixed(MAX_PROD_PREZZO_DIGITS_DECIMAL);
+        });
+        formCart.addEventListener('submit', function(e) {
+            const quantity = parseInt(quantitySelect.value);
+            quantityInputCart.value = quantity;
         });
     });
 </script>

@@ -43,6 +43,11 @@ class PurchasePageView(CustomLoginRequiredMixin,ModeratoreAccessForbiddenMixin,V
         quantita = self.request.GET.get("quantita", f"{MIN_ORDN_QUANTITA_VALUE}") 
         user_id = self.request.user.id#type:ignore
         invoice_id = str(uuid.uuid4())
+        try:
+            int(quantita)
+        except:
+            return redirect(f'{reverse("sylvelius:dettagli_annuncio",kwargs={"uuid": annuncio_id})}?evento=non_intero')
+        
         if int(quantita) > annuncio.qta_magazzino:
             return redirect(f'{reverse("sylvelius:dettagli_annuncio",kwargs={"uuid": annuncio_id})}?evento=ordine_grosso')
         elif int(quantita) < 1:
@@ -243,4 +248,9 @@ class SetupIban(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin,Templat
             # Restituisci una risposta di errore con il messaggio
             return render(request, self.template_name, {'evento': error_message})
         return redirect(f'{reverse("sylvelius:profile_annunci")}?evento=iban_imp')
-    
+
+@require_POST
+@login_required
+def add_to_cart(request):
+
+    return redirect('sylv')
