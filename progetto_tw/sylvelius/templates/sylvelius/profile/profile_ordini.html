@@ -26,7 +26,7 @@
                     <tbody>
                         {% for ordine in ordini %}
                         <tr>
-                            <td>
+                            <td style="word-break: break-word;">
                                 {% if ordine.prodotto.annunci.is_published %}
                                     <a href="{% url 'sylvelius:dettagli_annuncio' ordine.prodotto.annunci.uuid %}">
                                         {{ ordine.prodotto.nome|truncatechars:MAX_TRUNCATED_PROFILO_CHARS }}

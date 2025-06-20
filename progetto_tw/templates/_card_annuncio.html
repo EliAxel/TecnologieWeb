@@ -17,7 +17,7 @@
                         <strong>{{ annuncio.prodotto.nome }}</strong>
                     </a>
                 </h5>
-                <p class="card-text">{{ annuncio.prodotto.descrizione_breve|truncatewords:MAX_TRUNCATED_CARDS_CHARS }}</p>
+                <p class="card-text">{{ annuncio.prodotto.descrizione_breve|truncatechars:MAX_TRUNCATED_CARDS_CHARS }}</p>
                 <div class="mb-2">
                     {% for tag in annuncio.prodotto.tags.all|slice:MAX_SLICE_TAGS_PER_CARD %}
                         <span class="badge rounded-pill me-1" style="background-color: {% if 'moderatori' in user.groups.values_list|join:',' %}

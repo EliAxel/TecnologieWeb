@@ -40,7 +40,7 @@ function showBootstrapAlertWithIcon(text, type) {
     const alertElement = $('.alert.fixed-top').last();
     const timeout = setTimeout(() => {
         alertElement.alert('close');
-    }, 3000);
+    }, 4000);
 
     alertElement.on('closed.bs.alert', function () {
         clearTimeout(timeout);

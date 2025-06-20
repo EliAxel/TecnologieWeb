@@ -11,7 +11,7 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             {% block titolo %}<h2>Pagamento di: €{{ amount|intcomma }}</h2>{% endblock %}
-            {% block sottotitolo %}<p>Stai acquistando: <strong>{{ item_name }}</strong> (Quantità: {{ quantity }})</p>{% endblock %}
+            {% block sottotitolo %}<p>Stai acquistando: <strong style="word-break: break-word;">{{ item_name }}</strong> (Quantità: {{ quantity }})</p>{% endblock %}
             
             <!-- PayPal -->
             <div class="card shadow-sm mb-3">

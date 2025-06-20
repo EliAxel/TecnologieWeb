@@ -114,6 +114,7 @@
       notifElement.className = `dropdown-item${notif.read ? '' : ' font-weight-bold'}`;
       notifElement.style.pointerEvents = 'none'; // Disabilita il clic
       notifElement.style.cursor = 'default';
+      notifElement.style.wordBreak = "break-word"
 
       notifElement.style.whiteSpace = 'wrap';
       notifElement.innerHTML = `<strong>${notif.title}</strong><br>${notif.message}`;

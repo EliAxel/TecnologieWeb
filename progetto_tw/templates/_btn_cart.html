@@ -1,11 +1,11 @@
 <!-- _btn_bell.html -->
-<button class="btn position-relative text-white" id="cartButton" aria-expanded="false">
-<i class="bi bi-cart" style="font-size: 1.5rem;"></i>
-<span id="cartBadge" class="badge badge-danger position-absolute"
-        style="top: 10px; right: 10px; border-radius: 50%; width: 18px; height: 18px; padding: 0; z-index: 10; display: none;">
-    <span id="cartCount" style="font-size: 0.75rem; position: relative; top: 2px;"></span>
-</span>
-</button>
+<a href="{% url 'purchase:carrello' %}" class="btn position-relative text-white" id="cartButton" aria-expanded="false" style="display: inline;">
+    <i class="bi bi-cart" style="font-size: 1.5rem;"></i>
+    <span id="cartBadge" class="badge badge-danger position-absolute"
+            style="top: 10px; right: 10px; border-radius: 50%; width: 18px; height: 18px; padding: 0; z-index: 10; display: none;">
+        <span id="cartCount" style="font-size: 0.75rem; position: relative; top: 2px;"></span>
+    </span>
+</a>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {

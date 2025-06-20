@@ -64,9 +64,9 @@ def create_invoice(request, annuncio, quantity, cart=None):
     """Crea una nuova fattura e la associa eventualmente a un carrello."""
     invoice_obj = Invoice.objects.create(
         invoice_id=str(uuid.uuid4()),
-        user_id=request.user.id,
+        user=request.user,
         quantita=quantity,
-        prodotto_id=annuncio.prodotto.id,
+        prodotto=annuncio.prodotto,
         cart=cart
     )
     return invoice_obj
@@ -74,9 +74,12 @@ def create_invoice(request, annuncio, quantity, cart=None):
 def get_invoice_data(request):
     """Elabora i dati della richiesta e restituisce annuncio, quantità e eventuale errore."""
     annuncio_id = request.POST.get("annuncio_id")
+    if not annuncio_id:
+        annuncio_id = request.GET.get("annuncio_id")
     annuncio = get_object_or_404(Annuncio, uuid=annuncio_id, is_published=True)
-    quantity = request.POST.get("quantita", f"{MIN_ORDN_QUANTITA_VALUE}")
-    
+    quantity = request.POST.get("quantita")
+    if not quantity:
+        quantity = request.GET.get("quantita")
     # Validazione quantità
     error_redirect = validate_quantity(quantity, annuncio)
     if error_redirect:
@@ -112,7 +115,10 @@ def add_to_cart(request):
     if error_redirect:
         return error_redirect
     
-    carrello, _ = Cart.objects.get_or_create(utente=request.user)
+    carrello, created = Cart.objects.get_or_create(utente=request.user)
+    if created:
+        carrello.invoice = f'{uuid.uuid4()}' 
+    carrello.save()
     create_invoice(request, annuncio, quantity, cart=carrello)
     
     return redirect(
@@ -176,13 +182,86 @@ def verify_paypal_webhook(request,body):
     response.raise_for_status()
     verification_status = response.json().get("verification_status")
     return verification_status == "SUCCESS"
+# non callable
+def invoice_validation(invoice_obj, pu):
+    user = invoice_obj.user
+    prodotto = invoice_obj.prodotto
+    quantita = invoice_obj.quantita
+
+    if not user or not prodotto:
+        return HttpResponse(status=404)
+
+    try:
+        user = User.objects.get(id=user.id)
+    except User.DoesNotExist:
+        return HttpResponse(status=404)
+    
+    try:
+        prodotto = Prodotto.objects.get(id=prodotto.id) # type: ignore
+    except Prodotto.DoesNotExist:
+        create_notification(
+            recipient=user,
+            title="Acquisto Annullato",
+            message="Purtroppo l'acquisto non è andato a buon fine, il prodotto comprato è stato rimosso dalla piattaforma. Le arriverà un rimborso completo il prima possibile."
+        )
+        return HttpResponse(status=200)
+
+    try:
+        annuncio = Annuncio.objects.get(prodotto=prodotto)
+    except Annuncio.DoesNotExist:
+        create_notification(
+            recipient=user,
+            title="Acquisto Annullato",
+            message=f"Purtroppo l'acquisto non è andato a buon fine, il prodotto {prodotto.nome} è stato rimosso dalla piattaforma. Le arriverà un rimborso completo il prima possibile."
+        )
+        return HttpResponse(status=200)
+    
+    if annuncio.qta_magazzino < quantita:
+        create_notification(
+            recipient=user,
+            title="Acquisto Annullato",
+            message=f"Purtroppo l'acquisto non è andato a buon fine, le scorte del prodotto {prodotto.nome} in magazzino sono finite. Le arriverà un rimborso completo il prima possibile."
+        )
+        stato = "annullato"
+    else:
+        annuncio.qta_magazzino = annuncio.qta_magazzino - quantita
+        annuncio.save()
+        stato = "da spedire"
+
+    ordine = Ordine.objects.create(
+        utente=user,
+        prodotto=prodotto,
+        quantita=quantita,
+        invoice=invoice_obj.invoice_id,
+        stato_consegna=stato
+    )
+
+    shipping = pu.get('shipping', {})
+    address = shipping.get('address', {})
+    if address:
+        ordine.luogo_consegna = address
+        ordine.save()
+        invoice_obj.delete()
+        create_notification(
+            recipient=user,
+            title="Acquisto Confermato!",
+            message=f"L'acquisto di {prodotto.nome} è andato a buon fine!"
+        )
+        inserzionista = getattr(annuncio, 'inserzionista', None)
+        if inserzionista:
+            create_notification(
+                recipient=inserzionista,
+                title="Un utente ha acquistato!",
+                message=f"Un utente ha acquistato {ordine.quantita} unità di {ordine.prodotto.nome}!"
+            )
+    return HttpResponse(status=200)
 
 @csrf_exempt
 @require_POST
 def paypal_coa(request):    
     body = request.body
 
-    if not verify_paypal_webhook(request,body):
+    if not verify_paypal_webhook(request, body):
         return HttpResponse(status=401)
     
     payload = json.loads(body)
@@ -195,62 +274,29 @@ def paypal_coa(request):
             return HttpResponse(status=400)
 
         pu = purchase_units[0]  # prendi il primo purchase unit
-        invoice = pu.get('invoice_id')
+        invoice_id = pu.get('invoice_id')
+
+        invoice_obj = None
+        cart_obj = None
 
         try:
-            invoice_obj = Invoice.objects.get(invoice_id=invoice)
+            invoice_obj = Invoice.objects.get(invoice_id=invoice_id)
         except Invoice.DoesNotExist:
-            return HttpResponse(status=404)
+            try:
+                cart_obj = Cart.objects.get(invoice=invoice_id)
+            except Cart.DoesNotExist:
+                return HttpResponse(status=404)
         
-        product_id = invoice_obj.prodotto_id
-        user_id = invoice_obj.user_id
-        quantita = invoice_obj.quantita
-        
-        try:
-            user = User.objects.get(id=user_id)
-        except User.DoesNotExist:
-            return HttpResponse(status=404)
-        
-        try:
-            prodotto = Prodotto.objects.get(id=product_id)
-        except Prodotto.DoesNotExist:
-            create_notification(recipient=user,title="Acquisto Annullato",
-                                message=f"Purtroppo l'acquisto non è andato a buon fine, il prodotto comprato è stato rimosso dalla piattaforma. Le arriverà un rimborso completo il prima possibile.")
-            return HttpResponse(status=200)
+        if invoice_obj:
+            return invoice_validation(invoice_obj, pu)
+        elif cart_obj:
+            # Per ogni invoice associata al carrello, processa come sopra
+            invoices = Invoice.objects.filter(cart=cart_obj)
+            response = None
+            for inv in invoices:
+                response = invoice_validation(inv, pu)
+            return response if response else HttpResponse(status=200)
 
-        try:
-            annuncio=Annuncio.objects.get(prodotto=prodotto)
-        except Annuncio.DoesNotExist:
-            create_notification(recipient=user,title="Acquisto Annullato",
-                                message=f"Purtroppo l'acquisto non è andato a buon fine, il prodotto {prodotto.nome} è stato rimosso dalla piattaforma. Le arriverà un rimborso completo il prima possibile.")
-            return HttpResponse(status=200)
-        
-        if(annuncio.qta_magazzino < quantita):
-            create_notification(recipient=user,title="Acquisto Annullato",
-                                message=f"Purtroppo l'acquisto non è andato a buon fine, le scorte del prodotto {prodotto.nome} in magazzino sono finite. Le arriverà un rimborso completo il prima possibile.")
-            stato="annullato"
-        else:
-            annuncio.qta_magazzino = annuncio.qta_magazzino-quantita
-            annuncio.save()
-            stato="da spedire"
-
-        ordine = Ordine.objects.create(
-            utente=user,
-            prodotto=prodotto,
-            quantita=quantita,
-            invoice=invoice,
-            stato_consegna=stato
-        )
-
-        shipping = pu.get('shipping', {})
-        address = shipping.get('address', {})
-        if address:
-            ordine.luogo_consegna = address
-            ordine.save()
-            invoice_obj.delete()
-            create_notification(recipient=user,title="Acquisto Confermato!",message=f"L'acquisto di {prodotto.nome} è andato a buon fine!")
-            create_notification(recipient=ordine.prodotto.annunci.inserzionista,title="Un utente ha acquistato!",message=f"Un utente ha acquistato {ordine.quantita} unità di {ordine.prodotto.nome}!") #type:ignore
-            return HttpResponse(status=200)
     return HttpResponse(status=400)
 
 class SetupIban(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin,TemplateView):
@@ -300,3 +346,90 @@ class SetupIban(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin,Templat
             # Restituisci una risposta di errore con il messaggio
             return render(request, self.template_name, {'evento': error_message})
         return redirect(f'{reverse("sylvelius:profile_annunci")}?evento=iban_imp')
+
+class CarrelloPageView(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin,TemplateView):
+    template_name = "purchase/carrello.html"
+    login_url = reverse_lazy('sylvelius:login')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if Cart.objects.filter(utente=self.request.user).exists(): #type:ignore
+            context['cart'] = self.request.user.cart #type:ignore
+        return context
+
+class CheckoutPageView(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin,TemplateView):
+    template_name = "purchase/checkout.html"
+    login_url = reverse_lazy('sylvelius:login')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if Cart.objects.filter(utente = self.request.user).exists():
+            for invoice in self.request.user.cart.invoices.all():  #type:ignore
+                try:
+                    Annuncio.objects.get(prodotto=invoice.prodotto)
+                except Annuncio.DoesNotExist:
+                    # Elimina tutte le invoice con lo stesso prodotto
+                    Invoice.objects.filter(prodotto=invoice.prodotto, cart=self.request.user.cart).delete() #type:ignore
+            context['cart'] = self.request.user.cart  #type:ignore
+            context['amount'] = self.request.user.cart.total #type:ignore
+            context['paypal_client_id'] = settings.xxx
+            context['invoice_id'] = self.request.user.cart.invoice #type:ignore
+        return context
+# non callable
+def controlla_annuncio_e_quantita(invoice, incremento=1):
+    try:
+        annuncio = Annuncio.objects.get(prodotto=invoice.prodotto)
+    except Annuncio.DoesNotExist:
+        # Elimina tutte le invoice con lo stesso prodotto
+        Invoice.objects.filter(prodotto=invoice.prodotto, user=invoice.user).delete()
+        return redirect(
+            reverse("purchase:carrello") +
+            "?evento=articoli_inesistenti"
+        ), None
+
+    nuova_quantita = invoice.quantita + incremento
+    if nuova_quantita > annuncio.qta_magazzino:
+        # Imposta la quantità massima disponibile
+        invoice.quantita = annuncio.qta_magazzino
+        invoice.save()
+        return redirect(
+            reverse("purchase:carrello") +
+            "?evento=troppi_articoli"
+        ), annuncio
+
+    return None, annuncio
+
+@require_POST
+@login_required
+def aumenta_carrello(request, invoice_id):
+    invoice = get_object_or_404(Invoice, invoice_id=invoice_id, user=request.user)
+    error_redirect, annuncio = controlla_annuncio_e_quantita(invoice, incremento=1)
+    if error_redirect:
+        return error_redirect
+
+    invoice.quantita += 1
+    invoice.save()
+    return redirect(reverse("purchase:carrello"))
+
+@require_POST
+@login_required
+def diminuisci_carrello(request, invoice_id):
+    invoice = get_object_or_404(Invoice, invoice_id=invoice_id, user=request.user)
+    # Per diminuzione, non serve controllo magazzino, ma serve controllo esistenza annuncio
+    error_redirect, annuncio = controlla_annuncio_e_quantita(invoice, incremento=-1)
+    if error_redirect:
+        return error_redirect
+
+    if invoice.quantita > 1:
+        invoice.quantita -= 1
+        invoice.save()
+    else:
+        invoice.delete()
+    return redirect(reverse("purchase:carrello"))
+
+@require_POST
+@login_required
+def rimuovi_da_carrello(request, invoice_id):
+    invoice = get_object_or_404(Invoice,invoice_id=invoice_id)
+    invoice.delete()
+    return redirect(reverse("purchase:carrello") + '?evento=rimosso')

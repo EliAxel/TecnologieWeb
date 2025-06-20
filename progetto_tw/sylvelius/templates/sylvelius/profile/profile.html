@@ -131,7 +131,7 @@
                             >
                             <div class="card-body">
                                 <h5 class="card-title">{{ annuncio.prodotto.nome }}</h5>
-                                <p class="card-text">{{ annuncio.prodotto.descrizione_breve|truncatewords:MAX_TRUNCATED_CARDS_CHARS }}</p>
+                                <p class="card-text">{{ annuncio.prodotto.descrizione_breve|truncatechars:MAX_TRUNCATED_PROFILO_CHARS }}</p>
                                 <p class="card-text">Prezzo: {{ annuncio.prodotto.prezzo|intcomma }} €</p>
                             </div>
                         </div>
