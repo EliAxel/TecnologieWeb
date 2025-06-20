@@ -1,4 +1,7 @@
 <!-- _btn_bell.html -->
+{% if 'moderatori' not in user.groups.values_list|join:',' %}
+  {% include '_btn_cart.html' %}
+{% endif %}
 <div class="dropdown" id="notificationDropdown">
   <button class="btn position-relative 
   {% if 'moderatori' in user.groups.values_list|join:',' %}
@@ -10,7 +13,7 @@
     <i class="bi bi-bell" style="font-size: 1.5rem;"></i>
     <span id="notificationBadge" class="badge badge-danger position-absolute"
           style="top: 10px; right: 10px; border-radius: 50%; width: 18px; height: 18px; padding: 0; z-index: 10; display: none;">
-      <span id="notifCount" style="font-size: 0.75rem;"></span>
+      <span id="notifCount" style="font-size: 0.75rem; position: relative; top: 2px;"></span>
     </span>
   </button>
 

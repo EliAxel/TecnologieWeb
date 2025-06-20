@@ -33,6 +33,12 @@
             "La quantità non è un numero","bad"
         );
     </script>
+    {% elif request.GET.evento == 'carrello'%}
+    <script>
+        showBootstrapAlertWithIcon(
+            "Ordine aggiunto al carrello!","good"
+        );
+    </script>
     {% endif %}
 {% endif %}
 <div class="container mt-5 mb-5">
@@ -98,8 +104,8 @@
             <div class="mt-4 mb-4">
                 <form action="{% url 'purchase:add_to_cart' %}" method="post" class="d-inline-block" id="cart-form-{{ annuncio.id }}">
                     {% csrf_token %}
-                    <input type="hidden" name="annuncio_id_cart" value="{{ annuncio.uuid }}">
-                    <input type="hidden" name="quantita_cart" value="{{MIN_ORDN_QUANTITA_VALUE}}" id="cart-quantity-input-{{ annuncio.id }}">
+                    <input type="hidden" name="annuncio_id" value="{{ annuncio.uuid }}">
+                    <input type="hidden" name="quantita" value="{{MIN_ORDN_QUANTITA_VALUE}}" id="cart-quantity-input-{{ annuncio.id }}">
                     <button type="submit" class="btn text-white d-inline-block" id="cart-btn" style="background-color:{{SECONDARY_COLOR}};">
                         <i class="bi bi-cart"></i>
                         Aggiungi al carrello

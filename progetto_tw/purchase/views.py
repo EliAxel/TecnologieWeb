@@ -1,9 +1,10 @@
+from decimal import Decimal
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.urls import reverse, reverse_lazy
 from django.views import View
 from django.views.generic import TemplateView
-from django.http import HttpResponse, HttpResponseBadRequest
+from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.shortcuts import get_object_or_404, render, redirect
@@ -18,7 +19,7 @@ from sylvelius.models import (
     Annuncio
 )
 from sylvelius.views import create_notification
-from .models import Invoice, Iban
+from .models import Invoice, Iban, Cart
 from progetto_tw.constants import MIN_ORDN_QUANTITA_VALUE
 from progetto_tw.mixins import CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin
 # Other
@@ -26,47 +27,98 @@ import json
 import uuid
 import requests
 from requests.auth import HTTPBasicAuth
-from django.core.exceptions import PermissionDenied
 
-# Create your views here.
-class PurchasePageView(CustomLoginRequiredMixin,ModeratoreAccessForbiddenMixin,View):
-    template_name="purchase/payment_process.html"
+#non callable
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse, reverse_lazy
+from django.views import View
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
+from django.conf import settings
+import uuid
+
+def validate_quantity(quantity, annuncio):
+    """Valida la quantità e restituisce un redirect in caso di errore o None se tutto ok."""
+    try:
+        quantity = int(quantity)
+    except ValueError:
+        return redirect(
+            reverse("sylvelius:dettagli_annuncio", kwargs={"uuid": annuncio.uuid}) + 
+            "?evento=non_intero"
+        )
+    
+    if quantity > annuncio.qta_magazzino:
+        return redirect(
+            reverse("sylvelius:dettagli_annuncio", kwargs={"uuid": annuncio.uuid}) + 
+            "?evento=ordine_grosso"
+        )
+    elif quantity < 1:
+        return redirect(
+            reverse("sylvelius:dettagli_annuncio", kwargs={"uuid": annuncio.uuid}) + 
+            "?evento=ordine_piccolo"
+        )
+    
+    return None
+
+def create_invoice(request, annuncio, quantity, cart=None):
+    """Crea una nuova fattura e la associa eventualmente a un carrello."""
+    invoice_obj = Invoice.objects.create(
+        invoice_id=str(uuid.uuid4()),
+        user_id=request.user.id,
+        quantita=quantity,
+        prodotto_id=annuncio.prodotto.id,
+        cart=cart
+    )
+    return invoice_obj
+
+def get_invoice_data(request):
+    """Elabora i dati della richiesta e restituisce annuncio, quantità e eventuale errore."""
+    annuncio_id = request.POST.get("annuncio_id")
+    annuncio = get_object_or_404(Annuncio, uuid=annuncio_id, is_published=True)
+    quantity = request.POST.get("quantita", f"{MIN_ORDN_QUANTITA_VALUE}")
+    
+    # Validazione quantità
+    error_redirect = validate_quantity(quantity, annuncio)
+    if error_redirect:
+        return None, None, error_redirect
+    
+    return annuncio, int(quantity), None
+
+class PurchasePageView(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin, View):
+    template_name = "purchase/payment_process.html"
     login_url = reverse_lazy('sylvelius:login')
 
     def get(self, request):
-        context = {}
-        annuncio_id = self.request.GET.get("annuncio_id")
-        annuncio = get_object_or_404(Annuncio,uuid=annuncio_id,is_published=True)
-        amount = annuncio.prodotto.prezzo
-        item_name = annuncio.prodotto.nome
-        product_id = annuncio.prodotto.id #type:ignore
-        quantita = self.request.GET.get("quantita", f"{MIN_ORDN_QUANTITA_VALUE}") 
-        user_id = self.request.user.id#type:ignore
-        invoice_id = str(uuid.uuid4())
-        try:
-            int(quantita)
-        except:
-            return redirect(f'{reverse("sylvelius:dettagli_annuncio",kwargs={"uuid": annuncio_id})}?evento=non_intero')
+        annuncio, quantity, error_redirect = get_invoice_data(request)
+        if error_redirect:
+            return error_redirect
         
-        if int(quantita) > annuncio.qta_magazzino:
-            return redirect(f'{reverse("sylvelius:dettagli_annuncio",kwargs={"uuid": annuncio_id})}?evento=ordine_grosso')
-        elif int(quantita) < 1:
-            return redirect(f'{reverse("sylvelius:dettagli_annuncio",kwargs={"uuid": annuncio_id})}?evento=ordine_piccolo')
+        invoice = create_invoice(request, annuncio, quantity)
+        product = annuncio.prodotto # type: ignore
         
-        invoice_obj =Invoice.objects.create(
-                        invoice_id = invoice_id,
-                        user_id=user_id,
-                        quantita=quantita,
-                        prodotto_id=product_id
-                    )
-        invoice_obj.save()
-        
-        context["amount"] = amount * int(quantita)
-        context["item_name"] = item_name
-        context["invoice_id"] = invoice_id
-        context["quantity"] = quantita
-        context["paypal_client_id"] = settings.xxx
-        return render(request, self.template_name,context)
+        context = {
+            "amount": product.prezzo * Decimal(quantity), # type: ignore
+            "item_name": product.nome,
+            "invoice_id": invoice.invoice_id,
+            "quantity": quantity,
+            "paypal_client_id": settings.xxx,
+        }
+        return render(request, self.template_name, context)
+
+@require_POST
+@login_required
+def add_to_cart(request):
+    annuncio, quantity, error_redirect = get_invoice_data(request)
+    if error_redirect:
+        return error_redirect
+    
+    carrello, _ = Cart.objects.get_or_create(utente=request.user)
+    create_invoice(request, annuncio, quantity, cart=carrello)
+    
+    return redirect(
+        reverse("sylvelius:dettagli_annuncio", kwargs={"uuid": annuncio.uuid}) +  # type: ignore
+        "?evento=carrello"
+    )
 
 def payment_done(request):
     return render(request, 'purchase/payment_done.html')
@@ -248,9 +300,3 @@ class SetupIban(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin,Templat
             # Restituisci una risposta di errore con il messaggio
             return render(request, self.template_name, {'evento': error_message})
         return redirect(f'{reverse("sylvelius:profile_annunci")}?evento=iban_imp')
-
-@require_POST
-@login_required
-def add_to_cart(request):
-
-    return redirect('sylv')

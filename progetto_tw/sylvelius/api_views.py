@@ -1,5 +1,7 @@
 from django.http import JsonResponse
 from .models import ImmagineProdotto, Notification
+from purchase.models import Cart
+from django.contrib.auth.decorators import login_required
 from asgiref.sync import sync_to_async
 from django.db.models import Q
 from progetto_tw.constants import MAX_MESSAGES_PER_PAGE
@@ -46,3 +48,12 @@ async def notifications_api(request):
     } for n in notifications]
     
     return JsonResponse(data, safe=False)
+
+@login_required
+def cart_check(request):
+    try:
+        cart = request.user.cart
+        count = cart.invoices.count()
+        return JsonResponse({'count': count})
+    except Cart.DoesNotExist:
+        return JsonResponse({'count': 0})

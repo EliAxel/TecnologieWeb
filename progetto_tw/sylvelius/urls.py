@@ -1,6 +1,6 @@
 from django.urls import path, re_path
 from . import views
-from .api_views import get_immagine_prodotto, get_immagini_prodotto, notifications_api
+from .api_views import get_immagine_prodotto, get_immagini_prodotto, notifications_api, cart_check
 
 app_name = "sylvelius"
 
@@ -36,4 +36,5 @@ urlpatterns = [
     path('api/immagine/<int:prodotto_id>/', get_immagine_prodotto),
     path('api/immagini/<int:prodotto_id>/', get_immagini_prodotto),
     path('api/notifications/', notifications_api, name='notifications_api'),
+    path('api/cart_check/', cart_check, name='cart_check')
 ]
