@@ -192,7 +192,6 @@ def check_if_annuncio_is_valid(request):
         
         width, height = immagine.size 
         aspect_ratio = width / height
-        print(aspect_ratio)
         
         if aspect_ratio < MIN_IMG_ASPECT_RATIO or aspect_ratio > MAX_IMG_ASPECT_RATIO:
             return {'evento': 'imgproportion'}
