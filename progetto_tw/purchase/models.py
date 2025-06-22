@@ -5,7 +5,7 @@ from sylvelius.models import Prodotto
 # Create your models here.
 class Invoice(models.Model):
     invoice_id = models.CharField(max_length=MAX_ORDN_INVOICE_CHARS, unique=True)
-    user = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='invoices', null=True)
+    utente = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='invoices', null=True)
     quantita = models.PositiveIntegerField()
     prodotto = models.ForeignKey(Prodotto, on_delete=models.CASCADE, related_name='invoices', null=True)
     cart = models.ForeignKey('Cart', on_delete=models.CASCADE, related_name='invoices', null=True)
@@ -20,7 +20,7 @@ class Iban(models.Model):
 
 class Cart(models.Model):
     utente  = models.OneToOneField('auth.User', on_delete=models.CASCADE, related_name='cart')
-    invoice = models.CharField(max_length=MAX_ORDN_INVOICE_CHARS, unique=True, null=True)
+    uuid = models.CharField(max_length=MAX_ORDN_INVOICE_CHARS, unique=True, null=True)
 
     @property
     def total(self):

@@ -127,7 +127,7 @@ class PayPalCOATests(TestCase):
         self.annuncio = Annuncio.objects.create(prodotto=self.prodotto,inserzionista=self.user, qta_magazzino=5)
         self.invoice = Invoice.objects.create(
             invoice_id='INV-123',
-            user=self.user,
+            utente=self.user,
             prodotto=self.prodotto,
             quantita=2
         )
@@ -330,12 +330,12 @@ class PayPalCOATests(TestCase):
     @patch('purchase.views.verify_paypal_webhook', return_value=True)
     def test_checkout_order_approved_with_cart(self, mock_verify):
         # Creiamo un carrello con più fatture
-        cart = Cart.objects.create(invoice='CART-123', utente=self.user)
+        cart = Cart.objects.create(uuid='CART-123', utente=self.user)
         
         # Creiamo 2 fatture associate al carrello
         invoice1 = Invoice.objects.create(
             invoice_id='INV-001',
-            user=self.user,
+            utente=self.user,
             prodotto=self.prodotto,
             quantita=1,
             cart=cart
@@ -347,7 +347,7 @@ class PayPalCOATests(TestCase):
         
         invoice2 = Invoice.objects.create(
             invoice_id='INV-002',
-            user=self.user,
+            utente=self.user,
             prodotto=prodotto2,
             quantita=3,
             cart=cart
@@ -394,7 +394,7 @@ class PayPalCOATests(TestCase):
     @patch('purchase.views.verify_paypal_webhook', return_value=True)
     def test_checkout_order_approved_with_cart_insufficient_stock(self, mock_verify):
         # Creiamo un carrello con una fattura che ha quantità insufficiente
-        cart = Cart.objects.create(invoice='CART-123', utente=self.user)
+        cart = Cart.objects.create(uuid='CART-123', utente=self.user)
         
         # Modifichiamo la quantità disponibile a 1
         self.annuncio.qta_magazzino = 1
@@ -403,7 +403,7 @@ class PayPalCOATests(TestCase):
         # Creiamo 2 fatture associate al carrello
         invoice1 = Invoice.objects.create(
             invoice_id='INV-001',
-            user=self.user,
+            utente=self.user,
             prodotto=self.prodotto,
             quantita=2,  # Quantità maggiore di quella disponibile
             cart=cart
@@ -448,7 +448,7 @@ class PayPalCOATests(TestCase):
     @patch('purchase.views.verify_paypal_webhook', return_value=True)
     def test_checkout_order_approved_with_empty_cart(self, mock_verify):
         # Creiamo un carrello vuoto
-        cart = Cart.objects.create(invoice='CART-123', utente=self.user)
+        cart = Cart.objects.create(uuid='CART-123', utente=self.user)
 
         payload = {
             "event_type": "CHECKOUT.ORDER.APPROVED",
@@ -699,13 +699,13 @@ class CartTests(TestCase):
         # Crea un carrello per l'utente
         self.cart = Cart.objects.create(
             utente=self.user,
-            invoice=str(uuid.uuid4())
+            uuid=str(uuid.uuid4())
         )
         
         # Crea una invoice di test
         self.invoice = Invoice.objects.create(
             invoice_id=str(uuid.uuid4()),
-            user=self.user,
+            utente=self.user,
             quantita=2,
             prodotto=self.prodotto,
             cart=self.cart
@@ -783,7 +783,7 @@ class CartTests(TestCase):
         # Crea un oggetto Invoice con dati minimi validi ma prodotto/annuncio non esistente
         inv_err = Invoice.objects.create(
             invoice_id=str(uuid.uuid4()),
-            user=self.user,
+            utente=self.user,
             quantita=1,
             prodotto=self.prodotto,  # prodotto esistente, ma puoi anche crearne uno nuovo se vuoi testare annuncio mancante
             cart=self.cart
@@ -833,7 +833,7 @@ class CartTests(TestCase):
         """Test decremento quantità articolo nel carrello"""
         inv_err = Invoice.objects.create(
             invoice_id=str(uuid.uuid4()),
-            user=self.user,
+            utente=self.user,
             quantita=1,
             prodotto=self.prodotto,  # prodotto esistente, ma puoi anche crearne uno nuovo se vuoi testare annuncio mancante
             cart=self.cart
@@ -908,7 +908,7 @@ class CartTests(TestCase):
         self.assertEqual(response.context['cart'], self.cart)
         self.assertEqual(response.context['amount'], self.cart.total)
         self.assertEqual(response.context['paypal_client_id'], 'test_client_id')
-        self.assertEqual(response.context['invoice_id'], self.cart.invoice)
+        self.assertEqual(response.context['invoice_id'], self.cart.uuid)
 
     def test_checkout_page_view_removes_invalid_items(self):
         """Test che verifica che gli articoli non più disponibili vengano rimossi"""
@@ -928,7 +928,7 @@ class CartTests(TestCase):
         )
         invoice2 = Invoice.objects.create(
             invoice_id=str(uuid.uuid4()),
-            user=self.user,
+            utente=self.user,
             quantita=1,
             prodotto=prodotto2,
             cart=self.cart

@@ -266,9 +266,9 @@ class ModelsTestingStringsCoverage(TestCase):
 
         invoice=Invoice.objects.create(
             invoice_id=uuid.uuid4(),
-            user_id=self.user.id, #type: ignore
+            utente=self.user, #type: ignore
             quantita=3,
-            prodotto_id=NEXT_PROD_ID
+            prodotto=Prodotto.objects.get(id=NEXT_PROD_ID)
         )
 
         mock = {
@@ -282,7 +282,7 @@ class ModelsTestingStringsCoverage(TestCase):
         Ordine.objects.create(
             id=NEXT_PROD_ID,
             invoice = invoice.invoice_id,
-            utente = invoice.user, 
+            utente = invoice.utente, 
             prodotto = invoice.prodotto,
             quantita = invoice.quantita,
             stato_consegna = "consegnato",
@@ -523,16 +523,16 @@ class UtilityFunctionsTests(TestCase):
         
         # Testa casi di errore
         test_cases = [
-            ({'nome': ''}, {'notok': 'noval'}),  # Campo nome vuoto
-            ({'nome': 'a'*201}, {'notok': 'lentxt'}),  # Nome troppo lungo
-            ({'prezzo': 'abc'}, {'notok': 'prerr'}),  # Prezzo non numerico
-            ({'prezzo': '-1'}, {'notok': 'price'}),  # Prezzo negativo
-            ({'iva': '99'}, {'notok': 'cond'}),  # IVA non valida
-            ({'qta_magazzino': 'abc'}, {'notok': 'qtaerr'}),  # Quantità non numerica
-            ({'qta_magazzino': '-1'}, {'notok': 'qta'}),  # Quantità troppo bassa
-            ({'tags': 'a'*51}, {'notok': 'tagchar'}),  # Tag troppo lungo
-            ({'tags': ','.join(['tag']*51)}, {'notok': 'tagn'}),  # Troppi tag
-            ({'condizione': 'non_valida'}, {'notok': 'cond'}),  # Condizione non valida
+            ({'nome': ''}, {'evento': 'noval'}),  # Campo nome vuoto
+            ({'nome': 'a'*201}, {'evento': 'lentxt'}),  # Nome troppo lungo
+            ({'prezzo': 'abc'}, {'evento': 'prerr'}),  # Prezzo non numerico
+            ({'prezzo': '-1'}, {'evento': 'price'}),  # Prezzo negativo
+            ({'iva': '99'}, {'evento': 'cond'}),  # IVA non valida
+            ({'qta_magazzino': 'abc'}, {'evento': 'qtaerr'}),  # Quantità non numerica
+            ({'qta_magazzino': '-1'}, {'evento': 'qta'}),  # Quantità troppo bassa
+            ({'tags': 'a'*51}, {'evento': 'tagchar'}),  # Tag troppo lungo
+            ({'tags': ','.join(['tag']*51)}, {'evento': 'tagn'}),  # Troppi tag
+            ({'condizione': 'non_valida'}, {'evento': 'cond'}),  # Condizione non valida
         ]
         
         for data, expected in test_cases:
@@ -553,11 +553,11 @@ class UtilityFunctionsTests(TestCase):
         request = self.factory.post('/', post_data)
         request.FILES['immagini'] = invalid_image
         result = check_if_annuncio_is_valid(request)
-        self.assertEqual(result, {'notok': 'imgtype'})
+        self.assertEqual(result, {'evento': 'imgtype'})
         
         request = self.factory.post('/', data={**post_data, 'immagini': [image]*11})
         result = check_if_annuncio_is_valid(request)
-        self.assertEqual(result, {'notok': 'imgn'})
+        self.assertEqual(result, {'evento': 'imgn'})
 
         image3x1 = SimpleUploadedFile(
             name='test_image.jpg',
@@ -572,7 +572,7 @@ class UtilityFunctionsTests(TestCase):
         request = self.factory.post('/', post_data)
         request.FILES['immagini'] = image3x1
         result = check_if_annuncio_is_valid(request)
-        self.assertEqual(result, {'notok': 'imgproportion'})
+        self.assertEqual(result, {'evento': 'imgproportion'})
 
         imagehuge = SimpleUploadedFile(
             name='test_image.jpg',
@@ -587,7 +587,7 @@ class UtilityFunctionsTests(TestCase):
         request = self.factory.post('/', post_data)
         request.FILES['immagini'] = imagehuge
         result = check_if_annuncio_is_valid(request)
-        self.assertEqual(result, {'notok': 'imgsize'})
+        self.assertEqual(result, {'evento': 'imgsize'})
 
 
         # Testa troppe immagini (dovresti creare MAX_IMGS_PER_ANNU_VALUE + 1 immagini)
@@ -833,8 +833,8 @@ class ViewTests(TestCase):
         response = self.client.post(reverse('sylvelius:profile_delete'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'sylvelius/profile/profile_delete.html')
-        self.assertIn('err', response.context)
-        self.assertEqual(response.context['err'], 'ship')
+        self.assertIn('evento', response.context)
+        self.assertEqual(response.context['evento'], 'ship')
         self.assertTrue(User.objects.filter(username='testuser').exists())
         
         # Test case 4: User has "spedito" order as seller - should prevent deletion
@@ -859,8 +859,8 @@ class ViewTests(TestCase):
         response = self.client.post(reverse('sylvelius:profile_delete'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'sylvelius/profile/profile_delete.html')
-        self.assertIn('err', response.context)
-        self.assertEqual(response.context['err'], 'shipd')
+        self.assertIn('evento', response.context)
+        self.assertEqual(response.context['evento'], 'shipd')
         self.assertTrue(User.objects.filter(username='testuser').exists())
 
     def test_annuncio_detail_view(self):
@@ -1549,7 +1549,7 @@ class AnnuncioCreationTests(TestCase):
             )
             
             self.assertEqual(response.status_code, 200)
-            self.assertIn(error_code, response.context['notok'])
+            self.assertIn(error_code, response.context['evento'])
     
     def test_profilo_modifica_annuncio_page_view_get(self):
         self.client.login(username='testuser', password='testpass123')
@@ -1701,7 +1701,7 @@ class AnnuncioCreationTests(TestCase):
                 format='multipart'
             )
             self.assertEqual(response.status_code, 200)
-            self.assertIn(error_code, response.context['notok'])
+            self.assertIn(error_code, response.context['evento'])
 
 class ProfiloEditTests(TestCase):
 

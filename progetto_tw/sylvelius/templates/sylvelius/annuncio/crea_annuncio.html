@@ -3,81 +3,81 @@
 {% block title %}Crea Annuncio - Sylvelius{% endblock %}
 {% block search_bar %}{% endblock %}
 {% block middle %}
-{% if notok %}
+{% if evento %}
     <script src="{% static 'js/toast.js' %}"></script>
-    {% if notok ==  "cond" %}
+    {% if evento ==  "cond" %}
     <script>
         showBootstrapAlertWithIcon(
             "Condizioni o IVA incorrette","warning"
         );
     </script>
-    {% elif notok ==  "noval" %}
+    {% elif evento ==  "noval" %}
     <script>
         showBootstrapAlertWithIcon(
             "Nome, descrizione breve o prezzo mancanti","warning"
         );
     </script>
-    {% elif notok ==  "lentxt" %}
+    {% elif evento ==  "lentxt" %}
     <script>
         showBootstrapAlertWithIcon(
             "Nome, descrizione breve o descrizione troppo lunghi","warning"
         );
     </script>
-    {% elif notok ==  "prerr" %}
+    {% elif evento ==  "prerr" %}
     <script>
         showBootstrapAlertWithIcon(
             "Prezzo invalido","warning"
         );
     </script>
-    {% elif notok ==  "price" %}
+    {% elif evento ==  "price" %}
     <script>
         showBootstrapAlertWithIcon(
             "Prezzo fuori dai limiti","warning"
         );
     </script>
-    {% elif notok ==  "qtaerr" %}
+    {% elif evento ==  "qtaerr" %}
     <script>
         showBootstrapAlertWithIcon(
             "Quantità invalida","warning"
         );
     </script>
-    {% elif notok ==  "qta" %}
+    {% elif evento ==  "qta" %}
     <script>
         showBootstrapAlertWithIcon(
             "Quantità fuori dai limiti","warning"
         );
     </script>
-    {% elif notok ==  "tagn" %}
+    {% elif evento ==  "tagn" %}
     <script>
         showBootstrapAlertWithIcon(
             "Troppi tag","warning"
         );
     </script>
-    {% elif notok ==  "tagchar" %}
+    {% elif evento ==  "tagchar" %}
     <script>
         showBootstrapAlertWithIcon(
             "Uno o più tag troppo lunghi","warning"
         );
     </script>
-    {% elif notok ==  "imgn" %}
+    {% elif evento ==  "imgn" %}
     <script>
         showBootstrapAlertWithIcon(
             "Troppe immagini","warning"
         );
     </script>
-    {% elif notok ==  "imgtype" %}
+    {% elif evento ==  "imgtype" %}
     <script>
         showBootstrapAlertWithIcon(
             "Trovati file non in formati immagine","warning"
         );
     </script>
-    {% elif notok ==  "imgsize" %}
+    {% elif evento ==  "imgsize" %}
     <script>
         showBootstrapAlertWithIcon(
             "Trovate immagini troppo pesanti","warning"
         );
     </script>
-    {% elif notok ==  "imgproportion" %}
+    {% elif evento ==  "imgproportion" %}
     <script>
         showBootstrapAlertWithIcon(
             "Trovate immagini sproporzionate verticalmente od orizzontalmente","warning"
@@ -167,7 +167,7 @@
                     <small class="form-text text-muted">Puoi caricare più immagini:</small>
                     <small class="form-text text-muted">1. Massimo {{MAX_IMGS_PER_ANNU_VALUE}} immagini</small>
                     <small class="form-text text-muted">2. Massimo {{MAX_IMG_SIZE_HUMAN}} per immagine</small>
-                    <small class="form-text text-muted">3. Il rapporto d'aspetto è di massimo {{MAX_IMG_ASPECT_RATIO}} e minimo {{MIN_IMG_ASPECT_RATIO}}</small>
+                    <small class="form-text text-muted">3. L'immagine non può essere o troppo lunga o troppo stretta</small>
                 </div>
 
                 <button type="submit" id='crea-annuncio-btn' class="btn btn-primary" style="background-color: {{SECONDARY_COLOR}}; border: none; ">

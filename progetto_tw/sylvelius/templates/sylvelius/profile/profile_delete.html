@@ -6,16 +6,16 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-danger">
 {% endblock %}
 {% block middle %}
-{% if err %}
+{% if evento %}
     <script src="{% static 'js/toast.js' %}"></script>
-    {% if err == "shipd" %}
+    {% if evento == "shipd" %}
         <script>
             showBootstrapAlertWithIcon(
                 "Sono presenti ordini di vendita ancora in fase di spedizione.","warning"
             );
         </script>
     {% endif %}
-    {% if err == "ship" %}
+    {% if evento == "ship" %}
         <script>
             showBootstrapAlertWithIcon(
                 "Sono presenti ordini d'acquisto da spedire o spediti.","warning"

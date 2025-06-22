@@ -59,7 +59,7 @@ def create_invoice(request, annuncio, quantity, cart=None):
     """Crea una nuova fattura e la associa eventualmente a un carrello."""
     invoice_obj = Invoice.objects.create(
         invoice_id=str(uuid.uuid4()),
-        user=request.user,
+        utente=request.user,
         quantita=quantity,
         prodotto=annuncio.prodotto,
         cart=cart
@@ -161,7 +161,7 @@ def verify_paypal_webhook(request,body):
     return verification_status == "SUCCESS"
 # non callable
 def invoice_validation(invoice_obj, pu):
-    user = invoice_obj.user
+    user = invoice_obj.utente
     prodotto = invoice_obj.prodotto
     quantita = invoice_obj.quantita
 
@@ -242,7 +242,7 @@ def paypal_coa(request):
             invoice_obj = Invoice.objects.get(invoice_id=invoice_id)
         except Invoice.DoesNotExist:
             try:
-                cart_obj = Cart.objects.get(invoice=invoice_id)
+                cart_obj = Cart.objects.get(uuid=invoice_id)
             except Cart.DoesNotExist:
                 return HttpResponse(status=404)
         
@@ -315,7 +315,7 @@ def add_to_cart(request):
     
     carrello, created = Cart.objects.get_or_create(utente=request.user)
     if created:
-        carrello.invoice = f'{uuid.uuid4()}' 
+        carrello.uuid = f'{uuid.uuid4()}' 
     carrello.save()
     create_invoice(request, annuncio, quantity, cart=carrello)
     
@@ -350,7 +350,7 @@ class CheckoutPageView(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin,
             context['cart'] = self.request.user.cart  #type:ignore
             context['amount'] = self.request.user.cart.total #type:ignore
             context['paypal_client_id'] = settings.xxx
-            context['invoice_id'] = self.request.user.cart.invoice #type:ignore
+            context['invoice_id'] = self.request.user.cart.uuid #type:ignore
         return context
 # non callable
 def controlla_annuncio_e_quantita(invoice, incremento=1):
@@ -358,7 +358,7 @@ def controlla_annuncio_e_quantita(invoice, incremento=1):
         annuncio = Annuncio.objects.get(prodotto=invoice.prodotto)
     except Annuncio.DoesNotExist:
         # Elimina tutte le invoice con lo stesso prodotto
-        Invoice.objects.filter(prodotto=invoice.prodotto, user=invoice.user).delete()
+        Invoice.objects.filter(prodotto=invoice.prodotto, utente=invoice.utente).delete()
         return redirect(
             reverse("purchase:carrello") +
             "?evento=articoli_inesistenti"
@@ -379,7 +379,7 @@ def controlla_annuncio_e_quantita(invoice, incremento=1):
 @require_POST
 @login_required
 def aumenta_carrello(request, invoice_id):
-    invoice = get_object_or_404(Invoice, invoice_id=invoice_id, user=request.user)
+    invoice = get_object_or_404(Invoice, invoice_id=invoice_id, utente=request.user)
     error_redirect, annuncio = controlla_annuncio_e_quantita(invoice, incremento=1)
     if error_redirect:
         return error_redirect
@@ -391,7 +391,7 @@ def aumenta_carrello(request, invoice_id):
 @require_POST
 @login_required
 def diminuisci_carrello(request, invoice_id):
-    invoice = get_object_or_404(Invoice, invoice_id=invoice_id, user=request.user)
+    invoice = get_object_or_404(Invoice, invoice_id=invoice_id, utente=request.user)
     # Per diminuzione, non serve controllo magazzino, ma serve controllo esistenza annuncio
     error_redirect, annuncio = controlla_annuncio_e_quantita(invoice, incremento=-1)
     if error_redirect:

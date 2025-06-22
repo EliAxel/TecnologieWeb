@@ -136,47 +136,47 @@ def check_if_annuncio_is_valid(request):
     condizione = request.POST.get('condizione', 'nuovo')
 
     if condizione not in PROD_CONDIZIONE_CHOICES_ID:
-        return {'notok': 'cond'}
+        return {'evento': 'cond'}
 
     # Validazione base
     if not nome or not descrizione_breve or not prezzo:
-        return {'notok': 'noval'}
+        return {'evento': 'noval'}
     
     if (len(nome) > MAX_PROD_NOME_CHARS or
         len(descrizione_breve) > MAX_PROD_DESC_BR_CHARS or
         len(descrizione) > MAX_PROD_DESC_CHARS):
-        return {'notok': 'lentxt'}
+        return {'evento': 'lentxt'}
     
     try:
         prezzo = float(prezzo)
     except ValueError:
-        return {'notok': 'prerr'}
+        return {'evento': 'prerr'}
     
     if prezzo < MIN_PROD_PREZZO_VALUE or prezzo > MAX_PROD_PREZZO_VALUE:
-        return {'notok': 'price'}
+        return {'evento': 'price'}
     
     if iva not in ALIQUOTE_LIST_VALS:
-        return {'notok': 'cond'}
+        return {'evento': 'cond'}
 
     try:
         qta_magazzino = int(qta_magazzino)
     except ValueError:
-        return {'notok': 'qtaerr'}
+        return {'evento': 'qtaerr'}
     if qta_magazzino < MIN_CREA_ANNUNCIO_QTA_VALUE or qta_magazzino > MAX_ANNU_QTA_MAGAZZINO_VALUE:
-        return {'notok': 'qta'}
+        return {'evento': 'qta'}
     
         # Gestione dei tag (split manuale)
     tag_names = [t.strip().lower() for t in tag_string.split(',') if t.strip()]
     if(len(tag_names)>MAX_TAGS_N_PER_PROD):
-        return {'notok': 'tagn'}
+        return {'evento': 'tagn'}
 
     for nome in tag_names:
         if (len(nome) > MAX_TAGS_CHARS):
-            return {'notok': 'tagchar'}
+            return {'evento': 'tagchar'}
     
     # Salva immagini
     if(len(immagini) > MAX_IMGS_PER_ANNU_VALUE):
-        return {'notok': 'imgn'}
+        return {'evento': 'imgn'}
     
     for img in immagini:
         immagine = None
@@ -184,17 +184,18 @@ def check_if_annuncio_is_valid(request):
             immagine = Image.open(img)
             immagine.verify()  # Verifica se è immagine valida
         except Exception:
-            return {'notok': 'imgtype'}
+            return {'evento': 'imgtype'}
 
         file_size = img.size
         if file_size > MAX_IMG_SIZE:
-            return {'notok': 'imgsize'}
+            return {'evento': 'imgsize'}
         
         width, height = immagine.size 
         aspect_ratio = width / height
+        print(aspect_ratio)
         
         if aspect_ratio < MIN_IMG_ASPECT_RATIO or aspect_ratio > MAX_IMG_ASPECT_RATIO:
-            return {'notok': 'imgproportion'}
+            return {'evento': 'imgproportion'}
     
     return None
 
@@ -234,7 +235,7 @@ class RegistrazionePageView(CreateView):
         return response
     
     def form_invalid(self, form):
-        return HttpResponseRedirect(reverse('sylvelius:register') + '?auth=notok')
+        return HttpResponseRedirect(reverse('sylvelius:register') + '?auth=evento')
     
     def get_success_url(self):
             return reverse('sylvelius:login') + '?reg=ok'
@@ -367,12 +368,12 @@ class ProfiloDeletePageView(CustomLoginRequiredMixin, View):
     def post(self, request):
         user = request.user
         if(Ordine.objects.filter(utente=user,stato_consegna="spedito").exists()):
-            return render(request, self.template_name,{"err":"ship"})
+            return render(request, self.template_name,{"evento":"ship"})
         if(Ordine.objects.filter(
             prodotto__annunci__inserzionista=user,
             stato_consegna='spedito'
             ).exists()):
-            return render(request, self.template_name,{"err":"shipd"})
+            return render(request, self.template_name,{"evento":"shipd"})
         
         ordine_ex=Ordine.objects.filter(utente=user,stato_consegna="da spedire")
         ordine_in=Ordine.objects.filter(

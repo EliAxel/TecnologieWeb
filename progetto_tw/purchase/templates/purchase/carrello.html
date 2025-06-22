@@ -40,11 +40,13 @@
                                 <tr>
                                     <td>
                                         {% if invoice.prodotto.immagini.first %}
-                                            <img src="{{ invoice.prodotto.immagini.first.immagine.url }}" 
-                                                    alt="{{ invoice.prodotto.nome }}" 
-                                                    class="img-thumbnail mr-3" 
-                                                    style="width: 80px; height: 80px; object-fit: cover;">
-                                            </img>
+                                            <img
+                                                data-prodotto-id="{{ invoice.prodotto.id }}"
+                                                class="img-thumbnail immagine-asincrona"
+                                                alt="{{ invoice.prodotto.nome }}"
+                                                src="{% static 'img/default_loading.png' %}"
+                                                style="max-width: 60px; max-height: 60px;"
+                                            >
                                         {% endif %}
                                     </td>
                                     <td>
@@ -58,14 +60,14 @@
                                     <td class="align-middle">€{{ invoice.prodotto.prezzo }}</td>
                                     <td class="align-middle text-center">
                                         <div class="d-flex justify-content-center align-items-center">
-                                            <form method="post" action="{% url 'purchase:diminuisci_carrello' invoice.invoice_id %}" class="mr-2">
+                                            <form method="post" action="{% url 'purchase:diminuisci_carrello' invoice.invoice_id %}" class="mr-2 save-scroll-form">
                                                 {% csrf_token %}
                                                 <button type="submit" class="btn btn-sm btn-outline-secondary" {% if invoice.quantita <= 1 %}disabled{% endif %}>
                                                     <i class="bi bi-dash"></i>
                                                 </button>
                                             </form>
                                             <span class="mx-2">{{ invoice.quantita }}</span>
-                                            <form method="post" action="{% url 'purchase:aumenta_carrello' invoice.invoice_id %}" class="ml-2">
+                                            <form method="post" action="{% url 'purchase:aumenta_carrello' invoice.invoice_id %}" class="ml-2 save-scroll-form">
                                                 {% csrf_token %}
                                                 <button type="submit" class="btn btn-sm btn-outline-secondary">
                                                     <i class="bi bi-plus"></i>
@@ -75,7 +77,7 @@
                                     </td>
                                     <td class="align-middle">€{{ invoice.total|floatformat:2 }}</td>
                                     <td class="align-middle">
-                                        <form method="post" action="{% url 'purchase:rimuovi_da_carrello' invoice.invoice_id %}">
+                                        <form method="post" action="{% url 'purchase:rimuovi_da_carrello' invoice.invoice_id %}" class="save-scroll-form">
                                             {% csrf_token %}
                                             <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Vuoi rimuovere l\'ordine?')">
                                                 <i class="bi bi-trash"></i> Rimuovi
@@ -113,25 +115,21 @@
 </div>
 
 <script>
-    // Gestione degli aggiornamenti delle quantità con AJAX per un'esperienza più fluida
-    $(document).ready(function() {
-        $('.quantity-form').on('submit', function(e) {
-            e.preventDefault();
-            const form = $(this);
-            
-            $.ajax({
-                type: form.attr('method'),
-                url: form.attr('action'),
-                data: form.serialize(),
-                success: function(data) {
-                    // Ricarica la pagina per aggiornare i totali
-                    location.reload();
-                },
-                error: function(xhr, errmsg, err) {
-                    showBootstrapAlertWithIcon("Si è verificato un errore durante l'aggiornamento della quantità", "bad");
-                }
-            });
+    // Salva la posizione di scroll prima di inviare il form
+    document.querySelectorAll('.save-scroll-form').forEach(form => {
+        form.addEventListener('submit', () => {
+            sessionStorage.setItem('scrollPosition', window.scrollY);
         });
     });
+
+    // Ripristina la posizione di scroll dopo il caricamento
+    window.addEventListener('load', () => {
+        const savedPosition = sessionStorage.getItem('scrollPosition');
+        if (savedPosition) {
+            window.scrollTo(0, savedPosition);
+            sessionStorage.removeItem('scrollPosition');
+        }
+    });
 </script>
+<script src="{% static 'js/img_loader.js' %}"></script>
 {% endblock %}
