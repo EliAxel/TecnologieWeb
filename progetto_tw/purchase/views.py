@@ -206,20 +206,18 @@ def invoice_validation(invoice_obj, pu):
             title="Acquisto Confermato!",
             message=f"L'acquisto di {prodotto.nome} è andato a buon fine!"
         )
-        inserzionista = getattr(annuncio, 'inserzionista', None)
-        if inserzionista:
-            create_notification(
-                recipient=inserzionista,
-                title="Un utente ha acquistato!",
-                message=f"Un utente ha acquistato {ordine.quantita} unità di {ordine.prodotto.nome}!"
-            )
+        create_notification(
+            recipient=annuncio.inserzionista,
+            title="Un utente ha acquistato!",
+            message=f"Un utente ha acquistato {ordine.quantita} unità di {ordine.prodotto.nome}!"
+        )
     else:
         return HttpResponse(status=400)
     return HttpResponse(status=200)
 
 @csrf_exempt
 @require_POST
-def paypal_coa(request):    
+def paypal_coa(request):
     body = request.body
 
     if not verify_paypal_webhook(request, body):
@@ -250,7 +248,7 @@ def paypal_coa(request):
         
         if invoice_obj:
             return invoice_validation(invoice_obj, pu)
-        elif cart_obj:
+        else:
             # Per ogni invoice associata al carrello, processa come sopra
             invoices = Invoice.objects.filter(cart=cart_obj)
             response = None

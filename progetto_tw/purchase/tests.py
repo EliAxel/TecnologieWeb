@@ -327,6 +327,160 @@ class PayPalCOATests(TestCase):
 
         self.assertEqual(response.status_code, 200)
 
+    @patch('purchase.views.verify_paypal_webhook', return_value=True)
+    def test_checkout_order_approved_with_cart(self, mock_verify):
+        # Creiamo un carrello con più fatture
+        cart = Cart.objects.create(invoice='CART-123', utente=self.user)
+        
+        # Creiamo 2 fatture associate al carrello
+        invoice1 = Invoice.objects.create(
+            invoice_id='INV-001',
+            user=self.user,
+            prodotto=self.prodotto,
+            quantita=1,
+            cart=cart
+        )
+        
+        # Creiamo un secondo prodotto e annuncio per la seconda fattura
+        prodotto2 = Prodotto.objects.create(nome='Prodotto Test 2', descrizione_breve='testtest2', prezzo=15.0)
+        annuncio2 = Annuncio.objects.create(prodotto=prodotto2, inserzionista=self.user, qta_magazzino=10)
+        
+        invoice2 = Invoice.objects.create(
+            invoice_id='INV-002',
+            user=self.user,
+            prodotto=prodotto2,
+            quantita=3,
+            cart=cart
+        )
+
+        payload = {
+            "event_type": "CHECKOUT.ORDER.APPROVED",
+            "resource": {
+                "purchase_units": [
+                    {
+                        "invoice_id": "CART-123",  # ID del carrello
+                        "shipping": {
+                            "address": {
+                                "address_line_1": "123 Test St",
+                                "admin_area_2": "Test City",
+                                "admin_area_1": "TS",
+                                "postal_code": "12345",
+                                "country_code": "IT"
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+
+        response = self.client.post(
+            '/pagamento/paypal/coa/',
+            data=json.dumps(payload),
+            content_type='application/json',
+            HTTP_X_PAYPAL_SIGNATURE='dummy-signature'
+        )
+
+        self.assertEqual(response.status_code, 200)
+        
+        # Verifichiamo che siano stati creati 2 ordini
+        self.assertEqual(Ordine.objects.count(), 2)
+        
+        # Verifichiamo l'aggiornamento delle quantità
+        self.annuncio.refresh_from_db()
+        self.assertEqual(self.annuncio.qta_magazzino, 4)  # 5 - 1
+        annuncio2.refresh_from_db()
+        self.assertEqual(annuncio2.qta_magazzino, 7)  # 10 - 3
+
+    @patch('purchase.views.verify_paypal_webhook', return_value=True)
+    def test_checkout_order_approved_with_cart_insufficient_stock(self, mock_verify):
+        # Creiamo un carrello con una fattura che ha quantità insufficiente
+        cart = Cart.objects.create(invoice='CART-123', utente=self.user)
+        
+        # Modifichiamo la quantità disponibile a 1
+        self.annuncio.qta_magazzino = 1
+        self.annuncio.save()
+        
+        # Creiamo 2 fatture associate al carrello
+        invoice1 = Invoice.objects.create(
+            invoice_id='INV-001',
+            user=self.user,
+            prodotto=self.prodotto,
+            quantita=2,  # Quantità maggiore di quella disponibile
+            cart=cart
+        )
+        
+        payload = {
+            "event_type": "CHECKOUT.ORDER.APPROVED",
+            "resource": {
+                "purchase_units": [
+                    {
+                        "invoice_id": "CART-123",
+                        "shipping": {
+                            "address": {
+                                "address_line_1": "123 Test St",
+                                "admin_area_2": "Test City",
+                                "admin_area_1": "TS",
+                                "postal_code": "12345",
+                                "country_code": "IT"
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+
+        response = self.client.post(
+            '/pagamento/paypal/coa/',
+            data=json.dumps(payload),
+            content_type='application/json',
+            HTTP_X_PAYPAL_SIGNATURE='dummy-signature'
+        )
+
+        self.assertEqual(response.status_code, 200)
+        
+        # Verifichiamo che l'ordine sia stato creato ma annullato
+        ordine = Ordine.objects.first()
+        self.assertEqual(ordine.stato_consegna, "annullato")#type: ignore
+        self.assertEqual(ordine.quantita, 2)#type: ignore
+        self.annuncio.refresh_from_db()
+        self.assertEqual(self.annuncio.qta_magazzino, 1)  # Non deve essere cambiato
+
+    @patch('purchase.views.verify_paypal_webhook', return_value=True)
+    def test_checkout_order_approved_with_empty_cart(self, mock_verify):
+        # Creiamo un carrello vuoto
+        cart = Cart.objects.create(invoice='CART-123', utente=self.user)
+
+        payload = {
+            "event_type": "CHECKOUT.ORDER.APPROVED",
+            "resource": {
+                "purchase_units": [
+                    {
+                        "invoice_id": "CART-123",
+                        "shipping": {
+                            "address": {
+                                "address_line_1": "123 Test St",
+                                "admin_area_2": "Test City",
+                                "admin_area_1": "TS",
+                                "postal_code": "12345",
+                                "country_code": "IT"
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+
+        response = self.client.post(
+            '/pagamento/paypal/coa/',
+            data=json.dumps(payload),
+            content_type='application/json',
+            HTTP_X_PAYPAL_SIGNATURE='dummy-signature'
+        )
+
+        self.assertEqual(response.status_code, 200)
+        # Nessun ordine dovrebbe essere creato
+        self.assertFalse(Ordine.objects.exists())
+
 class TestPaypalFunctions(TestCase):
     
     @patch('requests.post')
@@ -577,6 +731,19 @@ class CartTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertIn(str(self.annuncio.uuid), response.url) #type:ignore
 
+    def test_add_to_cart_item(self):
+        """Test aggiunta di un nuovo articolo al carrello"""
+        
+        response = self.client.post(
+            reverse('purchase:add_to_cart'),
+            {'annuncio_id': self.annuncio.uuid, 'quantita': 2}
+        )        
+        self.assertEqual(self.cart.invoices.count(), 2) #type:ignore
+        
+        # Verifica il redirect alla pagina dell'annuncio
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(str(self.annuncio.uuid), response.url) #type:ignore
+
     def test_add_to_cart_invalid_annuncio(self):
         """Test aggiunta con annuncio non valido"""
         response = self.client.post(
@@ -586,6 +753,16 @@ class CartTests(TestCase):
         
         # Verifica il redirect alla home
         self.assertEqual(response.status_code, 404)
+    
+    def test_add_to_cart_invalid_quantita(self):
+        """Test aggiunta con annuncio non valido"""
+        response = self.client.post(
+            reverse('purchase:add_to_cart'),
+            {'annuncio_id': self.annuncio.uuid, 'quantita': 'err'}
+        )
+        
+        # Verifica il redirect alla home
+        self.assertEqual(response.status_code, 302)
 
     def test_aumenta_carrello(self):
         """Test incremento quantità articolo nel carrello"""
@@ -600,6 +777,25 @@ class CartTests(TestCase):
         # Verifica il redirect al carrello
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse('purchase:carrello')) #type:ignore
+    
+    def test_aumenta_carrello_non_existent_annuncio(self):
+        """Test incremento quantità articolo nel carrello"""
+        # Crea un oggetto Invoice con dati minimi validi ma prodotto/annuncio non esistente
+        inv_err = Invoice.objects.create(
+            invoice_id=str(uuid.uuid4()),
+            user=self.user,
+            quantita=1,
+            prodotto=self.prodotto,  # prodotto esistente, ma puoi anche crearne uno nuovo se vuoi testare annuncio mancante
+            cart=self.cart
+        )
+        # Elimina l'annuncio associato per simulare annuncio non esistente
+        inv_err.prodotto.annunci.delete() # type: ignore
+        response = self.client.post(
+            reverse('purchase:aumenta_carrello', kwargs={'invoice_id': inv_err.invoice_id})
+        )
+        
+        # Verifica il redirect al carrello
+        self.assertEqual(response.status_code, 302)
 
     def test_aumenta_carrello_exceeds_stock(self):
         """Test incremento quantità oltre la disponibilità"""
@@ -632,6 +828,23 @@ class CartTests(TestCase):
         # Verifica il redirect al carrello
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse('purchase:carrello')) #type:ignore
+    
+    def test_diminuisci_carrello_non_existent_annuncio(self):
+        """Test decremento quantità articolo nel carrello"""
+        inv_err = Invoice.objects.create(
+            invoice_id=str(uuid.uuid4()),
+            user=self.user,
+            quantita=1,
+            prodotto=self.prodotto,  # prodotto esistente, ma puoi anche crearne uno nuovo se vuoi testare annuncio mancante
+            cart=self.cart
+        )
+        inv_err.prodotto.annunci.delete() # type: ignore
+        response = self.client.post(
+            reverse('purchase:diminuisci_carrello', kwargs={'invoice_id': inv_err.invoice_id})
+        )
+        
+        # Verifica il redirect al carrello
+        self.assertEqual(response.status_code, 302)
 
     def test_diminuisci_carrello_to_zero(self):
         """Test decremento quantità fino a zero (cancellazione articolo)"""
@@ -738,3 +951,15 @@ class CartTests(TestCase):
         
         self.assertEqual(response.status_code, 200)
         self.assertNotIn('cart', response.context)
+    
+    def test_cart_check(self):
+        response= self.client.get(reverse('sylvelius:cart_check'))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('count', response.json())
+        self.assertEqual(response.json()['count'], self.cart.invoices.count()) # type: ignore
+
+        self.cart.delete()
+        response= self.client.get(reverse('sylvelius:cart_check'))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('count', response.json())
+        self.assertEqual(response.json()['count'], 0) # type: ignore
