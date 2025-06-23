@@ -5,7 +5,7 @@ from django.contrib.auth.models import User, Group,AnonymousUser
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from django.conf import settings
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, Http404
 from django.core.exceptions import PermissionDenied
 
 # Standard library imports
@@ -24,7 +24,7 @@ from .models import (
     Ordine, Tag, Prodotto, Notification
 )
 from .views import (
-    RicercaAnnunciView, send_notification, 
+    RicercaAnnunciView, ProfiloDetailsPageView, send_notification, 
     mark_notifications_read, create_notification, annulla_ordine_free, 
     check_if_annuncio_is_valid, annulla_ordine
 )
@@ -34,9 +34,12 @@ from progetto_tw.mixins import ModeratoreAccessForbiddenMixin
 from purchase.models import Invoice
 from progetto_tw.t_ests_constants import NEXT_PROD_ID
 from progetto_tw.constants import (
+    MAX_PAGINATOR_COMMENTI_ANNUNCIO_VALUE,
     MAX_UNAME_CHARS, 
     MAX_PWD_CHARS,
-    MAX_PAGINATOR_RICERCA_VALUE
+    MAX_PAGINATOR_RICERCA_VALUE,
+    MAX_PAGINATOR_COMMENTI_DETTAGLI_VALUE,
+    MAX_ANNUNCI_PER_DETTAGLI_VALUE
 )
 class AnonUrls(TestCase):
 
@@ -596,9 +599,13 @@ class UtilityFunctionsTests(TestCase):
 class ViewTests(TestCase):
     def setUp(self):
         Annuncio.objects.all().delete()
+        CommentoAnnuncio.objects.all().delete()
         self.factory = RequestFactory()
         self.user = User.objects.create_user(
             username='testuser', password='testpass123'
+        )
+        self.user2 = User.objects.create_user(
+            username='testuser2', password='testpass123'
         )
         self.group = Group.objects.create(name='moderatori')
         self.client = Client()
@@ -862,20 +869,6 @@ class ViewTests(TestCase):
         self.assertIn('evento', response.context)
         self.assertEqual(response.context['evento'], 'shipd')
         self.assertTrue(User.objects.filter(username='testuser').exists())
-
-    def test_annuncio_detail_view(self):
-        url = reverse('sylvelius:dettagli_annuncio', args=[self.annuncio.uuid])
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'sylvelius/annuncio/dettagli_annuncio.html')
-        self.assertIn('annuncio', response.context)
-        self.assertIn('commenti', response.context)
-        
-        # Testa il contesto per un utente autenticato
-        self.client.login(username='testuser', password='testpass123')
-        response = self.client.get(url)
-        self.assertIn('ha_acquistato', response.context)
-        self.assertIn('non_ha_commentato', response.context)
     
     def test_profilo_ordini_page_view(self):
         self.client.login(username='testuser', password='testpass123')
@@ -944,6 +937,114 @@ class ViewTests(TestCase):
             response = self.client.get(reverse('sylvelius:ricerca_annunci'), params)
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.context['annunci']), expected_count)
+    
+    def test_annuncio_detail_view(self):
+        url = reverse('sylvelius:dettagli_annuncio', args=[self.annuncio.uuid])
+        # Test per utente non autenticato
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'sylvelius/annuncio/dettagli_annuncio.html')
+        self.assertIn('annuncio', response.context)
+        self.assertIn('commenti', response.context)
+        self.assertEqual(response.context['annuncio'], self.annuncio)
+        self.assertIn(self.commento, response.context['commenti'])
+        self.assertIsNone(response.context.get('get_commento'))
+        self.assertFalse(response.context['ha_acquistato'])
+        self.assertTrue(response.context['non_ha_commentato'])
+        
+        # Test per utente autenticato normale
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.get(url)
+        self.assertIn('ha_acquistato', response.context)
+        self.assertIn('non_ha_commentato', response.context)
+        self.assertEqual(response.context['get_commento'], self.commento)
+        self.assertFalse(response.context['ha_acquistato'])  # Ordine non è ancora consegnato
+        self.assertFalse(response.context['non_ha_commentato'])  # Ha già commentato
+        
+        # Test con ordine consegnato
+        self.ordine.stato_consegna = 'consegnato'
+        self.ordine.save()
+        response = self.client.get(url)
+        self.assertTrue(response.context['ha_acquistato'])
+        
+        # Test con annuncio non pubblicato (dovrebbe fallire per utente normale)
+        self.annuncio.is_published = False
+        self.annuncio.save()
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 404)
+        self.annuncio.is_published = True
+        self.annuncio.save()
+        
+        # Test per moderatore
+        self.user.groups.add(self.group)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        
+        # Test con annuncio non pubblicato (dovrebbe funzionare per moderatore)
+        self.annuncio.is_published = False
+        self.annuncio.save()
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.annuncio.is_published = True
+        self.annuncio.save()
+        
+        # Test con utente inserzionista non attivo
+        self.user.is_active = False
+        self.user.save()
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 404)
+        self.user.is_active = True
+        self.user.save()
+        
+        # Test con utente che non ha commentato
+        CommentoAnnuncio.objects.filter(utente=self.user).delete()
+        response = self.client.get(url)
+        self.assertTrue(response.context['non_ha_commentato'])
+        self.assertIsNone(response.context['get_commento'])
+        
+        # Test paginazione
+        # Creiamo più commenti per testare la paginazione
+        for i in range(MAX_PAGINATOR_COMMENTI_ANNUNCIO_VALUE):
+            CommentoAnnuncio.objects.create(
+                annuncio=self.annuncio,
+                utente=self.user,
+                testo=f"Commento {i}",
+                rating=3
+            )
+        response = self.client.get(url)
+        self.assertEqual(len(response.context['commenti']), MAX_PAGINATOR_COMMENTI_ANNUNCIO_VALUE-1)
+        self.assertFalse(response.context['has_next'])
+        
+        # Test seconda pagina
+        response = self.client.get(url + '?page=2')
+        self.assertEqual(response.status_code, 200)
+        
+        # Test con utente non attivo che ha commentato (il commento non dovrebbe apparire)
+        inactive_user = User.objects.create_user(
+            username='inactive', password='testpass123', is_active=False
+        )
+        inactive_comment = CommentoAnnuncio.objects.create(
+            annuncio=self.annuncio,
+            utente=inactive_user,
+            testo="Commento utente non attivo",
+            rating=2
+        )
+        response = self.client.get(url)
+        self.assertIn(inactive_comment, response.context['commenti'])
+        self.client.force_login(self.user2)
+        response = self.client.get(url)
+        self.assertNotIn(inactive_comment, response.context['commenti'])
+        
+        # Verifica che per i moderatori appaiano anche i commenti di utenti non attivi
+        response = self.client.get(url)
+        all_comments = CommentoAnnuncio.objects.filter(annuncio=self.annuncio).count()
+        self.assertLess(len(response.context['commenti']), all_comments)  # Dovrebbe esserci la paginazione
+        
+        # Test con UUID non esistente
+        fake_uuid = uuid.uuid4()
+        url = reverse('sylvelius:dettagli_annuncio', args=[fake_uuid])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 404)
 
 class FunctionBasedViewTests(TestCase):
     def setUp(self):
@@ -2308,6 +2409,123 @@ class RicercaAnnunciViewTest(TestCase):
         context = view.get_context_data()
         self.assertNotIn(annuncio_privato, context['annunci'])
 
+    def test_filtro_inserzionista(self):
+        # Test con utente normale
+        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'inserzionista': 'testuser'})
+        request.user = self.user  # Aggiungi questa linea per impostare l'utente
+        view = RicercaAnnunciView()
+        view.request = request
+        
+        context = view.get_context_data()
+        self.assertEqual(len(context['annunci']), 3)
+        self.assertIn(self.annuncio1, context['annunci'])
+        self.assertIn(self.annuncio2, context['annunci'])
+        self.assertIn(self.annuncio3, context['annunci'])
+        
+        # Test con inserzionista inesistente
+        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'inserzionista': 'nonexistent'})
+        request.user = self.user  # Aggiungi questa linea anche qui
+        view.request = request
+        
+        context = view.get_context_data()
+        self.assertEqual(len(context['annunci']), 0)
+
+    def test_filtro_inserzionista_con_moderatore(self):
+        # Creiamo un utente moderatore
+        moderator = get_user_model().objects.create_user(username='moderator', password='12345')
+        moderator.groups.create(name='moderatori')
+        
+        # Creiamo un annuncio non pubblicato
+        prod_privato = Prodotto.objects.create(
+            nome='Prodotto Privato Moderatore',
+            descrizione_breve='Dovrebbe apparire solo per moderatori',
+            prezzo=100,
+            condizione='nuovo'
+        )
+        annuncio_privato = Annuncio.objects.create(
+            prodotto=prod_privato,
+            inserzionista=self.user,
+            qta_magazzino=1,
+            is_published=False
+        )
+        
+        # Test con moderatore che cerca annunci di testuser (dovrebbe vedere anche non pubblicati)
+        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'inserzionista': 'testuser'})
+        request.user = moderator
+        view = RicercaAnnunciView()
+        view.request = request
+        
+        context = view.get_context_data()
+        self.assertEqual(len(context['annunci']), 4)  # 3 pubblicati + 1 non pubblicato
+        self.assertIn(annuncio_privato, context['annunci'])
+
+    def test_filtri_vuoti_o_invalidi(self):
+        # Test con parametri vuoti
+        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {
+            'q': '',
+            'categoria': '',
+            'condition': '',
+            'search_by_rating': '',
+            'prezzo_min': '',
+            'prezzo_max': '',
+            'qta_mag': ''
+        })
+        view = RicercaAnnunciView()
+        view.request = request
+        
+        context = view.get_context_data()
+        self.assertEqual(len(context['annunci']), 3)  # Dovrebbe mostrare tutti gli annunci pubblicati
+        
+        # Test con parametri non validi
+        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {
+            'prezzo_min': 'abc',
+            'prezzo_max': 'def',
+            'page': 'invalid'
+        })
+        view.request = request
+        
+        context = view.get_context_data()
+        self.assertEqual(len(context['annunci']), 3)  # Dovrebbe ignorare i filtri non validi
+        self.assertEqual(context['page'], 1)  # Dovrebbe tornare alla pagina 1
+
+    def test_ordinamento_rating(self):
+        # Ordinamento per miglior rating
+        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'sort': 'best-star'})
+        view = RicercaAnnunciView()
+        view.request = request
+        
+        context = view.get_context_data()
+        # L'annuncio1 ha rating medio 4.5, annuncio3 ha 2, annuncio2 non ha rating
+        self.assertEqual(context['annunci'][0], self.annuncio1)
+        self.assertEqual(context['annunci'][1], self.annuncio3)
+        self.assertEqual(context['annunci'][2], self.annuncio2)
+        
+        # Ordinamento per peggior rating
+        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'sort': 'worst-star'})
+        view.request = request
+        
+        context = view.get_context_data()
+        self.assertEqual(context['annunci'][0], self.annuncio2)
+        self.assertEqual(context['annunci'][1], self.annuncio3)
+        self.assertEqual(context['annunci'][2], self.annuncio1)
+
+    def test_annunci_utente_disattivato(self):
+        # Disattiviamo l'utente
+        self.user.is_active = False
+        self.user.save()
+        
+        request = self.factory.get(reverse('sylvelius:ricerca_annunci'))
+        view = RicercaAnnunciView()
+        view.request = request
+        
+        context = view.get_context_data()
+        # Non dovrebbero apparire annunci di utenti disattivati
+        self.assertEqual(len(context['annunci']), 0)
+        
+        # Ripristiniamo l'utente
+        self.user.is_active = True
+        self.user.save()
+
 class TestModeratoreAccessForbiddenMixin(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -2359,3 +2577,235 @@ class TestModeratoreAccessForbiddenMixin(TestCase):
         request.user = user
         response = self.test_view(request)
         self.assertEqual(response.status_code, 200)
+
+class ProfiloDetailsPageViewTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        
+        # Crea utenti
+        self.normal_user = User.objects.create_user(
+            username='normaluser',
+            password='testpass123',
+            is_active=True
+        )
+        
+        self.moderator_user = User.objects.create_user(
+            username='moderator',
+            password='modpass123',
+            is_active=True
+        )
+        
+        # Crea gruppo moderatori e aggiungi l'utente moderatore
+        moderator_group = Group.objects.create(name='moderatori')
+        self.moderator_user.groups.add(moderator_group)
+        
+        # Crea prodotti e annunci
+        self.prodotto1 = Prodotto.objects.create(
+            nome='Prodotto 1',
+            descrizione_breve='Descrizione breve 1',
+            prezzo=10.00,
+            iva=22,
+            condizione='nuovo'
+        )
+        
+        self.prodotto2 = Prodotto.objects.create(
+            nome='Prodotto 2',
+            descrizione_breve='Descrizione breve 2',
+            prezzo=20.00,
+            iva=22,
+            condizione='usato'
+        )
+        
+        self.annuncio1 = Annuncio.objects.create(
+            inserzionista=self.normal_user,
+            prodotto=self.prodotto1,
+            is_published=True
+        )
+        
+        self.annuncio2 = Annuncio.objects.create(
+            inserzionista=self.normal_user,
+            prodotto=self.prodotto2,
+            is_published=False
+        )
+        
+        # Crea commenti
+        self.commento1 = CommentoAnnuncio.objects.create(
+            annuncio=self.annuncio1,
+            utente=self.moderator_user,
+            testo='Ottimo prodotto!',
+            rating=5
+        )
+        
+        self.commento2 = CommentoAnnuncio.objects.create(
+            annuncio=self.annuncio1,
+            utente=self.normal_user,
+            testo='Buono ma non eccezionale',
+            rating=3
+        )
+        
+        # URL per i test
+        self.normal_user_url = reverse('sylvelius:dettagli_profilo', kwargs={'user_profile': self.normal_user.username})
+        self.moderator_user_url = reverse('sylvelius:dettagli_profilo', kwargs={'user_profile': self.moderator_user.username})
+
+    def test_get_queryset_for_moderator_user(self):
+        """Test che un moderatore possa vedere tutti gli annunci, anche non pubblicati"""
+        self.client.force_login(self.moderator_user)
+        response = self.client.get(self.normal_user_url)
+        
+        # Verifica che la risposta abbia status 200
+        self.assertEqual(response.status_code, 200)
+        
+        # Verifica che il context contenga tutti gli annunci
+        self.assertEqual(response.context['annunci_count'], 2)
+        
+        # Verifica che vengano mostrati entrambi gli annunci (pubblicato e non pubblicato)
+        annunci_in_context = response.context['annunci']
+        self.assertEqual(len(annunci_in_context), 2)
+        
+    def test_get_queryset_for_normal_user(self):
+        """Test che un utente normale veda solo gli annunci pubblicati"""
+        self.client.force_login(self.normal_user)
+        response = self.client.get(self.normal_user_url)
+        
+        # Verifica che la risposta abbia status 200
+        self.assertEqual(response.status_code, 200)
+        
+        # Verifica che il context contenga solo l'annuncio pubblicato
+        self.assertEqual(response.context['annunci_count'], 1)
+        
+        # Verifica che venga mostrato solo l'annuncio pubblicato
+        annunci_in_context = response.context['annunci']
+        self.assertEqual(len(annunci_in_context), 1)
+        self.assertEqual(annunci_in_context[0].prodotto.nome, 'Prodotto 1')
+        
+    def test_normal_user_cannot_view_moderator_profile(self):
+        """Test che un utente normale non possa vedere il profilo di un moderatore"""
+        self.client.force_login(self.normal_user)
+        response = self.client.get(self.moderator_user_url)
+        self.assertEqual(response.status_code, 404)
+            
+    def test_moderator_can_view_moderator_profile(self):
+        """Test che un moderatore possa vedere il profilo di un altro moderatore"""
+        another_moderator = User.objects.create_user(
+            username='anothermod',
+            password='modpass123',
+            is_active=True
+        )
+        another_moderator.groups.add(Group.objects.get(name='moderatori'))
+        
+        url = reverse('sylvelius:dettagli_profilo', kwargs={'user_profile': another_moderator.username})
+        self.client.force_login(self.moderator_user)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        
+    def test_pagination_of_comments(self):
+        """Test che i commenti siano paginati correttamente"""
+        for i in range(MAX_PAGINATOR_COMMENTI_DETTAGLI_VALUE + 5):
+            # Per ogni ciclo, crea un nuovo annuncio e un commento associato
+            prodotto = Prodotto.objects.create(
+                nome=f'Prodotto Commento {i}',
+                descrizione_breve=f'Descrizione breve {i}',
+                prezzo=10.00 + i,
+                iva=22,
+                condizione='nuovo'
+            )
+            annuncio = Annuncio.objects.create(
+                inserzionista=self.normal_user,
+                prodotto=prodotto,
+                is_published=True
+            )
+            CommentoAnnuncio.objects.create(
+                annuncio=annuncio,
+                utente=self.normal_user,
+                testo=f'Commento {i}',
+                rating=4
+            )
+
+        self.client.force_login(self.moderator_user)
+        response = self.client.get(self.normal_user_url + '?page=2')
+
+        # Verifica la paginazione
+        self.assertFalse(response.context['has_next'])
+        self.assertTrue(response.context['has_previous'])
+        self.assertEqual(response.context['page'], 2)
+
+        # Verifica il numero di commenti per pagina
+        commenti_in_context = response.context['commenti']
+        self.assertLessEqual(len(commenti_in_context), MAX_PAGINATOR_COMMENTI_DETTAGLI_VALUE)
+        
+    def test_inactive_user_profile_returns_404(self):
+        """Test che il profilo di un utente inattivo restituisca 404"""
+        inactive_user = User.objects.create_user(
+            username='inactive',
+            password='testpass123',
+            is_active=False
+        )
+        
+        url = reverse('sylvelius:dettagli_profilo', kwargs={'user_profile': inactive_user.username})
+        self.client.force_login(self.normal_user)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 404)
+            
+    def test_annunci_ordered_by_rating(self):
+        """Test che gli annunci siano ordinati per rating medio"""
+        # Crea un altro annuncio con rating più alto
+        prodotto3 = Prodotto.objects.create(
+            nome='Prodotto 3',
+            descrizione_breve='Descrizione breve 3',
+            prezzo=30.00,
+            iva=22,
+            condizione='nuovo'
+        )
+        annuncio3 = Annuncio.objects.create(
+            inserzionista=self.normal_user,
+            prodotto=prodotto3,
+            is_published=True
+        )
+        
+        # Aggiungi commenti con rating alto
+        CommentoAnnuncio.objects.create(
+            annuncio=annuncio3,
+            utente=self.moderator_user,
+            testo='Eccellente!',
+            rating=5
+        )
+        CommentoAnnuncio.objects.create(
+            annuncio=annuncio3,
+            utente=self.normal_user,
+            testo='Fantastico',
+            rating=5
+        )
+        
+        self.client.force_login(self.moderator_user)
+        response = self.client.get(self.normal_user_url)
+        
+        # Verifica che l'annuncio con rating più alto sia il primo
+        annunci_in_context = response.context['annunci']
+        self.assertEqual(annunci_in_context[0].prodotto.nome, 'Prodotto 3')
+        
+    def test_max_annunci_per_dettagli_value(self):
+        """Test che vengano mostrati al massimo MAX_ANNUNCI_PER_DETTAGLI_VALUE annunci"""
+        # Crea più annunci per superare il limite
+        for i in range(MAX_ANNUNCI_PER_DETTAGLI_VALUE + 5):
+            prodotto = Prodotto.objects.create(
+                nome=f'Extra Prodotto {i}',
+                descrizione_breve=f'Descrizione breve {i}',
+                prezzo=10.00 + i,
+                iva=22,
+                condizione='nuovo'
+            )
+            Annuncio.objects.create(
+                inserzionista=self.normal_user,
+                prodotto=prodotto,
+                is_published=True
+            )
+        
+        self.client.force_login(self.moderator_user)
+        response = self.client.get(self.normal_user_url)
+        
+        # Verifica che il numero di annunci nel context non superi il massimo
+        annunci_in_context = response.context['annunci']
+        self.assertEqual(len(annunci_in_context), MAX_ANNUNCI_PER_DETTAGLI_VALUE)
+        
+        # Verifica che il conteggio totale sia corretto
+        self.assertEqual(response.context['annunci_count'], MAX_ANNUNCI_PER_DETTAGLI_VALUE + 5 + 2)  # +1 per l'annuncio1 già esistente

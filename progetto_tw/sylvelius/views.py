@@ -312,7 +312,7 @@ class ProfiloDetailsPageView(View):
             # Impedisci agli utenti base di vedere i profili dei moderatori
             if user.groups.filter(name='moderatori').exists():
                 return HttpResponse(status=404)
-        commenti = CommentoAnnuncio.objects.filter(utente=user,annuncio__inserzionista__is_active=True)
+        commenti = CommentoAnnuncio.objects.filter(utente=user,annuncio__inserzionista__is_active=True).order_by('-data_pubblicazione')
         paginator = Paginator(commenti, MAX_PAGINATOR_COMMENTI_DETTAGLI_VALUE) 
         
         page_number = self.request.GET.get('page',1)
@@ -433,15 +433,32 @@ class AnnuncioDetailView(TemplateView):
             annuncio = get_object_or_404(Annuncio, uuid=annuncio_uuid)
         else:
             annuncio = get_object_or_404(Annuncio, uuid=annuncio_uuid, is_published=True,inserzionista__is_active=True)
+
+        context['get_commento'] = annUt = CommentoAnnuncio.objects.filter(
+            annuncio=annuncio,
+            utente=user
+        ).first() if user.is_authenticated else None
+
         if self.request.user.groups.filter(name='moderatori').exists():
-            commenti = CommentoAnnuncio.objects.filter(
+            if annUt:
+                commenti = CommentoAnnuncio.objects.filter(
+                    annuncio=annuncio
+                ).exclude(id=annUt.id).select_related('utente').order_by('-data_pubblicazione') # type: ignore
+            else:
+                commenti = CommentoAnnuncio.objects.filter(
                     annuncio=annuncio
                 ).select_related('utente').order_by('-data_pubblicazione')
         else:
-            commenti = CommentoAnnuncio.objects.filter(
-                annuncio=annuncio,
-                utente__is_active=True
-            ).select_related('utente').order_by('-data_pubblicazione')
+            if annUt:
+                commenti = CommentoAnnuncio.objects.filter(
+                    annuncio=annuncio,
+                    utente__is_active=True
+                ).exclude(id=annUt.id).select_related('utente').order_by('-data_pubblicazione') # type: ignore
+            else:
+                commenti = CommentoAnnuncio.objects.filter(
+                    annuncio=annuncio,
+                    utente__is_active=True
+                ).select_related('utente').order_by('-data_pubblicazione')
 
         ha_acquistato = False
         if user.is_authenticated:
@@ -456,11 +473,6 @@ class AnnuncioDetailView(TemplateView):
                 annuncio=annuncio,
                 utente=user
             ).exists()
-
-        context['get_commento'] = CommentoAnnuncio.objects.filter(
-            annuncio=annuncio,
-            utente=user
-        ).first() if user.is_authenticated else None
 
         context['non_ha_commentato'] = non_ha_commentato
         context['ha_acquistato'] = ha_acquistato

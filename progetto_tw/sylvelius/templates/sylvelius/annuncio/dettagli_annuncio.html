@@ -89,11 +89,13 @@
                     {% csrf_token %}
                     Cancella annuncio</button>
                 </form>
+                {% if annuncio.inserzionista.is_active %}
                 <form action="{% url 'sylvelius:espelli_utente' 'ban' annuncio.inserzionista.id %}" method="post" class="d-inline-block" onclick="return confirm('Sei sicuro di voler espellere questo utente?');">
                     {% csrf_token %}
                     <button type="submit" class="btn" style="background-color:{{ADMIN_SECONDARY_COLOR}};" id="ban-user">
                         Espelli utente</button>
                 </form>
+                {% endif %}
             </div>   
             {% else %}
             {% if annuncio.qta_magazzino > 0 %}
@@ -189,16 +191,18 @@
             {% if ha_acquistato and non_ha_commentato %}
                 {% url 'sylvelius:aggiungi_commento' annuncio.id as create_url%}
                 {% include "_card_nuovo_commento.html" with direction=create_url %}
+                <hr class="my-4 border-secondary">
             {% elif not non_ha_commentato %}
                 {% include "_card_commento.html" with commento=get_commento %}
+                <hr class="my-4 border">
             {% endif %}
 
             {% for commento in commenti %}
                 {% include "_card_commento.html" with excluded=get_commento %}
-                {% include "_btn_paginazione.html" %}
             {% empty %}
                 <p class="text-muted">Nessun commento per questo annuncio.</p>
             {% endfor %}
+            {% include "_btn_paginazione.html" %}
         </div>
     </div>
 </div>
