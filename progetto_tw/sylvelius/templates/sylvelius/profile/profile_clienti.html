@@ -25,7 +25,11 @@
 {% block annullad %}Rifiuta{% endblock %}
 {% block annullare %}rifiutare{% endblock %}
 {% block spedisci %}
-<a href="{% url 'shipping:ship' %}?page={{page}}&ordine={{ordine.id}}" class="btn btn-success btn-sm mb-1">Spedisci</a>
+{% if ordine.utente.is_active is True %}
+    <a href="{% url 'shipping:ship' %}?page={{page}}&ordine={{ordine.id}}" class="btn btn-success btn-sm mb-1">Spedisci</a>
+{% else %}
+    <button class="btn btn-secondary btn-sm mb-1" disabled>Utente bandito</button>
+{% endif %}
 {% endblock %}
 {% block spediscid %}
 <button class="btn btn-secondary btn-sm mb-1" disabled>Spedisci</button>

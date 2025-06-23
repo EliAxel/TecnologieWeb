@@ -1,3 +1,4 @@
+{% if has_previous or has_next %}
 <div class="col-12 d-flex justify-content-center mt-4" style="margin-bottom: 15px;">
     <form method="get" class="me-2">
         {% for key, value in request.GET.items %}
@@ -6,7 +7,7 @@
             {% endif %}
         {% endfor %}
         <button type="submit" name="page" value="{{ page|add:'-1' }}" class="btn btn-primary"
-            {% if page <= 1 %}disabled{% endif %}>
+            {% if not has_previous %}disabled{% endif %}>
             Indietro
         </button>
     </form>
@@ -25,3 +26,4 @@
         </button>
     </form>
 </div>
+{% endif %}

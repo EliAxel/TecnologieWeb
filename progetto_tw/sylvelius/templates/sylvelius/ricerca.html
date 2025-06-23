@@ -6,14 +6,16 @@
     {% include "_btn_toprightbuttons.html" %}
 {% endblock %}
 {% block middle %}
-<div class="container-fluid mt-5 mb-5">
+<div class="container-fluid mt-3 mb-5">
     <div class="row justify-content-center">
         <div class="col-md-12 text-center">
             {% if annunci %}
+                <div class="w-100 d-flex justify-content-left mb-2" style="gap: 0.5rem;">
+                    <small class="text-muted">Risultati totali: {{n_ris}}</small>
+                </div>
                 <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4">
                     {% include "_card_annuncio.html" %}
                 </div>
-
                 {% include "_btn_paginazione.html" %}
             {% else %}
                 <div class="d-flex justify-content-center align-items-center" style="min-height: 200px;">

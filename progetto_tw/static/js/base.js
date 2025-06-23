@@ -76,6 +76,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('#category-tags span').forEach(tag => {
             categoryTags.push(tag.textContent.trim().slice(0, -2)); // togli "×"
         });
+        let inserzionista = document.getElementById('inserzionista-q').value;
         let priceMin = document.getElementById('price-min').value.trim();
         let priceMax = document.getElementById('price-max').value.trim();
         let sortOrder = document.getElementById('sort-order').value;
@@ -92,6 +93,9 @@ document.addEventListener('DOMContentLoaded', function() {
         // Invia TUTTI i tag come 'categoria' (separati da virgole)
         if (categoryTags.length > 0) {
             params.set('categoria', categoryTags.join(','));
+        }
+        if (inserzionista){
+            params.set('inserzionista', inserzionista);
         }
         if (priceMin) {
             params.set('prezzo_min', priceMin);

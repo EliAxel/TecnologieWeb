@@ -6,7 +6,7 @@
 {% else %}
     text-white
 {% endif %}
-        mr-2 ml-2" id="profileBtn" style="background: none; border: none; font-size: 1.1rem; font-weight: bold; cursor: pointer; text-decoration: none;">{{ user.username }}</a>
+        mr-2 ml-2" id="profileBtn" style="word-break: break-word;background: none; border: none; font-size: 1.1rem; font-weight: bold; cursor: pointer; text-decoration: none;">{{ user.username }}</a>
         {% include "_btn_logout.html"%}
     {% else %}
         <a href="{% url 'sylvelius:login' %}" class="

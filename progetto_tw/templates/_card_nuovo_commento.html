@@ -6,7 +6,7 @@
         </div>
         <div class="text-start w-100">
             <div class="d-flex align-items-center mb-1 flex-wrap">
-                <strong>{{ request.user.username }}</strong>
+                <strong style="word-break: break-word; overflow-wrap: anywhere; hyphens: auto;">{{ request.user.username }}</strong>
             </div>
             <form method="post" action={{ direction }} id="comment-form-new-{{ annuncio.id }}">
                 {% csrf_token %}

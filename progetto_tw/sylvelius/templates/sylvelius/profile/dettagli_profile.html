@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Profilo di {{ user_profile.username }} - Sylvelius{% endblock %}
+
+{% block sign_in_sign_up %}
+    {% include "_btn_toprightbuttons.html" %}
+{% endblock %}
+
+{% block middle %}
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-12">
+            <!-- Sezione informazioni utente -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="w-100 text-center">
+                            <h2 class="mb-1">{{ user_profile.username }}</h2>
+                            <p class="text-muted mb-1">Membro dal {{ user_profile.date_joined|date:"d/m/Y" }}</p>
+                            <div class="d-flex justify-content-center">
+                                <span class="badge bg-primary me-2 mr-1">
+                                    {{ annunci_count }} Annunci
+                                </span>
+                                <span class="badge bg-primary">
+                                    {{ commenti_count }} Recensioni
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sezione annunci -->
+            <div class="mb-5">
+                <h3 class="mb-4">Annunci pubblicati</h3>
+                {% if annunci %}
+                    <div class="row">
+                        {% include "_card_annuncio.html" with annunci=annunci %}
+                    </div>
+                    {% if annunci_count > MAX_ANNUNCI_PER_DETTAGLI_VALUE %}
+                        <div class="text-center mt-3">
+                            <a href="{% url 'sylvelius:ricerca_annunci' %}?inserzionista={{ user_profile.username }}&sort=best-star" class="btn btn-primary w-100">Vedi altri annunci</a>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="alert alert-info">
+                        Questo utente non ha ancora pubblicato annunci.
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Sezione commenti -->
+            <div class="mb-5">
+                <h3 class="mb-4">Recensioni pubblicate</h3>
+                {% if commenti %}
+                    {% for commento in commenti %}
+                        <div class="mb-2">
+                            <div class="card mb-1 p-2 d-flex flex-row align-items-center" style="background-color: #f8f9fa;">
+                                <a href="{% url 'sylvelius:dettagli_annuncio' commento.annuncio.uuid %}" class="d-flex align-items-center text-center" style="text-decoration: none;">
+                                    <img
+                                        data-prodotto-id="{{ commento.annuncio.prodotto.id }}"
+                                        class="card-img immagine-asincrona"
+                                        alt="img"
+                                        src="{% static 'img/default_loading.png' %}"
+                                        style="width: 20px; height: 20px; margin-right: 8px; border: 1.5px solid #e0e0e0; box-sizing: border-box; border-radius: 4px;"
+                                    >
+                                    <small class="text-muted">
+                                        {{ commento.annuncio.prodotto.nome }}
+                                    </small>
+                                </a>
+                            </div>
+                            {% include "_card_commento.html" with commento=commento %}
+                        </div>
+                    {% endfor %}
+                    {% include "_btn_paginazione.html" %}
+                {% else %}
+                    <div class="alert alert-info">
+                        Questo utente non ha ancora pubblicato recensioni.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+<script src="{% static 'js/img_loader.js' %}"></script>
+<style>
+    .badge.bg-primary {
+        background-color: {% if 'moderatori' in user.groups.values_list|join:',' %}
+            {{ADMIN_TERTIARY_COLOR}}
+        {% else %}
+            {{TERTIARY_COLOR}}
+        {% endif %} !important;
+        color: white !important;
+    }
+</style>
+<script src="{% static 'js/img_loader.js' %}"></script>
+{% endblock %}

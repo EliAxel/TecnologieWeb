@@ -47,7 +47,10 @@
         <div class="col-md-6">
             <h2 style="word-break: break-word;">{{ annuncio.prodotto.nome }}</h2>
             <p class="text-muted mb-1">
-                Pubblicato il {{ annuncio.data_pubblicazione|date:"d/m/Y" }} da {{ annuncio.inserzionista.username }}
+                Pubblicato il {{ annuncio.data_pubblicazione|date:"d/m/Y" }} da 
+                <a href="{% url 'sylvelius:dettagli_profilo' annuncio.inserzionista.username %}">
+                    {{ annuncio.inserzionista.username }}
+                </a>
             </p>
             <span class="text-muted mb-4">
                 Condizione: 
@@ -192,6 +195,7 @@
 
             {% for commento in commenti %}
                 {% include "_card_commento.html" with excluded=get_commento %}
+                {% include "_btn_paginazione.html" %}
             {% empty %}
                 <p class="text-muted">Nessun commento per questo annuncio.</p>
             {% endfor %}

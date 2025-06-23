@@ -10,6 +10,7 @@ urlpatterns = [
     path("login/", views.LoginPageView.as_view(), name="login"),
     path("logout/", views.LogoutPageView.as_view(), name="logout"),
     path("account/profilo/", views.ProfiloPageView.as_view(), name="profile"),
+    path("account/profilo/utente/<str:user_profile>/", views.ProfiloDetailsPageView.as_view(), name="dettagli_profilo"),
     path("account/profilo/modifica/", views.ProfiloEditPageView.as_view(), name="profile_edit"),
     path("account/profilo/elimina/", views.ProfiloDeletePageView.as_view(), name="profile_delete"),
     path("account/profilo/ordini/", views.ProfiloOrdiniPageView.as_view(), name="profile_ordini"),

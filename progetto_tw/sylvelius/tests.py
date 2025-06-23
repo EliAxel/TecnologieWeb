@@ -2256,7 +2256,7 @@ class RicercaAnnunciViewTest(TestCase):
         view.request = request
         
         context = view.get_context_data()
-        self.assertEqual(context['page'], 1)
+        self.assertEqual(context['page'], 2)
 
     def test_combinazione_filtri(self):
         # Combinazione di più filtri

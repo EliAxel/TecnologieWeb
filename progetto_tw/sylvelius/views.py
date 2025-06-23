@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.views import LoginView, LogoutView
 from django.core.paginator import Paginator
 from django.db.models import Q
-from django.http import HttpResponseRedirect, JsonResponse, HttpResponseForbidden
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, HttpResponseForbidden
 from django.urls import reverse, reverse_lazy
 from django.views import View
 from django.views.decorators.http import require_POST
@@ -57,6 +57,9 @@ from progetto_tw.constants import (
     MAX_IMG_SIZE,
     MAX_IMG_ASPECT_RATIO,
     MIN_IMG_ASPECT_RATIO,
+    MAX_ANNUNCI_PER_DETTAGLI_VALUE,
+    MAX_PAGINATOR_COMMENTI_DETTAGLI_VALUE,
+    MAX_PAGINATOR_COMMENTI_ANNUNCIO_VALUE,
     PROD_CONDIZIONE_CHOICES_ID
 )
 # Other
@@ -204,24 +207,16 @@ class HomePageView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        annunci = Annuncio.objects.filter(is_published=True,qta_magazzino__gt=0).order_by('-data_pubblicazione')
+        annunci = Annuncio.objects.filter(is_published=True,qta_magazzino__gt=0,inserzionista__is_active=True).order_by('-data_pubblicazione')
 
         paginator = Paginator(annunci, MAX_PAGINATOR_HOME_VALUE)
-
-        try:
-            page_number = int(self.request.GET.get('page', 1))
-            if page_number < 1:
-                page_number = 1
-        except ValueError:
-            page_number = 1
-
+        page_number = self.request.GET.get('page', 1)
         page_obj = paginator.get_page(page_number)
 
         context['annunci'] = page_obj.object_list
         context['page'] = page_obj.number
         context['has_next'] = page_obj.has_next()
         context['has_previous'] = page_obj.has_previous()
-        context['request'] = self.request  # Per usare request.GET nel template
 
         return context
 
@@ -258,14 +253,13 @@ class ProfiloPageView(CustomLoginRequiredMixin, TemplateView):
             
             paginator = Paginator(user_without_is_active_list, MAX_PAGINATOR_BANNED_USERS_VALUE)  # 10 utenti per pagina
         
-            page_number = self.request.GET.get('page')
+            page_number = self.request.GET.get('page',1)
             page_obj = paginator.get_page(page_number)
             
             context['user_without_is_active'] = page_obj.object_list
             context['page'] = page_obj.number
             context['has_next'] = page_obj.has_next()
             context['has_previous'] = page_obj.has_previous()
-            context['request'] = self.request
         else:
             utente = self.request.user
             context['user'] = utente
@@ -304,6 +298,38 @@ class ProfiloPageView(CustomLoginRequiredMixin, TemplateView):
 
         return context
 
+class ProfiloDetailsPageView(View):
+    template_name = 'sylvelius/profile/dettagli_profile.html'
+
+    def get(self, request, user_profile):
+        context = {}
+        if request.user.groups.filter(name='moderatori').exists():
+            user = get_object_or_404(User, username=user_profile)
+            annunci = Annuncio.objects.filter(inserzionista=user).annotate(avg_rating=Avg('commenti__rating')).order_by('-avg_rating')
+        else:
+            user = get_object_or_404(User, username=user_profile, is_active=True)
+            annunci = Annuncio.objects.filter(inserzionista=user,is_published=True).annotate(avg_rating=Avg('commenti__rating')).order_by('-avg_rating')
+            # Impedisci agli utenti base di vedere i profili dei moderatori
+            if user.groups.filter(name='moderatori').exists():
+                return HttpResponse(status=404)
+        commenti = CommentoAnnuncio.objects.filter(utente=user,annuncio__inserzionista__is_active=True)
+        paginator = Paginator(commenti, MAX_PAGINATOR_COMMENTI_DETTAGLI_VALUE) 
+        
+        page_number = self.request.GET.get('page',1)
+        page_obj = paginator.get_page(page_number)
+        
+        context = {
+            'user_profile': user,
+            'annunci': annunci[:MAX_ANNUNCI_PER_DETTAGLI_VALUE],
+            'annunci_count': annunci.count(),
+            'commenti_count': commenti.count(),
+        }
+        context['commenti'] = page_obj.object_list
+        context['page'] = page_obj.number
+        context['has_next'] = page_obj.has_next()
+        context['has_previous'] = page_obj.has_previous()
+        return render(request, self.template_name, context)
+    
 class ProfiloEditPageView(CustomLoginRequiredMixin, View):
     template_name = "sylvelius/profile/profile_edit.html"
     login_url = reverse_lazy('sylvelius:login')
@@ -403,10 +429,19 @@ class AnnuncioDetailView(TemplateView):
         context = super().get_context_data(**kwargs)
         user = self.request.user
         annuncio_uuid = self.kwargs['uuid']
-        annuncio = get_object_or_404(Annuncio, uuid=annuncio_uuid, is_published=True)
-        commenti = CommentoAnnuncio.objects.filter(
-            annuncio=annuncio
-        ).select_related('utente').order_by('-data_pubblicazione')
+        if self.request.user.groups.filter(name='moderatori').exists():
+            annuncio = get_object_or_404(Annuncio, uuid=annuncio_uuid)
+        else:
+            annuncio = get_object_or_404(Annuncio, uuid=annuncio_uuid, is_published=True,inserzionista__is_active=True)
+        if self.request.user.groups.filter(name='moderatori').exists():
+            commenti = CommentoAnnuncio.objects.filter(
+                    annuncio=annuncio
+                ).select_related('utente').order_by('-data_pubblicazione')
+        else:
+            commenti = CommentoAnnuncio.objects.filter(
+                annuncio=annuncio,
+                utente__is_active=True
+            ).select_related('utente').order_by('-data_pubblicazione')
 
         ha_acquistato = False
         if user.is_authenticated:
@@ -430,7 +465,15 @@ class AnnuncioDetailView(TemplateView):
         context['non_ha_commentato'] = non_ha_commentato
         context['ha_acquistato'] = ha_acquistato
         context['annuncio'] = annuncio
-        context['commenti'] = commenti
+
+        paginator = Paginator(commenti, MAX_PAGINATOR_COMMENTI_ANNUNCIO_VALUE) 
+        page_number = self.request.GET.get('page',1)
+        page_obj = paginator.get_page(page_number)
+
+        context['commenti'] = page_obj.object_list
+        context['page'] = page_obj.number
+        context['has_next'] = page_obj.has_next()
+        context['has_previous'] = page_obj.has_previous()
         return context
     
 class ProfiloOrdiniPageView(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin, TemplateView):
@@ -446,14 +489,13 @@ class ProfiloOrdiniPageView(CustomLoginRequiredMixin, ModeratoreAccessForbiddenM
         
         paginator = Paginator(ordini_list, MAX_PAGINATOR_ORDINI_VALUE)  # 20 ordini per pagina
         
-        page_number = self.request.GET.get('page')
+        page_number = self.request.GET.get('page',1)
         page_obj = paginator.get_page(page_number)
         
         context['ordini'] = page_obj.object_list
         context['page'] = page_obj.number
         context['has_next'] = page_obj.has_next()
         context['has_previous'] = page_obj.has_previous()
-        context['request'] = self.request
 
         return context
     
@@ -477,7 +519,6 @@ class ProfiloAnnunciPageView(CustomLoginRequiredMixin, ModeratoreAccessForbidden
         context['page'] = page_obj.number
         context['has_next'] = page_obj.has_next()
         context['has_previous'] = page_obj.has_previous()
-        context['request'] = self.request
 
         return context
 
@@ -628,7 +669,6 @@ class ProfiloClientiPageView(CustomLoginRequiredMixin, ModeratoreAccessForbidden
         context['page'] = page_obj.number
         context['has_next'] = page_obj.has_next()
         context['has_previous'] = page_obj.has_previous()
-        context['request'] = self.request
 
         return context
 
@@ -639,6 +679,7 @@ class RicercaAnnunciView(TemplateView):
         context = super().get_context_data(**kwargs)
         query = self.request.GET.get('q', '').strip()
         categoria_str = self.request.GET.get('categoria', '').strip()
+        inserzionista = self.request.GET.get('inserzionista', '').strip()
         prezzo_min = self.request.GET.get('prezzo_min')
         prezzo_max = self.request.GET.get('prezzo_max')
         sort_order = self.request.GET.get('sort', 'data-desc')
@@ -646,7 +687,7 @@ class RicercaAnnunciView(TemplateView):
         rating = self.request.GET.get('search_by_rating')
         qta_mag = self.request.GET.get('qta_mag')
 
-        annunci = Annuncio.objects.filter(is_published=True)
+        annunci = Annuncio.objects.all()
 
         if query:
             annunci = annunci.filter(
@@ -660,7 +701,14 @@ class RicercaAnnunciView(TemplateView):
             for tag in tag_list:
                 annunci = annunci.filter(prodotto__tags__nome=tag)
         
-
+        if inserzionista != '':
+            if self.request.user.groups.filter(name='moderatori').exists():
+                annunci = annunci.filter(inserzionista__username=inserzionista)
+            else:
+                annunci = annunci.filter(inserzionista__username=inserzionista,inserzionista__is_active=True,is_published=True)
+        else:
+            annunci = annunci.filter(inserzionista__is_active=True,is_published=True)
+        
         if condizione in PROD_CONDIZIONE_CHOICES_ID:
             annunci = annunci.filter(prodotto__condizione=condizione)
         # Se condizione == 'all' o non valida, non filtrare
@@ -716,17 +764,16 @@ class RicercaAnnunciView(TemplateView):
             annunci = annunci.order_by('prodotto__prezzo')
         elif sort_order == "prezzo-desc":
             annunci = annunci.order_by('-prodotto__prezzo')
+        elif sort_order == "best-star":
+            annunci = annunci.annotate(avg_rating=Avg('commenti__rating')).order_by('-avg_rating')
+        elif sort_order == "worst-star":
+            annunci = annunci.annotate(avg_rating=Avg('commenti__rating')).order_by('avg_rating')
 
         annunci = annunci.distinct()
 
+        context['n_ris'] = annunci.count()
         paginator = Paginator(annunci, MAX_PAGINATOR_RICERCA_VALUE)
         page_number = self.request.GET.get('page', 1)
-        try:
-            page_number = int(page_number)
-            if page_number < 1:
-                page_number = 1
-        except ValueError:
-            page_number = 1
 
         page_obj = paginator.get_page(page_number)
 
@@ -734,7 +781,6 @@ class RicercaAnnunciView(TemplateView):
         context['page'] = page_obj.number
         context['has_next'] = page_obj.has_next()
         context['has_previous'] = page_obj.has_previous()
-        context['request'] = self.request
         
         return context
 

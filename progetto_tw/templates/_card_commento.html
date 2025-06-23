@@ -4,11 +4,17 @@
   <div class="card mb-3 shadow-sm" id="comment-card-{{ commento.id }}">
     <div class="card-body d-flex">
       <div class="text-center me-3" style="min-width: 80px;">
-        <img src="{% static 'img/default_user.png' %}" class="rounded-circle" width="50" height="50" alt="Avatar">
+        <a href="{% url 'sylvelius:dettagli_profilo' commento.utente.username %}">
+          <img src="{% static 'img/default_user.png' %}" class="rounded-circle" width="50" height="50" alt="Avatar">
+        </a>
       </div>
       <div class="text-start w-100 text-left" style="overflow-wrap: break-word;">
         <div class="d-flex align-items-center mb-1 flex-wrap">
-          <h6 class="mb-0 font-weight-bold mr-3">{{ commento.utente.username }}</h6>
+          <h6 class="mb-0 font-weight-bold mr-3">
+            <a href="{% url 'sylvelius:dettagli_profilo' commento.utente.username %}" style="color: inherit; text-decoration: none;">
+              {{ commento.utente.username }}
+            </a>
+          </h6>
           <div class="text-warning me-3 mr-3">
             {% for i in RANGE_COMMNT_RATING_STRING %} <!-- |slice:":5" -->
               {% if forloop.counter <= commento.rating %}
@@ -21,9 +27,9 @@
           <small class="text-muted">{{ commento.data_pubblicazione|date:"d/m/Y" }}</small>
           {% if 'moderatori' in user.groups.values_list|join:',' %}
             <small id="cancella-commento-{{ commento.id }}" data-comment-id="{{ commento.id }}" class="ml-2" style="cursor: pointer; color: {{ADMIN_SECONDARY_COLOR}};">Elimina</small>
-            <small id="espelli-utente-{{ commento.utente.id }}" data-user-id="{{ commento.utente.id }}" class="ml-2" style="cursor: pointer; color: {{ADMIN_SECONDARY_COLOR}};">Espelli</small>
+            <small id="espelli-utente-{{ commento.id }}" data-user-id="{{ commento.utente.id }}" class="ml-2" style="cursor: pointer; color: {{ADMIN_SECONDARY_COLOR}};">Espelli</small>
             <script>
-              document.getElementById("espelli-utente-{{ commento.utente.id }}").addEventListener("click", function() {
+              document.getElementById("espelli-utente-{{ commento.id }}").addEventListener("click", function() {
                 const confirmSubmit = confirm("Sei sicuro di voler espellere questo utente?");
                 if (!confirmSubmit) {
                   return;
@@ -120,7 +126,13 @@
         </div>
         <div class="text-start w-100">
           <div class="d-flex align-items-center mb-1 flex-wrap">
-            <strong>{{ request.user.username }}</strong>
+            <strong>
+              {% if user.is_authenticated %}
+              <a href="{% url 'sylvelius:dettagli_profilo' request.user.username %}" style="color: inherit; text-decoration: none;">
+                {{ request.user.username }}
+              </a>
+              {% endif %}
+            </strong>
           </div>
           <form method="post" action="{% url 'sylvelius:modifica_commento' commento.id %}" id="edit-comment-form-{{ commento.id }}">
             {% csrf_token %}

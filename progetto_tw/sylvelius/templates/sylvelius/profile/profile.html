@@ -21,8 +21,11 @@
 <div class="container-fluid mt-5 mb-5">
     <div class="row justify-content-center">
         <div class="col-md-8 text-center">
-            <h1>Benvenuto/a {{ user.username }}!</h1>
+            <h1 style="word-break: break-word;">Benvenuto/a {{ user.username }}!</h1>
             <div class="mb-3 d-flex justify-content-center" style="gap: 2px;">
+                {% if 'moderatori' in user.groups.values_list|join:',' %}{% else %}
+                <a href="{% url 'sylvelius:dettagli_profilo' request.user.username %}" class="btn btn-light btn-sm font-weight-bold text-dark" style="font-size: 1.1rem;">Dettagli profilo</a>
+                {% endif %}
                 <a href="{% url 'sylvelius:profile_edit' %}" class="btn btn-light btn-sm font-weight-bold text-dark" style="font-size: 1.1rem;">Modifica profilo</a>
                 {% include "_btn_logout.html" %}
             </div>
@@ -50,7 +53,11 @@
                         {% for user in user_without_is_active %}
                         <tr>
                             <td>{{ user.id }}</td>
-                            <td>{{ user.username }}</td>
+                            <td>
+                                <a href="{% url 'sylvelius:dettagli_profilo' user.username %}">
+                                    {{ user.username }}
+                                </a>
+                            </td>
                             <td>{{ user.last_login|date:"d/m/Y H:i" }}</td>
                             <td>
                                 <form action="{% url 'sylvelius:espelli_utente' 'unban' user.id %}" method="post" class="d-inline-block" >
