@@ -390,7 +390,7 @@ class ProfiloDeletePageView(CustomLoginRequiredMixin, View):
         Iban.objects.filter(utente=request.user).delete()
         Cart.objects.filter(utente=request.user).delete()
         CommentoAnnuncio.objects.filter(utente=request.user).delete()
-        Notification.objects.filter(utente=request.user).delete()
+        Notification.objects.filter(recipient=request.user).delete()
         logout(request)  # logout PRIMA di eliminare l'utente per evitare problemi
         user.delete()    # elimina l'utente
         # 2. Reindirizza a una pagina di successo (es: home page)
