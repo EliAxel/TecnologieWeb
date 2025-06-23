@@ -19,7 +19,7 @@ from django.shortcuts import (
     get_object_or_404
 )
 
-from purchase.models import Iban
+from purchase.models import Iban, Cart
 # Project specific
 from .forms import CustomUserCreationForm
 from progetto_tw.mixins import CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin
@@ -388,6 +388,9 @@ class ProfiloDeletePageView(CustomLoginRequiredMixin, View):
 
         Annuncio.objects.filter(inserzionista=user).delete()
         Iban.objects.filter(utente=request.user).delete()
+        Cart.objects.filter(utente=request.user).delete()
+        CommentoAnnuncio.objects.filter(utente=request.user).delete()
+        Notification.objects.filter(utente=request.user).delete()
         logout(request)  # logout PRIMA di eliminare l'utente per evitare problemi
         user.delete()    # elimina l'utente
         # 2. Reindirizza a una pagina di successo (es: home page)
@@ -901,6 +904,8 @@ def formatta_utente(request, user_id):
             ordine_in.delete()
             Annuncio.objects.filter(inserzionista=user.id).delete() # type: ignore
             CommentoAnnuncio.objects.filter(utente=user.id).delete()# type: ignore
+            Cart.objects.filter(utente=user.id).delete()# type: ignore
+            Iban.objects.filter(utente=user.id).delete()# type: ignore
             Notification.objects.filter(recipient=user.id).delete()# type: ignore
         else:
             return HttpResponseForbidden()

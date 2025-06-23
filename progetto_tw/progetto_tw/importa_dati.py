@@ -108,6 +108,7 @@ def init_db():
             defaults={
                 'quantita': ordine_data['quantita'],
                 'stato_consegna': ordine_data['stato_consegna'],
+                'luogo_consegna': ordine_data['luogo_consegna']
             }
         )
     
