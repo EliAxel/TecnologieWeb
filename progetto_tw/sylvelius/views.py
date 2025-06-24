@@ -703,7 +703,7 @@ class RicercaAnnunciView(TemplateView):
                 annunci = annunci.filter(inserzionista__username=inserzionista)
             else:
                 annunci = annunci.filter(inserzionista__username=inserzionista,inserzionista__is_active=True,is_published=True)
-        else:
+        elif not self.request.user.groups.filter(name=_MODS_GRP_NAME).exists():
             annunci = annunci.filter(inserzionista__is_active=True,is_published=True)
         
         if condizione in PROD_CONDIZIONE_CHOICES_ID:

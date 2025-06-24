@@ -24,7 +24,6 @@ from progetto_tw.constants import (
     MAX_MESSAGE_TITLE_VALUE
 )
 
-
 # Create your models here.
 class Tag(models.Model):
     nome = models.CharField(max_length=MAX_TAGS_CHARS, unique=True)

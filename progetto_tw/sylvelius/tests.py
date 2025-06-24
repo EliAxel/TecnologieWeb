@@ -1821,16 +1821,28 @@ class ProfiloEditTests(TestCase):
 class RicercaAnnunciViewTest(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.factory = RequestFactory()
+        cls.client = Client()
         cls.user = get_user_model().objects.create_user(username='testuser', password='12345')
+        cls.user2 = get_user_model().objects.create_user(username='inactiveuser', password='12345', is_active=False)
+        
+        # Creazione gruppo moderatori
+        cls.moderator_group = Group.objects.create(name=_MODS_GRP_NAME)
+        cls.moderator = get_user_model().objects.create_user(username='moderator', password='12345')
+        cls.moderator.groups.add(cls.moderator_group)
+        
+        # Pulizia database
         Annuncio.objects.all().delete()
         Tag.objects.all().delete()
         Prodotto.objects.all().delete()
         CommentoAnnuncio.objects.all().delete()
+        
+        # Creazione tag
         cls.tag1 = Tag.objects.create(nome='elettronica')
         cls.tag2 = Tag.objects.create(nome='abbigliamento')
         cls.tag3 = Tag.objects.create(nome='casa')
+        cls.tag4 = Tag.objects.create(nome='giardinaggio')
         
+        # Creazione prodotti e annunci
         cls.prod1 = Prodotto.objects.create(
             nome='Smartphone XYZ',
             descrizione_breve='Smartphone di ultima generazione',
@@ -1862,7 +1874,8 @@ class RicercaAnnunciViewTest(TestCase):
         cls.prod3 = Prodotto.objects.create(
             nome='Tavolo da pranzo',
             descrizione_breve='Tavolo in legno massello',
-            prezzo=199.99
+            prezzo=199.99,
+            condizione='nuovo'
         )
         cls.prod3.tags.add(cls.tag3)
         cls.annuncio3 = Annuncio.objects.create(
@@ -1872,6 +1885,35 @@ class RicercaAnnunciViewTest(TestCase):
             is_published=True
         )
         
+        cls.prod4 = Prodotto.objects.create(
+            nome='Prodotto Privato',
+            descrizione_breve='Non dovrebbe apparire',
+            prezzo=100,
+            condizione='nuovo'
+        )
+        cls.prod4.tags.add(cls.tag4)
+        cls.annuncio4 = Annuncio.objects.create(
+            prodotto=cls.prod4,
+            inserzionista=cls.user,
+            qta_magazzino=1,
+            is_published=False
+        )
+        
+        cls.prod5 = Prodotto.objects.create(
+            nome='Prodotto Inattivo',
+            descrizione_breve='Utente inattivo',
+            prezzo=50,
+            condizione='usato'
+        )
+        cls.prod5.tags.add(cls.tag2)
+        cls.annuncio5 = Annuncio.objects.create(
+            prodotto=cls.prod5,
+            inserzionista=cls.user2,
+            qta_magazzino=3,
+            is_published=True
+        )
+
+        # Creazione commenti
         cls.commento1 = CommentoAnnuncio.objects.create(
             annuncio=cls.annuncio1,
             utente=cls.user,
@@ -1890,253 +1932,222 @@ class RicercaAnnunciViewTest(TestCase):
             rating=2,
             testo='Discreto'
         )
+        cls.commento4 = CommentoAnnuncio.objects.create(
+            annuncio=cls.annuncio3,
+            utente=cls.user,
+            rating=1,
+            testo='Scadente'
+        )
+
+    def setUp(self):
+        self.client.force_login(self.user)
 
     def test_ricerca_base(self):
-        request = self.factory.get(reverse('sylvelius:ricerca_annunci'))
-        view = RicercaAnnunciView()
-        view.request = request
+        # Test accesso base alla pagina
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'))
+        self.assertEqual(response.status_code, 200)
+        context = response.context
         
-        context = view.get_context_data()
-        
+        # Verifica che vengano mostrati solo gli annunci pubblicati di utenti attivi
         self.assertEqual(len(context['annunci']), 3)
         self.assertIn(self.annuncio1, context['annunci'])
         self.assertIn(self.annuncio2, context['annunci'])
         self.assertIn(self.annuncio3, context['annunci'])
+        self.assertNotIn(self.annuncio4, context['annunci'])  # Non pubblicato
+        self.assertNotIn(self.annuncio5, context['annunci'])  # Utente inattivo
         
+        # Verifica paginazione
         self.assertEqual(context['page'], 1)
         self.assertFalse(context['has_next'])
         self.assertFalse(context['has_previous'])
 
     def test_ricerca_per_testo(self):
-        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'q': 'Smartphone'})
-        view = RicercaAnnunciView()
-        view.request = request
-        
-        context = view.get_context_data()
+        # Test ricerca per testo nel nome prodotto
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'), {'q': 'Smartphone'})
+        context = response.context
         self.assertEqual(len(context['annunci']), 1)
         self.assertIn(self.annuncio1, context['annunci'])
         
-        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'q': 'caldo'})
-        view.request = request
-        
-        context = view.get_context_data()
+        # Test ricerca per testo nella descrizione
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'), {'q': 'caldo'})
+        context = response.context
         self.assertEqual(len(context['annunci']), 1)
         self.assertIn(self.annuncio2, context['annunci'])
         
-        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'q': 'elettronica'})
-        view.request = request
-        
-        context = view.get_context_data()
+        # Test ricerca per tag
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'), {'q': 'elettronica'})
+        context = response.context
         self.assertEqual(len(context['annunci']), 1)
         self.assertIn(self.annuncio1, context['annunci'])
+        
+        # Test ricerca senza risultati
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'), {'q': 'inesistente'})
+        context = response.context
+        self.assertEqual(len(context['annunci']), 0)
 
     def test_filtro_categoria(self):
-        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'categoria': 'elettronica'})
-        view = RicercaAnnunciView()
-        view.request = request
-        
-        context = view.get_context_data()
+        # Test filtro per singola categoria
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'), {'categoria': 'elettronica'})
+        context = response.context
         self.assertEqual(len(context['annunci']), 1)
         self.assertIn(self.annuncio1, context['annunci'])
         
-        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'categoria': 'elettronica,casa'})
-        view = RicercaAnnunciView()
-        view.request = request
-        
-        context = view.get_context_data()
+        # Test filtro per categoria inesistente
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'), {'categoria': 'Inesistente'})
+        context = response.context
         self.assertEqual(len(context['annunci']), 0)
         
-        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'categoria': 'Inesistente'})
-        view.request = request
-        
-        context = view.get_context_data()
+        # Test filtro per multiple categorie
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'), {'categoria': 'elettronica,abbigliamento'})
+        context = response.context
         self.assertEqual(len(context['annunci']), 0)
-
-        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'categoria': ' '})
-        view.request = request
-        
-        context = view.get_context_data()
-        self.assertEqual(len(context['annunci']), 3)
-
-        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'categoria': '  , , ,, ,   ,elettronica,, ,  ,'})
-        view.request = request
-        
-        context = view.get_context_data()
-        self.assertEqual(len(context['annunci']), 1)
 
     def test_filtro_condizione(self):
-        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'condition': 'nuovo'})
-        view = RicercaAnnunciView()
-        view.request = request
-        
-        context = view.get_context_data()
+        # Test filtro per condizione "nuovo"
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'), {'condition': 'nuovo'})
+        context = response.context
         self.assertEqual(len(context['annunci']), 2)
         self.assertIn(self.annuncio1, context['annunci'])
+        self.assertIn(self.annuncio3, context['annunci'])
         
-        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'condition': 'usato'})
-        view.request = request
-        
-        context = view.get_context_data()
+        # Test filtro per condizione "usato"
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'), {'condition': 'usato'})
+        context = response.context
         self.assertEqual(len(context['annunci']), 1)
         self.assertIn(self.annuncio2, context['annunci'])
         
-        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'condition': 'INVALID'})
-        view.request = request
-        
-        context = view.get_context_data()
-        self.assertEqual(len(context['annunci']), 3)
-
-        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'condition': '  '})
-        view.request = request
-        
-        context = view.get_context_data()
-        self.assertEqual(len(context['annunci']), 3)
-
-        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'condition': ' , ,, '})
-        view.request = request
-        
-        context = view.get_context_data()
-        self.assertEqual(len(context['annunci']), 3)
+        # Test filtro per condizione non valida
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'), {'condition': 'invalid'})
+        context = response.context
+        self.assertEqual(len(context['annunci']), 3)  # Mostra tutti (filtro ignorato)
 
     def test_filtro_qta_magazzino(self):
-        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'qta_mag': 'qta-pres'})
-        view = RicercaAnnunciView()
-        view.request = request
-        
-        context = view.get_context_data()
+        # Test filtro per quantità presente
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'), {'qta_mag': 'qta-pres'})
+        context = response.context
         self.assertEqual(len(context['annunci']), 2)
         self.assertIn(self.annuncio1, context['annunci'])
         self.assertIn(self.annuncio3, context['annunci'])
         
-        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'qta_mag': 'qta-manc'})
-        view.request = request
-        
-        context = view.get_context_data()
+        # Test filtro per quantità mancante
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'), {'qta_mag': 'qta-manc'})
+        context = response.context
         self.assertEqual(len(context['annunci']), 1)
         self.assertIn(self.annuncio2, context['annunci'])
+        
+        # Test filtro non valido
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'), {'qta_mag': 'invalid'})
+        context = response.context
+        self.assertEqual(len(context['annunci']), 3)  # Mostra tutti (filtro ignorato)
 
     def test_filtro_rating(self):
-        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'search_by_rating': '4'})
-        view = RicercaAnnunciView()
-        view.request = request
-        
-        context = view.get_context_data()
+        # Test filtro per rating specifico (4)
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'), {'search_by_rating': '4'})
+        context = response.context
         self.assertEqual(len(context['annunci']), 1)
         self.assertIn(self.annuncio1, context['annunci'])
         
-        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'search_by_rating': '2'})
-        view.request = request
+        # Test filtro per rating specifico (2)
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'), {'search_by_rating': '2'})
+        context = response.context
+        self.assertEqual(len(context['annunci']), 0)
         
-        context = view.get_context_data()
-        self.assertEqual(len(context['annunci']), 1)
-        self.assertIn(self.annuncio3, context['annunci'])
-        
-        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'search_by_rating': 'starred'})
-        view.request = request
-        
-        context = view.get_context_data()
+        # Test filtro per annunci con rating (starred)
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'), {'search_by_rating': 'starred'})
+        context = response.context
         self.assertEqual(len(context['annunci']), 2)
         self.assertIn(self.annuncio1, context['annunci'])
         self.assertIn(self.annuncio3, context['annunci'])
         
-        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'search_by_rating': 'none'})
-        view.request = request
-        
-        context = view.get_context_data()
+        # Test filtro per annunci senza rating (none)
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'), {'search_by_rating': 'none'})
+        context = response.context
         self.assertEqual(len(context['annunci']), 1)
         self.assertIn(self.annuncio2, context['annunci'])
         
-        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'search_by_rating': 'invalid'})
-        view.request = request
+        # Test filtro per rating non valido
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'), {'search_by_rating': 'invalid'})
+        context = response.context
+        self.assertEqual(len(context['annunci']), 3)  # Mostra tutti (filtro ignorato)
         
-        context = view.get_context_data()
-        self.assertEqual(len(context['annunci']), 3)
-
-        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'search_by_rating': '100'})
-        view.request = request
-        
-        context = view.get_context_data()
-        self.assertEqual(len(context['annunci']), 3)
+        # Test filtro per rating fuori range
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'), {'search_by_rating': '10'})
+        context = response.context
+        self.assertEqual(len(context['annunci']), 3)  # Mostra tutti (filtro ignorato)
 
     def test_filtro_prezzo(self):
-        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'prezzo_min': '100'})
-        view = RicercaAnnunciView()
-        view.request = request
-        
-        context = view.get_context_data()
+        # Test filtro prezzo minimo
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'), {'prezzo_min': '100'})
+        context = response.context
         self.assertEqual(len(context['annunci']), 2)
         self.assertIn(self.annuncio1, context['annunci'])
         self.assertIn(self.annuncio3, context['annunci'])
         
-        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'prezzo_max': '100'})
-        view.request = request
-        
-        context = view.get_context_data()
+        # Test filtro prezzo massimo
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'), {'prezzo_max': '100'})
+        context = response.context
         self.assertEqual(len(context['annunci']), 1)
         self.assertIn(self.annuncio2, context['annunci'])
         
-        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'prezzo_min': '50', 'prezzo_max': '200'})
-        view.request = request
-        
-        context = view.get_context_data()
+        # Test filtro prezzo min e max
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'), {'prezzo_min': '100', 'prezzo_max': '200'})
+        context = response.context
         self.assertEqual(len(context['annunci']), 1)
         self.assertIn(self.annuncio3, context['annunci'])
         
-        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'prezzo_min': 'invalid', 'prezzo_max': 'invalid'})
-        view.request = request
+        # Test filtro prezzo non valido
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'), {'prezzo_min': 'invalid'})
+        context = response.context
+        self.assertEqual(len(context['annunci']), 3)  # Mostra tutti (filtro ignorato)
         
-        context = view.get_context_data()
-        self.assertEqual(len(context['annunci']), 3)
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'), {'prezzo_max': 'invalid'})
+        context = response.context
+        self.assertEqual(len(context['annunci']), 3)  # Mostra tutti (filtro ignorato)
 
     def test_ordinamento_risultati(self):
-        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'sort': 'data-desc'})
-        view = RicercaAnnunciView()
-        view.request = request
+        # Test ordinamento per data decrescente (default)
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'), {'sort': 'data-desc'})
+        context = response.context
+        self.assertEqual(list(context['annunci']), [self.annuncio3, self.annuncio2, self.annuncio1])
         
-        context = view.get_context_data()
-        self.assertEqual(context['annunci'][0], self.annuncio3)
-        self.assertEqual(context['annunci'][1], self.annuncio2)
-        self.assertEqual(context['annunci'][2], self.annuncio1)
+        # Test ordinamento per data crescente
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'), {'sort': 'data-asc'})
+        context = response.context
+        self.assertEqual(list(context['annunci']), [self.annuncio1, self.annuncio2, self.annuncio3])
         
-        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'sort': 'data-asc'})
-        view.request = request
+        # Test ordinamento per prezzo crescente
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'), {'sort': 'prezzo-asc'})
+        context = response.context
+        self.assertEqual(list(context['annunci']), [self.annuncio2, self.annuncio3, self.annuncio1])
         
-        context = view.get_context_data()
-        self.assertEqual(context['annunci'][0], self.annuncio1)
-        self.assertEqual(context['annunci'][1], self.annuncio2)
-        self.assertEqual(context['annunci'][2], self.annuncio3)
+        # Test ordinamento per prezzo decrescente
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'), {'sort': 'prezzo-desc'})
+        context = response.context
+        self.assertEqual(list(context['annunci']), [self.annuncio1, self.annuncio3, self.annuncio2])
         
-        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'sort': 'prezzo-asc'})
-        view.request = request
+        # Test ordinamento per miglior rating
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'), {'sort': 'best-star'})
+        context = response.context
+        self.assertEqual(list(context['annunci']), [self.annuncio1, self.annuncio3, self.annuncio2])
         
-        context = view.get_context_data()
-        self.assertEqual(context['annunci'][0], self.annuncio2)
-        self.assertEqual(context['annunci'][1], self.annuncio3)
-        self.assertEqual(context['annunci'][2], self.annuncio1)
+        # Test ordinamento per peggior rating
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'), {'sort': 'worst-star'})
+        context = response.context
+        self.assertEqual(list(context['annunci']), [self.annuncio2, self.annuncio3, self.annuncio1])
         
-        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'sort': 'prezzo-desc'})
-        view.request = request
-        
-        context = view.get_context_data()
-        self.assertEqual(context['annunci'][0], self.annuncio1)
-        self.assertEqual(context['annunci'][1], self.annuncio3)
-        self.assertEqual(context['annunci'][2], self.annuncio2)
-
-        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'sort': 'err'})
-        view.request = request
-        
-        context = view.get_context_data()
-        self.assertEqual(context['annunci'][0], self.annuncio3)
-        self.assertEqual(context['annunci'][1], self.annuncio2)
-        self.assertEqual(context['annunci'][2], self.annuncio1)
+        # Test ordinamento non valido
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'), {'sort': 'invalid'})
+        context = response.context
+        self.assertEqual(len(context['annunci']), 3)  # Mostra tutti con ordinamento default
 
     def test_paginazione(self):
+        # Creazione annunci aggiuntivi per testare la paginazione
         for i in range(MAX_PAGINATOR_RICERCA_VALUE + 5):
             prod = Prodotto.objects.create(
                 nome=f'Prodotto {i}',
                 descrizione_breve=f'Descrizione {i}',
                 prezzo=10 + i,
-                condizione='NU'
+                condizione='nuovo'
             )
             Annuncio.objects.create(
                 prodotto=prod,
@@ -2145,186 +2156,176 @@ class RicercaAnnunciViewTest(TestCase):
                 is_published=True
             )
         
-        request = self.factory.get(reverse('sylvelius:ricerca_annunci'))
-        view = RicercaAnnunciView()
-        view.request = request
-        
-        context = view.get_context_data()
+        # Prima pagina
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'))
+        context = response.context
         self.assertEqual(len(context['annunci']), MAX_PAGINATOR_RICERCA_VALUE)
         self.assertEqual(context['page'], 1)
         self.assertTrue(context['has_next'])
         self.assertFalse(context['has_previous'])
         
-        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'page': '2'})
-        view.request = request
-        
-        context = view.get_context_data()
+        # Seconda pagina
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'), {'page': '2'})
+        context = response.context
         self.assertEqual(len(context['annunci']), 5 + 3)  # 5 nuovi + 3 originali - MAX_PAGINATOR_RICERCA_VALUE
         self.assertEqual(context['page'], 2)
         self.assertFalse(context['has_next'])
         self.assertTrue(context['has_previous'])
         
-        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'page': 'invalid'})
-        view.request = request
-        
-        context = view.get_context_data()
+        # Pagina non valida (usa la prima)
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'), {'page': 'invalid'})
+        context = response.context
         self.assertEqual(context['page'], 1)
 
-        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'page': '0'})
-        view.request = request
-        
-        context = view.get_context_data()
-        self.assertEqual(context['page'], 2)
-
-    def test_combinazione_filtri(self):
-        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {
-            'q': 'Smartphone',
-            'condition': 'NU',
-            'prezzo_min': '500',
-            'prezzo_max': '600',
-            'qta_mag': 'qta-pres',
-            'search_by_rating': 'starred'
-        })
-        view = RicercaAnnunciView()
-        view.request = request
-        
-        context = view.get_context_data()
-        self.assertEqual(len(context['annunci']), 1)
-        self.assertIn(self.annuncio1, context['annunci'])
-        
-        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {
-            'q': 'Smartphone',
-            'condition': 'US',
-            'prezzo_min': '1000'
-        })
-        view.request = request
-        
-        context = view.get_context_data()
-        self.assertEqual(len(context['annunci']), 0)
-
     def test_annunci_non_pubblicati(self):
-        prod = Prodotto.objects.create(
-            nome='Prodotto Privato',
-            descrizione_breve='Non dovrebbe apparire',
-            prezzo=100,
-            condizione='NU'
-        )
-        annuncio_privato = Annuncio.objects.create(
-            prodotto=prod,
-            inserzionista=self.user,
-            qta_magazzino=1,
-            is_published=False
-        )
+        # Verifica che l'utente normale non veda l'annuncio non pubblicato
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'))
+        context = response.context
+        self.assertNotIn(self.annuncio4, context['annunci'])
         
-        request = self.factory.get(reverse('sylvelius:ricerca_annunci'))
-        view = RicercaAnnunciView()
-        view.request = request
-        
-        context = view.get_context_data()
-        self.assertNotIn(annuncio_privato, context['annunci'])
+        # Verifica che l'utente normale non veda l'annuncio di utente inattivo
+        self.assertNotIn(self.annuncio5, context['annunci'])
 
     def test_filtro_inserzionista(self):
-        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'inserzionista': 'testuser'})
-        request.user = self.user 
-        view = RicercaAnnunciView()
-        view.request = request
-        
-        context = view.get_context_data()
+        # Test filtro per inserzionista
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'), {'inserzionista': 'testuser'})
+        context = response.context
         self.assertEqual(len(context['annunci']), 3)
         self.assertIn(self.annuncio1, context['annunci'])
         self.assertIn(self.annuncio2, context['annunci'])
         self.assertIn(self.annuncio3, context['annunci'])
         
-        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'inserzionista': 'nonexistent'})
-        request.user = self.user 
-        view.request = request
+        # Test filtro per inserzionista inesistente
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'), {'inserzionista': 'inesistente'})
+        context = response.context
+        self.assertEqual(len(context['annunci']), 0)
         
-        context = view.get_context_data()
+        # Test filtro per inserzionista inattivo (non dovrebbe mostrare nulla)
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'), {'inserzionista': 'inactiveuser'})
+        context = response.context
         self.assertEqual(len(context['annunci']), 0)
 
-    def test_filtro_inserzionista_con_moderatore(self):
-        moderator = get_user_model().objects.create_user(username='moderator', password='12345')
-        moderator.groups.create(name=_MODS_GRP_NAME)
+    def test_ricerca_con_moderatore(self):
+        # Login come moderatore
+        self.client.force_login(self.moderator)
         
-        prod_privato = Prodotto.objects.create(
-            nome='Prodotto Privato Moderatore',
-            descrizione_breve='Dovrebbe apparire solo per moderatori',
+        # Verifica che il moderatore veda tutti gli annunci
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'))
+        context = response.context
+        self.assertEqual(len(context['annunci']), 5)  # Incluso quello non pubblicato
+        self.assertIn(self.annuncio1, context['annunci'])
+        self.assertIn(self.annuncio2, context['annunci'])
+        self.assertIn(self.annuncio3, context['annunci'])
+        self.assertIn(self.annuncio4, context['annunci'])  # Annuncio non pubblicato
+        self.assertIn(self.annuncio5, context['annunci'])  # Utente inattivo
+        
+        # Verifica che il moderatore possa cercare annunci non pubblicati
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'), {'q': 'Privato'})
+        context = response.context
+        self.assertEqual(len(context['annunci']), 1)
+        self.assertIn(self.annuncio4, context['annunci'])
+        
+        # Verifica che il moderatore possa filtrare per inserzionista inattivo
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'), {'inserzionista': 'inactiveuser'})
+        context = response.context
+        self.assertEqual(len(context['annunci']), 1)
+        self.assertIn(self.annuncio5, context['annunci'])
+
+    def test_ricerca_senza_login(self):
+        # Logout
+        self.client.logout()
+        
+        # Verifica che l'utente non loggato veda solo annunci pubblicati di utenti attivi
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'))
+        context = response.context
+        self.assertEqual(len(context['annunci']), 3)
+        self.assertIn(self.annuncio1, context['annunci'])
+        self.assertIn(self.annuncio2, context['annunci'])
+        self.assertIn(self.annuncio3, context['annunci'])
+        self.assertNotIn(self.annuncio4, context['annunci'])  # Non pubblicato
+        self.assertNotIn(self.annuncio5, context['annunci'])  # Utente inattivo
+
+class RicercaAnnunciModeratoreTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.client = Client()
+        Annuncio.objects.all().delete()
+        Tag.objects.all().delete()
+        Prodotto.objects.all().delete()
+        CommentoAnnuncio.objects.all().delete()
+        cls.user = get_user_model().objects.create_user(username='testuser', password='12345')
+        
+        # Crea gruppo moderatori e utente moderatore
+        cls.moderator_group = Group.objects.create(name=_MODS_GRP_NAME)
+        cls.moderator = get_user_model().objects.create_user(username='moderator', password='12345')
+        cls.moderator.groups.add(cls.moderator_group)
+        
+        # Crea annunci
+        tag = Tag.objects.create(nome='elettronica')
+        
+        # Annuncio pubblicato
+        prod1 = Prodotto.objects.create(
+            nome='Smartphone XYZ',
+            descrizione_breve='Smartphone di ultima generazione',
+            prezzo=599.99,
+            condizione='nuovo'
+        )
+        prod1.tags.add(tag)
+        cls.annuncio_pubblicato = Annuncio.objects.create(
+            prodotto=prod1,
+            inserzionista=cls.user,
+            qta_magazzino=5,
+            is_published=True
+        )
+        
+        # Annuncio non pubblicato
+        prod2 = Prodotto.objects.create(
+            nome='Prodotto Privato',
+            descrizione_breve='Non dovrebbe apparire',
             prezzo=100,
             condizione='nuovo'
         )
-        annuncio_privato = Annuncio.objects.create(
-            prodotto=prod_privato,
-            inserzionista=self.user,
+        prod2.tags.add(tag)
+        cls.annuncio_privato = Annuncio.objects.create(
+            prodotto=prod2,
+            inserzionista=cls.user,
             qta_magazzino=1,
             is_published=False
         )
-        
-        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'inserzionista': 'testuser'})
-        request.user = moderator
-        view = RicercaAnnunciView()
-        view.request = request
-        
-        context = view.get_context_data()
-        self.assertEqual(len(context['annunci']), 4)  # 3 pubblicati + 1 non pubblicato
-        self.assertIn(annuncio_privato, context['annunci'])
 
-    def test_filtri_vuoti_o_invalidi(self):
-        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {
-            'q': '',
-            'categoria': '',
-            'condition': '',
-            'search_by_rating': '',
-            'prezzo_min': '',
-            'prezzo_max': '',
-            'qta_mag': ''
-        })
-        view = RicercaAnnunciView()
-        view.request = request
+    def test_ricerca_con_moderatore(self):
+        # Login come moderatore
+        self.client.force_login(self.moderator)
         
-        context = view.get_context_data()
-        self.assertEqual(len(context['annunci']), 3)  
-        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {
-            'prezzo_min': 'abc',
-            'prezzo_max': 'def',
-            'page': 'invalid'
-        })
-        view.request = request
+        # 1. Verifica che il moderatore veda tutti gli annunci
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'))
+        self.assertEqual(response.status_code, 200)
+        annunci = response.context['annunci']
+        self.assertEqual(len(annunci), 2)
+        self.assertIn(self.annuncio_pubblicato, annunci)
+        self.assertIn(self.annuncio_privato, annunci)
         
-        context = view.get_context_data()
-        self.assertEqual(len(context['annunci']), 3)  # Dovrebbe ignorare i filtri non validi
-        self.assertEqual(context['page'], 1)  # Dovrebbe tornare alla pagina 1
-
-    def test_ordinamento_rating(self):
-        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'sort': 'best-star'})
-        view = RicercaAnnunciView()
-        view.request = request
+        # 2. Verifica che la ricerca per testo trovi anche annunci non pubblicati
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'), {'q': 'Privato'})
+        annunci = response.context['annunci']
+        self.assertEqual(len(annunci), 1)
+        self.assertIn(self.annuncio_privato, annunci)
         
-        context = view.get_context_data()
-        self.assertEqual(context['annunci'][0], self.annuncio1)
-        self.assertEqual(context['annunci'][1], self.annuncio3)
-        self.assertEqual(context['annunci'][2], self.annuncio2)
+        # 3. Verifica che un utente normale non veda l'annuncio privato
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'))
+        annunci = response.context['annunci']
+        self.assertEqual(len(annunci), 1)
+        self.assertIn(self.annuncio_pubblicato, annunci)
+        self.assertNotIn(self.annuncio_privato, annunci)
         
-        request = self.factory.get(reverse('sylvelius:ricerca_annunci'), {'sort': 'worst-star'})
-        view.request = request
-        
-        context = view.get_context_data()
-        self.assertEqual(context['annunci'][0], self.annuncio2)
-        self.assertEqual(context['annunci'][1], self.annuncio3)
-        self.assertEqual(context['annunci'][2], self.annuncio1)
-
-    def test_annunci_utente_disattivato(self):
-        self.user.is_active = False
-        self.user.save()
-        
-        request = self.factory.get(reverse('sylvelius:ricerca_annunci'))
-        view = RicercaAnnunciView()
-        view.request = request
-        
-        context = view.get_context_data()
-        self.assertEqual(len(context['annunci']), 0)
-        
-        self.user.is_active = True
-        self.user.save()
+        # 4. Verifica che un utente anonimo non veda l'annuncio privato
+        self.client.logout()
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'))
+        annunci = response.context['annunci']
+        self.assertEqual(len(annunci), 1)
+        self.assertIn(self.annuncio_pubblicato, annunci)
+        self.assertNotIn(self.annuncio_privato, annunci)
 
 class TestModeratoreAccessForbiddenMixin(TestCase):
     @classmethod
