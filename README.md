@@ -1,17 +1,19 @@
 # Sylvelius
 Installazione:
 1. Clonare l'intero progetto in una cartella
-2. Installare pipenv alla versione 2025.0.3 o superiori
-3. Eseguire da riga di comando nella stessa cartella contenente Pipfile e Pipfile.lock "pipenv install"
-4. Successivamente al completamento, se su Windows, digitare "cd .\progetto_tw\", altrimenti su Linux/GNU "cd ./progetto_tw/"
-5. Andare a ./progetto_tw/progetto_tw/urls.py e commentare sia delete_db() che init_db()
-6. Digitare se su Windows "python.exe .\manage.py migrate" o se su Linux/GNU "python.exe ./manage.py migrate"
-7. Ritornare a ./progetto_tw/progetto_tw/urls.py e decommentare sia #delete_db() che #init_db()
-8. Infine digitare, se su Windows "python.exe .\manage.py runserver" o se su Linux/GNU "python.exe ./manage.py runserver"
-9. Sul browser, cercare nella barra degli indirizzi localhost:8000
+2. Installare python ad una versione superiore alla 3.10 (progetto testato fino alla versione 3.12)
+3. Installare pipenv alla versione 2025.0.3 o superiori
+4. Eseguire da riga di comando nella stessa cartella contenente Pipfile e Pipfile.lock "pipenv install"
+5. Eseguire "pipenv shell"
+6. Successivamente se su Windows, digitare "cd .\progetto_tw\", altrimenti su Linux/GNU "cd ./progetto_tw/"
+7. Andare a ./progetto_tw/urls.py e commentare sia delete_db() che init_db()
+8. Digitare se su Windows "python.exe .\manage.py migrate" o se su Linux/GNU "python3 ./manage.py migrate"
+9. Ritornare a ./progetto_tw/urls.py e decommentare sia #delete_db() che #init_db()
+10. Infine digitare, se su Windows "python.exe .\manage.py runserver" o se su Linux/GNU "python3 ./manage.py runserver"
+11. Sul browser, cercare nella barra degli indirizzi localhost:8000
 
 Note:
-- PayPal NON funzionerà, mancano le credenziali segrete in .env
+- PayPal NON funzionerà, mancano le credenziali segrete di .env
 
 Programmi supportati:
 - Python 3.10, 3.11, 3.12
