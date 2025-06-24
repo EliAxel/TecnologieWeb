@@ -25,7 +25,7 @@
         {% endif %}
     {% endblock %}
         <div class="container-fluid">
-            <!-- Logo (sempre allineato a sinistra) -->
+            <!-- Logo -->
             <a class="navbar-brand d-flex align-items-center mr-auto" href="{% url 'sylvelius:home' %}">
                 <img src="{% if 'moderatori' in user.groups.values_list|join:',' %}
                     {% static 'img/splash_art_admin.png' %}
@@ -34,7 +34,7 @@
                 {% endif %}" width="105" height="30" class="d-inline-block align-top mr-2" alt="Favicon">
             </a>
 
-            <!-- Pulsanti Login/Signup (a destra su desktop, accanto al logo su mobile) -->
+            <!-- Pulsanti Login/Signup -->
             <div class="ml-auto order-lg-3 d-flex">
                 {% if user.is_authenticated %}
                     {% include "_btn_bell.html" %}
@@ -46,7 +46,7 @@
                 {% block sign_in_sign_up %}{% endblock %}
             </div>
             
-            <!-- Barra di ricerca (centrata su desktop, a capo su mobile) -->
+            <!-- Barra di ricerca -->
             {% block search_bar %}
                 <div class="order-lg-2 col-12 col-lg-6 px-0 mx-auto d-flex justify-content-center position-relative" style="z-index: 1100;">
                     <form id="search-form" class="form-inline d-flex justify-content-center w-100" method="get" style="max-width: 800px; width: 100%;">

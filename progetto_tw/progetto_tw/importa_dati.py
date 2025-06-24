@@ -1,14 +1,8 @@
 import json
-import os
-import django
 import uuid
 from django.contrib.auth.models import User
 from sylvelius.models import Annuncio, CommentoAnnuncio, ImmagineProdotto, Ordine, Tag, Prodotto, Notification
 from purchase.models import Invoice, Cart
-
-# Imposta le variabili d'ambiente per Django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'progetto_tw.settings')
-django.setup()
 
 def delete_db():
     ImmagineProdotto.objects.all().delete()

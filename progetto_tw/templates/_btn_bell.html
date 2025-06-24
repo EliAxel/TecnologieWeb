@@ -1,4 +1,3 @@
-<!-- _btn_bell.html -->
 {% if 'moderatori' not in user.groups.values_list|join:',' %}
   {% include '_btn_cart.html' %}
 {% endif %}
@@ -17,7 +16,6 @@
     </span>
   </button>
 
-  <!-- Aggiungi questa classe "dropdown-menu-fixed-right" -->
   <div class="dropdown-menu dropdown-menu-right dropdown-menu-fixed-right p-2" aria-labelledby="bellDropdown"
        style="max-width: 400px; min-width: 400px; max-height: 80vh; overflow-y: auto; z-index: 2000;" id="notificationMenu">
     <h6 class="dropdown-header">Notifiche</h6>
@@ -27,16 +25,15 @@
   </div>
 </div>
 <style>
-.dropdown-menu-fixed-right {
-  position: fixed !important;
-  right: 0 !important;
-  left: auto !important;
-  transform: none !important; /* Rimuove il posizionamento relativo al bottone */
-  top: auto !important; /* Mantiene l'allineamento verticale rispetto al bottone */
-  margin-top: 0.5rem !important; /* Aggiunge un piccolo spazio sotto il bottone */
-}
+  .dropdown-menu-fixed-right {
+    position: fixed !important;
+    right: 0 !important;
+    left: auto !important;
+    transform: none !important; 
+    top: auto !important; 
+    margin-top: 0.5rem !important;
+  }
 </style>
-
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     const notifBadge = document.getElementById('notificationBadge');

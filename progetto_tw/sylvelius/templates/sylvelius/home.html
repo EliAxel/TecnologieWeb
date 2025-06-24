@@ -4,25 +4,27 @@
     {% include "_btn_toprightbuttons.html" %}
 {% endblock %}
 {% block middle %}
-<script src="{% static 'js/toast.js' %}"></script>
-{% if request.GET.evento == 'logout'%}
-    <script>
-        showBootstrapAlertWithIcon(
-            "Logout completato con successo!","good"
-        );
-    </script>
-{% elif request.GET.evento == 'crea_annuncio' %}
-    <script>
-        showBootstrapAlertWithIcon(
-            "Annuncio creato con successo!","good"
-        );
-    </script>
-{% elif request.GET.evento == 'elimina_pub' %}
-    <script>
-        showBootstrapAlertWithIcon(
-            "Annuncio eliminato con successo!","good"
-        );
-    </script>
+{% if request.GET.evento %}
+    <script src="{% static 'js/toast.js' %}"></script>
+    {% if request.GET.evento == 'logout'%}
+        <script>
+            showBootstrapAlertWithIcon(
+                "Logout completato con successo!","good"
+            );
+        </script>
+    {% elif request.GET.evento == 'crea_annuncio' %}
+        <script>
+            showBootstrapAlertWithIcon(
+                "Annuncio creato con successo!","good"
+            );
+        </script>
+    {% elif request.GET.evento == 'elimina_pub' %}
+        <script>
+            showBootstrapAlertWithIcon(
+                "Annuncio eliminato con successo!","good"
+            );
+        </script>
+    {% endif %}
 {% endif %}
 <div class="container mt-5 mb-5">
     <div class="row justify-content-center">
@@ -32,8 +34,6 @@
             <div class="row">
                 {% include "_card_annuncio.html" %}
             </div>
-
-            <!-- Navigazione pagine -->
             {% include "_btn_paginazione.html" %}
             <p class="mt-3">Scopri ciò che cerchi veramente e molto altro ancora filtrando la ricerca!</p>
         </div>

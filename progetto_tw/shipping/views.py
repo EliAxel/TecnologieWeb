@@ -1,11 +1,12 @@
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
-from django.views.generic import TemplateView
-from progetto_tw.mixins import CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin
-from sylvelius.views import create_notification
-from sylvelius.models import Ordine
 from django.views.decorators.http import require_POST
-from django.contrib.auth.decorators import login_required
+from django.views.generic import TemplateView
+
+from progetto_tw.mixins import CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin
+from sylvelius.models import Ordine
+from sylvelius.views import create_notification
 # Create your views here.
 class SpedizionePageView(CustomLoginRequiredMixin,ModeratoreAccessForbiddenMixin,TemplateView):
     template_name = "shipping/spedizione.html"

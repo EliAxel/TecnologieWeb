@@ -6,19 +6,21 @@
     {% include "_btn_toprightbuttons.html" %}
 {% endblock %}
 {% block middle %}
-<script src="{% static 'js/toast.js' %}"></script>
-{% if usr == "bad" %}
-<script>
-    showBootstrapAlertWithIcon(
-        "Si è verificato un errore con la modifica dell'username. Per favore, riprova.","bad"
-    );
-</script>
-{% elif pwd == "bad" %}
-<script>
-    showBootstrapAlertWithIcon(
-        "Si è verificato un errore con la modifica della password. Per favore, riprova.","bad"
-    );
-</script>
+{% if evento %}
+    <script src="{% static 'js/toast.js' %}"></script>
+    {% if evento == "usr" %}
+        <script>
+            showBootstrapAlertWithIcon(
+                "Si è verificato un errore con la modifica dell'username. Per favore, riprova.","bad"
+            );
+        </script>
+    {% elif evento == "pwd" %}
+        <script>
+            showBootstrapAlertWithIcon(
+                "Si è verificato un errore con la modifica della password. Per favore, riprova.","bad"
+            );
+        </script>
+    {% endif %}
 {% endif %}
 <div class="container mt-5 mb-5" style="max-width: 500px;">
     <div class="card shadow">
@@ -68,132 +70,129 @@ document.addEventListener("DOMContentLoaded", function () {
     const oldPasswordError = document.getElementById('old-password-error');
     const passwordError2 = document.getElementById('password2-error');
     const usernameOld = "{{ user.username }}".trim();
-    // Username check (AJAX, POST)
-        usernameInput.addEventListener('input', function() {
-            const username = usernameInput.value.trim();
-            if(username !== usernameOld){
-                if (username.length !== 0){
-                    usernameError.textContent = "";
-                    usernameError.style.display = "none";
-                    usernameInput.classList.remove("is-invalid");
-                    fetch("{% url 'sylvelius:check_username_exists' %}", {
-                        method: "POST",
-                        headers: {
+
+    usernameInput.addEventListener('input', function() {
+        const username = usernameInput.value.trim();
+        if(username !== usernameOld){
+            if (username.length !== 0){
+                usernameError.textContent = "";
+                usernameError.style.display = "none";
+                usernameInput.classList.remove("is-invalid");
+                fetch("{% url 'sylvelius:check_username_exists' %}", {
+                    method: "POST",
+                    headers: {
                         "Content-Type": "application/json",
                         "X-CSRFToken": "{{ csrf_token }}"
-                        },
-                        body: JSON.stringify({username: username})
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.exists) {
+                    },
+                    body: JSON.stringify({username: username})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.exists) {
                         usernameError.textContent = "Username già esistente.";
                         usernameError.style.display = "block";
                         usernameInput.classList.add("is-invalid");
-                        } else {
+                    } else {
                         usernameError.textContent = "";
                         usernameError.style.display = "none";
                         usernameInput.classList.remove("is-invalid");
-                        }
-                    });
-                } else {
-                    usernameError.textContent = "L'username non può essere vuoto.";
-                    usernameError.style.display = "block";
-                    usernameInput.classList.add("is-invalid");
-                }
+                    }
+                });
             } else {
+                usernameError.textContent = "L'username non può essere vuoto.";
+                usernameError.style.display = "block";
+                usernameInput.classList.add("is-invalid");
+            }
+        } else {
             usernameError.textContent = "";
             usernameError.style.display = "none";
             usernameInput.classList.remove("is-invalid");
-            }
-        });
+        }
+    });
 
-        // Password check
-        function validatePasswords() {
-            const MIN_PWD_CHARS = {{MIN_PWD_CHARS}}
-            const pw1 = password1Input.value;
-            const pw2 = password2Input.value;
-            let errorMsg = "";
-            // Password security: at least 8 chars, one uppercase, one lowercase, one number
-            const strongPw = new RegExp(`^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{${MIN_PWD_CHARS},}$`);
-            if (!strongPw.test(pw1)) {
-                errorMsg = "La password deve contenere almeno {{MIN_PWD_CHARS}} caratteri, una maiuscola, una minuscola e un numero.";
-                password1Input.classList.add("is-invalid");
-                password2Input.classList.remove("is-invalid");
-            } else if (pw1 !== pw2) {
-                errorMsg = "Le password non combaciano.";
-                password2Input.classList.add("is-invalid");
-                password1Input.classList.remove("is-invalid");
-            }
-
-            if (errorMsg) {
-                passwordError2.textContent = errorMsg;
-                passwordError2.style.display = "block";
-                return false;
-            } else {
-                passwordError2.textContent = "";
-                passwordError2.style.display = "none";
-                password1Input.classList.remove("is-invalid");
-                password2Input.classList.remove("is-invalid");
-                return true;
-            }
+    function validatePasswords() {
+        const MIN_PWD_CHARS = {{MIN_PWD_CHARS}}
+        const pw1 = password1Input.value;
+        const pw2 = password2Input.value;
+        let errorMsg = "";
+        const strongPw = new RegExp(`^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{${MIN_PWD_CHARS},}$`);
+        if (!strongPw.test(pw1)) {
+            errorMsg = "La password deve contenere almeno {{MIN_PWD_CHARS}} caratteri, una maiuscola, una minuscola e un numero.";
+            password1Input.classList.add("is-invalid");
+            password2Input.classList.remove("is-invalid");
+        } else if (pw1 !== pw2) {
+            errorMsg = "Le password non combaciano.";
+            password2Input.classList.add("is-invalid");
+            password1Input.classList.remove("is-invalid");
         }
 
-        password1Input.addEventListener('input', validatePasswords);
-        password2Input.addEventListener('input', validatePasswords);
-        oldPasswordInput.addEventListener('input', function () {
-            oldPasswordError.textContent = "";
-            oldPasswordError.style.display = "none";
-            oldPasswordInput.classList.remove("is-invalid");
-        });
+        if (errorMsg) {
+            passwordError2.textContent = errorMsg;
+            passwordError2.style.display = "block";
+            return false;
+        } else {
+            passwordError2.textContent = "";
+            passwordError2.style.display = "none";
+            password1Input.classList.remove("is-invalid");
+            password2Input.classList.remove("is-invalid");
+            return true;
+        }
+    }
 
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            if (!usernameInput.classList.contains("is-invalid") && (password1Input.value === "" && password2Input.value === "" || validatePasswords())) {
-                const passwordOld = oldPasswordInput.value.trim();
-                if(passwordOld){
-                    fetch("{% url 'sylvelius:check_login_credentials' %}", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "X-CSRFToken": "{{ csrf_token }}",
-                        },
-                        body: JSON.stringify({username: usernameOld, password: passwordOld})
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (!data.exists) {
-                            usernameError.textContent = "Username non esistente.";
-                            usernameError.style.display = "block";
-                            usernameInput.classList.add("is-invalid");
-                        } else {
-                            usernameError.textContent = "";
-                            usernameError.style.display = "none";
-                            usernameInput.classList.remove("is-invalid");
-                        }
-
-                        if (!data.valid_password) {
-                            oldPasswordError.textContent = "Password non corretta.";
-                            oldPasswordError.style.display = "block";
-                            oldPasswordInput.classList.add("is-invalid");
-                        } else {
-                            oldPasswordError.textContent = "";
-                            oldPasswordError.style.display = "none";
-                            oldPasswordInput.classList.remove("is-invalid");
-                        }
-
-                        // Se tutto è valido, invia il form normalmente
-                        if (data.exists && data.valid_password) {
-                            form.submit();
-                        }
-                    });
-                } else {
-                    oldPasswordError.textContent = "Password non corretta.";
-                    oldPasswordError.style.display = "block";
-                    oldPasswordInput.classList.add("is-invalid");
-                }
-            }
-        });
+    password1Input.addEventListener('input', validatePasswords);
+    password2Input.addEventListener('input', validatePasswords);
+    oldPasswordInput.addEventListener('input', function () {
+        oldPasswordError.textContent = "";
+        oldPasswordError.style.display = "none";
+        oldPasswordInput.classList.remove("is-invalid");
     });
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        if (!usernameInput.classList.contains("is-invalid") && (password1Input.value === "" && password2Input.value === "" || validatePasswords())) {
+            const passwordOld = oldPasswordInput.value.trim();
+            if(passwordOld){
+                fetch("{% url 'sylvelius:check_login_credentials' %}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": "{{ csrf_token }}",
+                    },
+                    body: JSON.stringify({username: usernameOld, password: passwordOld})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.exists) {
+                        usernameError.textContent = "Username non esistente.";
+                        usernameError.style.display = "block";
+                        usernameInput.classList.add("is-invalid");
+                    } else {
+                        usernameError.textContent = "";
+                        usernameError.style.display = "none";
+                        usernameInput.classList.remove("is-invalid");
+                    }
+
+                    if (!data.valid_password) {
+                        oldPasswordError.textContent = "Password non corretta.";
+                        oldPasswordError.style.display = "block";
+                        oldPasswordInput.classList.add("is-invalid");
+                    } else {
+                        oldPasswordError.textContent = "";
+                        oldPasswordError.style.display = "none";
+                        oldPasswordInput.classList.remove("is-invalid");
+                    }
+
+                    if (data.exists && data.valid_password) {
+                        form.submit();
+                    }
+                });
+            } else {
+                oldPasswordError.textContent = "Password non corretta.";
+                oldPasswordError.style.display = "block";
+                oldPasswordInput.classList.add("is-invalid");
+            }
+        }
+    });
+});
 </script>
 {% endblock %}

@@ -54,11 +54,9 @@
     ibanForm.addEventListener('submit', function (e) {
         e.preventDefault();
         
-        // Reset error state
         ibanInput.classList.remove('is-invalid');
         ibanError.style.display = 'none';
         
-        // Get and clean IBAN value
         const iban = ibanInput.value.trim().replace(/\s+/g, '').toUpperCase();
         
         try {
@@ -70,15 +68,12 @@
     });
     
     function validateIban(iban) {
-        // Verifica la struttura base con regex
         if (!/^[A-Z]{2}\d{2}[A-Z0-9]{1,30}$/.test(iban)) {
             throw new Error('form');
         }
         
-        // Sposta i primi 4 caratteri alla fine
         const rearranged = iban.substring(4) + iban.substring(0, 4);
         
-        // Converti le lettere in numeri (A=10, B=11, ..., Z=35)
         let digits = [];
         for (const char of rearranged) {
             if (/[0-9]/.test(char)) {
@@ -88,8 +83,6 @@
             }
         }
         
-        // Unisci tutto in una stringa numerica e calcola il modulo 97
-        // Usiamo BigInt per gestire numeri molto grandi
         const numericStr = digits.join('');
         let remainder = 0n;
         

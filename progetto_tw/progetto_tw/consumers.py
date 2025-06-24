@@ -1,9 +1,8 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
-from sylvelius.models import Annuncio
+from sylvelius.models import Annuncio, Tag
 from django.db.models import Q
-from sylvelius.models import Tag
 from progetto_tw.constants import MAX_WS_QUERIES
 
 class SearchConsumer(AsyncWebsocketConsumer):
@@ -33,8 +32,7 @@ class SearchConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def get_suggestions(self, query):
-        # Versione più sicura della regex
-        regex = r'\b' + query  # \m è l'equivalente di \b ma più robusto per le regex PostgreSQL
+        regex = r'\b' + query  
         annunci = Annuncio.objects.filter(
             Q(prodotto__nome__iregex=regex),
             is_published=True
@@ -55,7 +53,6 @@ class SearchTags(AsyncWebsocketConsumer):
         suggestions = []
 
         if query:
-            # Cerca tag che contengono la query (case-insensitive)
             suggestions = await self.get_tags_by_query(query)
 
         await self.send(text_data=json.dumps({
@@ -64,7 +61,6 @@ class SearchTags(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def get_tags_by_query(self, query):
-        # Trova tag che contengono la query (case-insensitive)
         return list(
             Tag.objects.filter(nome__icontains=query).values_list('nome', flat=True).order_by('nome')[:MAX_WS_QUERIES]
         )
@@ -98,4 +94,3 @@ class GetNotifications(AsyncWebsocketConsumer):
             'title': event['title'],
             'message': event['message']
         }))
-

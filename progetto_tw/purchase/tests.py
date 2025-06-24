@@ -1,21 +1,17 @@
-from django.test import TestCase, Client, RequestFactory
-from django.contrib.auth.models import User, Group
-from django.core.exceptions import ValidationError
-from django.urls import reverse
-import uuid
-from sylvelius.models import (
-    Ordine,
-    Prodotto,
-    Annuncio,
-    Tag
-)
-from .models import Iban, Invoice, Cart
-from .views import SetupIban, get_paypal_access_token, verify_paypal_webhook
-from progetto_tw.t_ests_constants import NEXT_PROD_ID
-from progetto_tw.constants import _MODS_GRP_NAME
 import json
-from unittest.mock import patch, MagicMock
+import uuid
+
 import requests
+from django.contrib.auth.models import Group, User
+from django.core.exceptions import ValidationError
+from django.test import Client, RequestFactory, TestCase
+from django.urls import reverse
+from sylvelius.models import Annuncio, Ordine, Prodotto, Tag
+from unittest.mock import MagicMock, patch
+
+from progetto_tw.constants import _MODS_GRP_NAME, _NEXT_PROD_ID
+from .models import Cart, Iban, Invoice
+from .views import SetupIban, get_paypal_access_token, verify_paypal_webhook
 
 # Create your tests here.
 class AnonUrls(TestCase):
@@ -53,7 +49,7 @@ class PurchaseTests(TestCase):
         self.user2 = User.objects.create_user(username='testuser2', password='Testpass0')
         # Crea il prodotto SENZA i tag
         prodotto = Prodotto.objects.create(
-            id=NEXT_PROD_ID,
+            id=_NEXT_PROD_ID,
             nome="Prodotto di Test",
             descrizione_breve="Breve descrizione del prodotto di test",
             descrizione="Descrizione dettagliata del prodotto di test",
@@ -61,7 +57,7 @@ class PurchaseTests(TestCase):
             condizione="nuovo"
         )
         prodotto2 = Prodotto.objects.create(
-            id=NEXT_PROD_ID+2,
+            id=_NEXT_PROD_ID+2,
             nome="Prodotto di Test",
             descrizione_breve="Breve descrizione del prodotto di test",
             descrizione="Descrizione dettagliata del prodotto di test",
@@ -73,7 +69,7 @@ class PurchaseTests(TestCase):
         self.uuid2= uuid.uuid4(),
 
         Annuncio.objects.create(
-            id=NEXT_PROD_ID,
+            id=_NEXT_PROD_ID,
             uuid=self.uuid1,
             inserzionista=self.user,
             prodotto=prodotto,
@@ -81,7 +77,7 @@ class PurchaseTests(TestCase):
             is_published=True
         )
         Annuncio.objects.create(
-            id=NEXT_PROD_ID+2,
+            id=_NEXT_PROD_ID+2,
             uuid=self.uuid2,
             inserzionista=self.user2,
             prodotto=prodotto2,
@@ -329,10 +325,8 @@ class PayPalCOATests(TestCase):
 
     @patch('purchase.views.verify_paypal_webhook', return_value=True)
     def test_checkout_order_approved_with_cart(self, mock_verify):
-        # Creiamo un carrello con più fatture
         cart = Cart.objects.create(uuid='CART-123', utente=self.user)
         
-        # Creiamo 2 fatture associate al carrello
         invoice1 = Invoice.objects.create(
             invoice_id='INV-001',
             utente=self.user,
@@ -341,7 +335,6 @@ class PayPalCOATests(TestCase):
             cart=cart
         )
         
-        # Creiamo un secondo prodotto e annuncio per la seconda fattura
         prodotto2 = Prodotto.objects.create(nome='Prodotto Test 2', descrizione_breve='testtest2', prezzo=15.0)
         annuncio2 = Annuncio.objects.create(prodotto=prodotto2, inserzionista=self.user, qta_magazzino=10)
         
@@ -358,7 +351,7 @@ class PayPalCOATests(TestCase):
             "resource": {
                 "purchase_units": [
                     {
-                        "invoice_id": "CART-123",  # ID del carrello
+                        "invoice_id": "CART-123",
                         "shipping": {
                             "address": {
                                 "address_line_1": "123 Test St",
@@ -382,10 +375,8 @@ class PayPalCOATests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         
-        # Verifichiamo che siano stati creati 2 ordini
         self.assertEqual(Ordine.objects.count(), 2)
         
-        # Verifichiamo l'aggiornamento delle quantità
         self.annuncio.refresh_from_db()
         self.assertEqual(self.annuncio.qta_magazzino, 4)  # 5 - 1
         annuncio2.refresh_from_db()
@@ -393,19 +384,16 @@ class PayPalCOATests(TestCase):
 
     @patch('purchase.views.verify_paypal_webhook', return_value=True)
     def test_checkout_order_approved_with_cart_insufficient_stock(self, mock_verify):
-        # Creiamo un carrello con una fattura che ha quantità insufficiente
         cart = Cart.objects.create(uuid='CART-123', utente=self.user)
         
-        # Modifichiamo la quantità disponibile a 1
         self.annuncio.qta_magazzino = 1
         self.annuncio.save()
         
-        # Creiamo 2 fatture associate al carrello
         invoice1 = Invoice.objects.create(
             invoice_id='INV-001',
             utente=self.user,
             prodotto=self.prodotto,
-            quantita=2,  # Quantità maggiore di quella disponibile
+            quantita=2,
             cart=cart
         )
         
@@ -438,7 +426,6 @@ class PayPalCOATests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         
-        # Verifichiamo che l'ordine sia stato creato ma annullato
         ordine = Ordine.objects.first()
         self.assertEqual(ordine.stato_consegna, "annullato")#type: ignore
         self.assertEqual(ordine.quantita, 2)#type: ignore
@@ -447,7 +434,6 @@ class PayPalCOATests(TestCase):
 
     @patch('purchase.views.verify_paypal_webhook', return_value=True)
     def test_checkout_order_approved_with_empty_cart(self, mock_verify):
-        # Creiamo un carrello vuoto
         cart = Cart.objects.create(uuid='CART-123', utente=self.user)
 
         payload = {
@@ -485,35 +471,29 @@ class TestPaypalFunctions(TestCase):
     
     @patch('requests.post')
     def test_get_paypal_access_token_success(self, mock_post):
-        # Setup mock response
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {"access_token": "test_token"}
         mock_post.return_value = mock_response
         
-        # Call function
         token = get_paypal_access_token()
         
-        # Assertions
         self.assertEqual(token, "test_token")
         mock_response.raise_for_status.assert_called_once()
     
     @patch('requests.post')
     def test_get_paypal_access_token_failure(self, mock_post):
-        # Setup mock response
         mock_response = MagicMock()
         mock_response.status_code = 401
         mock_response.raise_for_status.side_effect = requests.HTTPError("Unauthorized")
         mock_post.return_value = mock_response
         
-        # Call function and assert exception
         with self.assertRaises(requests.HTTPError):
             get_paypal_access_token()
     
     @patch('purchase.views.get_paypal_access_token')
     @patch('requests.post')
     def test_verify_paypal_webhook_success(self, mock_post, mock_get_token):
-        # Setup
         mock_get_token.return_value = "test_token"
         
         request = MagicMock()
@@ -530,28 +510,22 @@ class TestPaypalFunctions(TestCase):
             "other_data": "value"
         })
         
-        # Mock verification response
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {"verification_status": "SUCCESS"}
         mock_post.return_value = mock_response
         
-        # Call function
         result = verify_paypal_webhook(request, body)
         
-        # Assertions
         self.assertTrue(result)
         mock_response.raise_for_status.assert_called_once()
     
     def test_verify_paypal_webhook_unsupported_event(self):
-        # Setup
         request = MagicMock()
         body = json.dumps({"event_type": "UNSUPPORTED.EVENT"})
         
-        # Call function
         result = verify_paypal_webhook(request, body)
         
-        # Assertions
         self.assertFalse(result)
 
 class SetUpIBANTests(TestCase):
@@ -578,7 +552,6 @@ class SetUpIBANTests(TestCase):
 
     def test_get_context_data_authenticated_user_with_iban(self):
         """Test that context contains both user and iban when user has iban"""
-        # Create an IBAN for the user
         iban_obj = Iban.objects.create(utente=self.user, iban='GB82WEST12345698765432')
         
         request = self.factory.get(self.url)
@@ -588,7 +561,6 @@ class SetUpIBANTests(TestCase):
         context = response.context_data #type:ignore
         
         self.assertEqual(context['user'], self.user)
-        # Check that we're getting the iban string, not the object
         self.assertEqual(context['iban'].iban, iban_obj.iban)
 
     def test_validate_iban_valid_ibans_coverage(self):
@@ -619,9 +591,7 @@ class SetUpIBANTests(TestCase):
         
         response = self.client.post(self.url, {'iban': valid_iban})
         
-        # Check IBAN was saved
         self.assertTrue(Iban.objects.filter(utente=self.user, iban=valid_iban).exists())
-        # Check redirect
         self.assertRedirects(response, f"{reverse('sylvelius:profile_annunci')}?evento=iban_imp")
 
     def test_post_invalid_iban_format(self):
@@ -634,35 +604,30 @@ class SetUpIBANTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, self.template_name)
         self.assertIn('evento', response.context)
-        # Expecting a list now
         self.assertEqual(response.context['evento'], 'iban_form')
 
     def test_post_invalid_iban_checksum(self):
         """Test that IBAN with invalid checksum returns error message"""
         self.client.force_login(self.user)
-        invalid_checksum_iban = 'GB82WEST12345698765433'  # Changed last digit
+        invalid_checksum_iban = 'GB82WEST12345698765433'
         
         response = self.client.post(self.url, {'iban': invalid_checksum_iban})
         
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, self.template_name)
         self.assertIn('evento', response.context)
-        # Expecting a list now
         self.assertEqual(response.context['evento'], 'iban_contr')
 
     def test_post_updates_existing_iban(self):
         """Test that posting updates existing IBAN"""
-        # Create initial IBAN
         Iban.objects.create(utente=self.user, iban='GB82WEST12345698765432')
         self.client.force_login(self.user)
         new_iban = 'DE89370400440532013000'
         
         response = self.client.post(self.url, {'iban': new_iban})
         
-        # Check only one IBAN exists (updated)
         self.assertEqual(Iban.objects.filter(utente=self.user).count(), 1)
         self.assertEqual(Iban.objects.get(utente=self.user).iban, new_iban)
-        # Check redirect
         self.assertRedirects(response, f"{reverse('sylvelius:profile_annunci')}?evento=iban_imp")
 
 class CartTests(TestCase):
@@ -673,10 +638,8 @@ class CartTests(TestCase):
             password='testpass123'
         )
         
-        # Login del client
         self.client.force_login(self.user)
         
-        # Crea un prodotto e annuncio di test
         self.tag = Tag.objects.create(nome='elettronica')
         self.prodotto = Prodotto.objects.create(
             nome='Smartphone',
@@ -696,13 +659,11 @@ class CartTests(TestCase):
             is_published=True
         )
         
-        # Crea un carrello per l'utente
         self.cart = Cart.objects.create(
             utente=self.user,
             uuid=str(uuid.uuid4())
         )
         
-        # Crea una invoice di test
         self.invoice = Invoice.objects.create(
             invoice_id=str(uuid.uuid4()),
             utente=self.user,
@@ -713,21 +674,18 @@ class CartTests(TestCase):
 
     def test_add_to_cart_new_item(self):
         """Test aggiunta di un nuovo articolo al carrello"""
-        # Cancella il carrello esistente per testare la creazione
         Cart.objects.filter(utente=self.user).delete()
         
         response = self.client.post(
             reverse('purchase:add_to_cart'),
             {'annuncio_id': self.annuncio.uuid, 'quantita': 3}
         )
-        # Verifica che sia stato creato un nuovo carrello
         self.assertTrue(Cart.objects.filter(utente=self.user).exists())
         
-        # Verifica che sia stata creata una nuova invoice
+        
         cart = Cart.objects.get(utente=self.user)
         self.assertEqual(cart.invoices.count(), 1) #type:ignore
         
-        # Verifica il redirect alla pagina dell'annuncio
         self.assertEqual(response.status_code, 302)
         self.assertIn(str(self.annuncio.uuid), response.url) #type:ignore
 
@@ -740,7 +698,6 @@ class CartTests(TestCase):
         )        
         self.assertEqual(self.cart.invoices.count(), 2) #type:ignore
         
-        # Verifica il redirect alla pagina dell'annuncio
         self.assertEqual(response.status_code, 302)
         self.assertIn(str(self.annuncio.uuid), response.url) #type:ignore
 
@@ -751,7 +708,6 @@ class CartTests(TestCase):
             {'annuncio_id': 'uuid-non-valido', 'quantita': 1}
         )
         
-        # Verifica il redirect alla home
         self.assertEqual(response.status_code, 404)
     
     def test_add_to_cart_invalid_quantita(self):
@@ -761,7 +717,6 @@ class CartTests(TestCase):
             {'annuncio_id': self.annuncio.uuid, 'quantita': 'err'}
         )
         
-        # Verifica il redirect alla home
         self.assertEqual(response.status_code, 302)
 
     def test_aumenta_carrello(self):
@@ -770,36 +725,30 @@ class CartTests(TestCase):
             reverse('purchase:aumenta_carrello', kwargs={'invoice_id': self.invoice.invoice_id})
         )
         
-        # Verifica che la quantità sia aumentata
         self.invoice.refresh_from_db()
         self.assertEqual(self.invoice.quantita, 3)
         
-        # Verifica il redirect al carrello
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse('purchase:carrello')) #type:ignore
     
     def test_aumenta_carrello_non_existent_annuncio(self):
         """Test incremento quantità articolo nel carrello"""
-        # Crea un oggetto Invoice con dati minimi validi ma prodotto/annuncio non esistente
         inv_err = Invoice.objects.create(
             invoice_id=str(uuid.uuid4()),
             utente=self.user,
             quantita=1,
-            prodotto=self.prodotto,  # prodotto esistente, ma puoi anche crearne uno nuovo se vuoi testare annuncio mancante
+            prodotto=self.prodotto,  
             cart=self.cart
         )
-        # Elimina l'annuncio associato per simulare annuncio non esistente
         inv_err.prodotto.annunci.delete() # type: ignore
         response = self.client.post(
             reverse('purchase:aumenta_carrello', kwargs={'invoice_id': inv_err.invoice_id})
         )
         
-        # Verifica il redirect al carrello
         self.assertEqual(response.status_code, 302)
 
     def test_aumenta_carrello_exceeds_stock(self):
         """Test incremento quantità oltre la disponibilità"""
-        # Imposta la quantità vicina al massimo
         self.invoice.quantita = 11
         self.invoice.save()
         
@@ -807,11 +756,9 @@ class CartTests(TestCase):
             reverse('purchase:aumenta_carrello', kwargs={'invoice_id': self.invoice.invoice_id})
         )
         
-        # Verifica che la quantità sia stata impostata al massimo
         self.invoice.refresh_from_db()
         self.assertEqual(self.invoice.quantita, 10)
         
-        # Verifica il redirect con messaggio di errore
         self.assertEqual(response.status_code, 302)
         self.assertIn('?evento=troppi_articoli', response.url) #type:ignore
 
@@ -821,11 +768,9 @@ class CartTests(TestCase):
             reverse('purchase:diminuisci_carrello', kwargs={'invoice_id': self.invoice.invoice_id})
         )
         
-        # Verifica che la quantità sia diminuita
         self.invoice.refresh_from_db()
         self.assertEqual(self.invoice.quantita, 1)
         
-        # Verifica il redirect al carrello
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse('purchase:carrello')) #type:ignore
     
@@ -835,7 +780,7 @@ class CartTests(TestCase):
             invoice_id=str(uuid.uuid4()),
             utente=self.user,
             quantita=1,
-            prodotto=self.prodotto,  # prodotto esistente, ma puoi anche crearne uno nuovo se vuoi testare annuncio mancante
+            prodotto=self.prodotto,  
             cart=self.cart
         )
         inv_err.prodotto.annunci.delete() # type: ignore
@@ -843,12 +788,10 @@ class CartTests(TestCase):
             reverse('purchase:diminuisci_carrello', kwargs={'invoice_id': inv_err.invoice_id})
         )
         
-        # Verifica il redirect al carrello
         self.assertEqual(response.status_code, 302)
 
     def test_diminuisci_carrello_to_zero(self):
         """Test decremento quantità fino a zero (cancellazione articolo)"""
-        # Imposta la quantità a 1
         self.invoice.quantita = 1
         self.invoice.save()
         
@@ -856,10 +799,8 @@ class CartTests(TestCase):
             reverse('purchase:diminuisci_carrello', kwargs={'invoice_id': self.invoice.invoice_id})
         )
         
-        # Verifica che l'invoice sia stata cancellata
         self.assertFalse(Invoice.objects.filter(invoice_id=self.invoice.invoice_id).exists())
         
-        # Verifica il redirect al carrello
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse('purchase:carrello')) #type:ignore
 
@@ -869,10 +810,8 @@ class CartTests(TestCase):
             reverse('purchase:rimuovi_da_carrello', kwargs={'invoice_id': self.invoice.invoice_id})
         )
         
-        # Verifica che l'invoice sia stata cancellata
         self.assertFalse(Invoice.objects.filter(invoice_id=self.invoice.invoice_id).exists())
         
-        # Verifica il redirect al carrello con messaggio
         self.assertEqual(response.status_code, 302)
         self.assertIn('?evento=rimosso', response.url) #type:ignore
 
@@ -886,7 +825,6 @@ class CartTests(TestCase):
 
     def test_carrello_page_view_without_cart(self):
         """Test visualizzazione pagina carrello senza carrello esistente"""
-        # Cancella il carrello esistente
         Cart.objects.filter(utente=self.user).delete()
         
         response = self.client.get(reverse('purchase:carrello'))
@@ -912,7 +850,6 @@ class CartTests(TestCase):
 
     def test_checkout_page_view_removes_invalid_items(self):
         """Test che verifica che gli articoli non più disponibili vengano rimossi"""
-        # Crea un prodotto e annuncio che verrà cancellato
         prodotto2 = Prodotto.objects.create(
             nome='Prodotto da cancellare',
             descrizione_breve='Descrizione breve',
@@ -934,17 +871,14 @@ class CartTests(TestCase):
             cart=self.cart
         )
         
-        # Cancella l'annuncio (ma non il prodotto)
         annuncio2.delete()
         
         response = self.client.get(reverse('purchase:checkout'))
         
-        # Verifica che l'invoice con prodotto non più disponibile sia stata cancellata
         self.assertFalse(Invoice.objects.filter(invoice_id=invoice2.invoice_id).exists())
         
     def test_checkout_page_view_without_cart(self):
         """Test visualizzazione pagina checkout senza carrello esistente"""
-        # Cancella il carrello esistente
         Cart.objects.filter(utente=self.user).delete()
         
         response = self.client.get(reverse('purchase:checkout'))

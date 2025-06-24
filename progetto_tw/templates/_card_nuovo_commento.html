@@ -17,9 +17,7 @@
                     <div class="me-2">
                         <label class="me-2 mb-0">Valutazione:</label>
                         <div id="star-rating-new-{{ annuncio.id }}" class="d-inline-block align-middle">
-                            <!-- Icona di divieto per 0 stelle -->
                             <i class="bi bi-slash-circle text-muted me-1" data-value="0" style="cursor: pointer; font-size: 1.2rem;"></i>
-                            <!-- Stelle 1-5 -->
                             {% for i in RANGE_COMMNT_RATING_STRING %}
                                 <i class="bi bi-star text-muted" data-value="{{ forloop.counter }}" style="cursor: pointer; font-size: 1.2rem;"></i>
                             {% endfor %}
@@ -84,27 +82,22 @@
             this.classList.add('text-danger');
         });
 
-        // ✏️ Reset dell'errore quando si inizia a scrivere
         commentText.addEventListener('input', function() {
             commentError.style.display = 'none';
         });
 
-        // ✨ CLICK stelle o divieto → nascondi errore
         [...stars, banIcon].forEach(el => {
             el.addEventListener('click', function() {
             commentError.style.display = 'none';
             });
         });
 
-        // 📤 AJAX submit con validazione integrata
         commentForm.addEventListener('submit', function(event) {
             event.preventDefault();
             const MIN_COMMNT_RATING_VALUE = {{MIN_COMMNT_RATING_VALUE}}
             const INVALID_COMMNT_RATING_VALUE = {{INVALID_COMMNT_RATING_VALUE}}
             const text = commentText.value.trim();
             const rating = parseInt(ratingInput.value);
-
-            // Validazione client-si
             
             if (text === '' && rating < MIN_COMMNT_RATING_VALUE) {
             commentError.textContent = 'Inserisci un commento e seleziona una valutazione.';
@@ -120,7 +113,6 @@
             return;
             }
 
-            // Se tutto ok, invia con fetch AJAX
             const formData = new FormData(commentForm);
 
             fetch(commentForm.action, {

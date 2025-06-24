@@ -1,4 +1,3 @@
-<!-- _btn_bell.html -->
 <a href="{% url 'purchase:carrello' %}" class="btn position-relative text-white" id="cartButton" aria-expanded="false" style="display: inline;">
     <i class="bi bi-cart" style="font-size: 1.5rem;"></i>
     <span id="cartBadge" class="badge badge-danger position-absolute"
@@ -9,7 +8,6 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-    // Funzione per controllare il carrello
     function checkCart() {
         fetch('/api/cart_check/', { 
             method: 'GET',

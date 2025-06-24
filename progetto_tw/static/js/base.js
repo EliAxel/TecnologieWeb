@@ -60,18 +60,14 @@
     });
 })();
 
-// Ricerca avanzata toggle
 document.getElementById('advanced-search-toggle').addEventListener('click', function() {
     const advBar = document.getElementById('advanced-search-bar');
     advBar.classList.toggle('slide-down');
 });
-// Toggle per la barra di ricerca avanzata
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelector('#search-form').addEventListener('submit', function(event) {
-        // Leggi il valore del campo di ricerca
         let queryInput = document.getElementById('search-input').value.trim();
 
-        // Leggi i valori dei filtri avanzati
         let categoryTags = [];
         document.querySelectorAll('#category-tags span').forEach(tag => {
             categoryTags.push(tag.textContent.trim().slice(0, -2)); // togli "×"
@@ -84,13 +80,10 @@ document.addEventListener('DOMContentLoaded', function() {
         let conditions = document.getElementById('condition-type').value;
         let rating = document.getElementById('search_by_rating').value;
 
-        // Crea un oggetto URLSearchParams con la query principale
         let params = new URLSearchParams();
         if (queryInput) {
             params.set('q', queryInput);
         }
-        // Invia solo il primo tag come 'categoria' (come la view si aspetta)
-        // Invia TUTTI i tag come 'categoria' (separati da virgole)
         if (categoryTags.length > 0) {
             params.set('categoria', categoryTags.join(','));
         }
@@ -116,14 +109,11 @@ document.addEventListener('DOMContentLoaded', function() {
             params.set('qta_mag', qtaMag);
         }
 
-        // Modifica l'URL di ricerca
         let baseUrl = '/ricerca/';
         let finalUrl = baseUrl + '?' + params.toString();
 
-        // Vai al nuovo URL (sottomissione GET)
         window.location.href = finalUrl;
 
-        // Blocca il submit di default
         event.preventDefault();
     });
 });

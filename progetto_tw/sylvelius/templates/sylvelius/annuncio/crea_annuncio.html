@@ -116,7 +116,7 @@
                 <div class="form-group">
                     <label for="id_prezzo">Prezzo (€)</label>
                     <input type="number" class="form-control" id="id_prezzo" name="prezzo" value="{{prezzo_mod}}" max="{{MAX_PROD_PREZZO_VALUE}}" step="0.01" min="{{MIN_PROD_PREZZO_VALUE}}" required placeholder="1.00">
-                    <div class="invalid-feedback"></div> <!-- messaggio errore -->
+                    <div class="invalid-feedback"></div>
                 </div>
                 <div class="form-group">
                     <label for="id_iva">IVA (IT)</label>
@@ -221,7 +221,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         let quantity = parseInt(qtaMagazzinoVal.value);
 
-        // Se il valore è invalido o fuori range, correggilo
         if (isNaN(quantity) || quantity < MIN_CREA_ANNUNCIO_QTA_VALUE) {
             quantity = MIN_CREA_ANNUNCIO_QTA_VALUE;
         } else if (quantity > MAX_ANNU_QTA_MAGAZZINO_VALUE){
@@ -244,7 +243,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         let prezzo = parseFloat(prezzoVal.value);
 
-        // Se il valore è invalido o fuori range, correggilo
         if (isNaN(prezzo) || prezzo < MIN_PROD_PREZZO_VALUE) {
             prezzo = MIN_PROD_PREZZO_VALUE;
         } else if (prezzo > MAX_PROD_PREZZO_VALUE) {
@@ -266,16 +264,12 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Aggiorna i prezzi al cambio
     qtaMagazzinoVal.addEventListener('input', updateQtas);
-    prezzoVal.addEventListener('input', updatePrices); // Inizializza al caricamento
+    prezzoVal.addEventListener('input', updatePrices);
     document.getElementById('id_iva').addEventListener('change', updatePrices);
 
-    
-    // Dopo setupSuggestions()
     const tagsContainer = document.getElementById('id_tags_selected');
 
-    // Observer per rilevare aggiunta/rimozione di tag
     const observer = new MutationObserver(function(mutations) {
         const error = validateField('tags', document.getElementById('id_tags_input'));
         if (error) {
@@ -288,13 +282,12 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
     window.addEventListener('beforeunload', function() {
-        observer.disconnect(); // Interrompi l'observer
+        observer.disconnect(); 
     });
 
-// Configura l'observer per monitorare aggiunta/rimozione di figli
     observer.observe(tagsContainer, {
-        childList: true,  // Osserva cambiamenti nei figli (tag aggiunti/rimossi)
-        subtree: true     // Monitora anche eventuali sotto-nodi
+        childList: true,
+        subtree: true
     });
 
     const form = document.querySelector('form');
@@ -311,13 +304,12 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     function showError(input, message) {
-        input.classList.add('is-invalid'); // se usi anche validazione positiva
+        input.classList.add('is-invalid');
 
-        // cerca il div di errore nel contenitore del campo
         const error = input.parentNode.querySelector('.invalid-feedback');
         if (error) {
             error.textContent = message;
-            error.classList.remove('d-none'); // nel caso tu voglia nasconderli di default
+            error.classList.remove('d-none');
         }
     }
 
@@ -379,7 +371,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 
             case 'immagini':
                 if (input.files.length > 0) {
-                    // Verifica il numero massimo di immagini (es. max 5)
                     const MAX_IMMAGINI = {{MAX_IMGS_PER_ANNU_VALUE}};
                     if (input.files.length > MAX_IMMAGINI) {
                         creaAnnuncioBtn.disabled = true;
@@ -443,7 +434,6 @@ document.addEventListener('DOMContentLoaded', function () {
             form.submit();
         }
     });
-    // Blocca invio su alcuni campi
     ['id_prezzo', 'id_descrizione_breve', 'id_qta_magazzino', 'id_nome', 'id_tags_input'].forEach(id => {
         document.getElementById(id).addEventListener('keydown', function(event) {
             if (event.key === 'Enter') {

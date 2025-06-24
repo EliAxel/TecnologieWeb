@@ -147,7 +147,7 @@
                         {% endfor %}
                     </div>
 
-                    <!-- Pulsanti di navigazione personalizzati -->
+                    <!-- Pulsanti di navigazione -->
                     {% if annuncio.prodotto.immagini.count > 1 %}
                         <a class="carousel-control-prev" href="#caroselloProdotto-{{ annuncio.id }}" role="button" data-slide="prev">
                             <span class="carousel-control-prev-icon bg-dark rounded-circle p-3" aria-hidden="true"></span>
@@ -187,7 +187,6 @@
             {% endif %}
             <h4 class="mb-4 mt-2">💬 Commenti degli utenti 💬</h4>
             
-            <!--- Form per l'inserimento di un nuovo commento -->
             {% if ha_acquistato and non_ha_commentato %}
                 {% url 'sylvelius:aggiungi_commento' annuncio.id as create_url%}
                 {% include "_card_nuovo_commento.html" with direction=create_url %}
@@ -198,7 +197,7 @@
             {% endif %}
 
             {% for commento in commenti %}
-                {% include "_card_commento.html" with excluded=get_commento %}
+                {% include "_card_commento.html" %}
             {% empty %}
                 <p class="text-muted">Nessun commento per questo annuncio.</p>
             {% endfor %}
@@ -242,7 +241,6 @@
             }
             let quantity = parseInt(quantitySelect.value);
 
-            // Se il valore è invalido o fuori range, correggilo
             if (isNaN(quantity) || quantity < MIN_ORDN_QUANTITA_VALUE) {
                 quantity = MIN_ORDN_QUANTITA_VALUE;
             } else if (quantity > {{ annuncio.qta_magazzino }}) {
@@ -265,9 +263,8 @@
             }
         }
 
-        // Aggiorna i prezzi al cambio
         quantitySelect.addEventListener('input', updatePrices);
-        updatePrices();  // Inizializza al caricamento
+        updatePrices();
         form.addEventListener('submit', function(e) {
             const quantity = parseInt(quantitySelect.value);
             quantityInput.value = quantity;

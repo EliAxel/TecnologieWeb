@@ -33,7 +33,7 @@ class Tag(models.Model):
         return self.nome
 
     def save(self, *args, **kwargs):
-        self.nome = self.nome.lower()  # Converti in minuscolo
+        self.nome = self.nome.lower()
         super().save(*args, **kwargs)
 
 class Prodotto(models.Model):

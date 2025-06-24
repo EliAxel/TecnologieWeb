@@ -6,7 +6,6 @@
 {% endblock %}
 {% block title %}Acquista - Sylvelius{% endblock %}
 {% block middle %}
-<!-- Aggiungi la quantità nella visualizzazione -->
 <div class="container mt-5 mb-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
@@ -62,7 +61,6 @@
 <script>
     paypal.Buttons({
     onInit: function (data, actions) {
-        // Nascondi la scritta “Caricamento...”
         document.getElementById('paypal-loading-text').style.display = 'none';
         document.getElementById('paypal-button-container').style.display = 'block';
     },

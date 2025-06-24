@@ -4,19 +4,27 @@
 {% block title %}{{user.username}} - Sylvelius{% endblock %}
     
 {% block middle %}
-<script src="{% static 'js/toast.js' %}"></script>
-{% if request.GET.evento == 'elimina_ut' %}
-    <script>
-        showBootstrapAlertWithIcon(
-            "User modificato con successo!","good"
-        );
-    </script>
-{% elif request.GET.evento == 'formatta_ut' %}
-    <script>
-        showBootstrapAlertWithIcon(
-            "User formattato con successo!","good"
-        );
-    </script>
+{% if request.GET.evento %}
+    <script src="{% static 'js/toast.js' %}"></script>
+    {% if request.GET.evento == 'elimina_ut' %}
+        <script>
+            showBootstrapAlertWithIcon(
+                "User modificato con successo!","good"
+            );
+        </script>
+    {% elif request.GET.evento == 'formatta_ut' %}
+        <script>
+            showBootstrapAlertWithIcon(
+                "User formattato con successo!","good"
+            );
+        </script>
+    {% elif request.GET.evento == 'profile_edit'%}
+        <script>
+            showBootstrapAlertWithIcon(
+                "Modifica account completata con successo!","good"
+            );
+        </script>
+    {% endif %}
 {% endif %}
 <div class="container-fluid mt-5 mb-5">
     <div class="row justify-content-center">
@@ -119,7 +127,7 @@
         </div>
     </div>
 
-    <!-- Sezione Annunci (Creazioni) -->
+    <!-- Sezione Annunci -->
     <div class="row justify-content-center mb-4">
         <div class="col-md-8 text-center">
             <h2>
@@ -199,13 +207,5 @@
     border-radius: 4px;
 }
 </style>
-{% if request.GET.evento == 'profile_edit'%}
-    <script src="{% static 'js/toast.js' %}"></script>
-    <script>
-        showBootstrapAlertWithIcon(
-            "Modifica account completata con successo!","good"
-        );
-    </script>
-{% endif %}
 <script src="{% static 'js/img_loader.js' %}"></script>
 {% endblock %}

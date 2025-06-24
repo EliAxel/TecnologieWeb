@@ -17,23 +17,27 @@
                         <strong>{{ annuncio.prodotto.nome }}</strong>
                     </a>
                 </h5>
-                <p class="card-text">{{ annuncio.prodotto.descrizione_breve|truncatechars:MAX_TRUNCATED_CARDS_CHARS }}</p>
+                <p class="card-text">
+                    {{ annuncio.prodotto.descrizione_breve|truncatechars:MAX_TRUNCATED_CARDS_CHARS }}
+                </p>
                 <div class="mb-2">
                     {% for tag in annuncio.prodotto.tags.all|slice:MAX_SLICE_TAGS_PER_CARD %}
-                        <span class="badge rounded-pill me-1" style="background-color: {% if 'moderatori' in user.groups.values_list|join:',' %}
-    {{ADMIN_TERTIARY_COLOR}}
-{% else %}
-    {{TERTIARY_COLOR}}
-{% endif %}; color: #fff;">{{ tag.nome }}</span>
+                        <span class="badge rounded-pill me-1"
+                              style="background-color: {% if 'moderatori' in user.groups.values_list|join:',' %}
+                                  {{ ADMIN_TERTIARY_COLOR }}
+                              {% else %}
+                                  {{ TERTIARY_COLOR }}
+                              {% endif %}; color: #fff;">
+                            {{ tag.nome }}
+                        </span>
                     {% endfor %}
                 </div>
                 {% if annuncio.rating_medio == INVALID_COMMNT_RATING_VALUE %}
                     <div class="text-muted">Nessuna recensione</div>
                 {% else %}
                     <div class="d-inline-flex align-items-center">
-                        
                         {% include "_txt_stars_medie.html" %}
-                        <span class="me-2 ml-1">{{ annuncio.rating_medio|floatformat:1 }}</span> 
+                        <span class="me-2 ml-1">{{ annuncio.rating_medio|floatformat:1 }}</span>
                     </div>
                 {% endif %}
                 <p class="card-text">Prezzo: {{ annuncio.prodotto.prezzo|intcomma }} €</p>

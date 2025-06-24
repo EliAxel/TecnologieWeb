@@ -47,7 +47,6 @@
         const usernameError = document.getElementById('username-error');
         const passwordError = document.getElementById('password-error');
 
-        // Username check (AJAX, POST)
         usernameInput.addEventListener('blur', function() {
         const username = usernameInput.value.trim();
         if (username.length === 0) return;
@@ -73,13 +72,11 @@
         });
         });
 
-        // Password check
         function validatePasswords() {
         const pw1 = password1Input.value;
         const pw2 = password2Input.value;
         let errorMsg = "";
 
-        // Password security: at least 8 chars, one uppercase, one lowercase, one number
         const MIN_PWD_CHARS = {{MIN_PWD_CHARS}};
         const strongPw = new RegExp(`^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{${MIN_PWD_CHARS},}$`);
         if (!strongPw.test(pw1)) {

@@ -50,7 +50,6 @@
                             <td>{{ ordine.stato_consegna|capfirst }}</td>
                             <td>{{ ordine.data_ordine|date:"d/m/Y H:i" }}</td>
                             <td>
-                                <!-- Modale Bootstrap 4 -->
                                 <button class="btn btn-primary btn-sm btn-dati-spedizione mb-1" data-id="{{ ordine.id }}" data-luogo-ordine="{{ordine.json_to_string}}">
                                     <i class="bi bi-truck"></i> Dati spedizione
                                 </button>
@@ -67,7 +66,6 @@
                                             </button>
                                         </div>
                                         <div class="modal-body">
-                                            <!-- Contenuto dinamico verrà inserito qui -->
                                             <div id="contenuto-spedizione-{{ordine.id}}">
                                             <p><strong><i class="bi bi-geo-alt"></i> Via/Strada:</strong> <span id="spedizione-via-{{ordine.id}}">N/D</span></p>
                                             <p><strong><i class="bi bi-geo-alt"></i> Città:</strong> <span id="spedizione-citta-{{ordine.id}}">N/D</span></p>
@@ -102,9 +100,7 @@
                     </tbody>
                 </table>
             </div>
-
-                <!-- Include della paginazione -->
-                {% include "_btn_paginazione.html" %}
+            {% include "_btn_paginazione.html" %}
             {% else %}
                 <div class="alert alert-info">Non hai ancora {% block nothing %}effettuato{% endblock %} ordini.</div>
             {% endif %}
@@ -125,7 +121,6 @@ document.addEventListener("DOMContentLoaded", function () {
             document.getElementById(`spedizione-cap-${ordineId}`).textContent = datiSpedizione.postal_code || "N/D";
             document.getElementById(`spedizione-provincia-${ordineId}`).textContent = datiSpedizione.admin_area_1 || "N/D";
             document.getElementById(`spedizione-paese-${ordineId}`).textContent = datiSpedizione.country_code || "N/D";
-            // Apri la modale
             $(`#datiSpedizioneModal-${ordineId}`).modal('show');
         });
     });
@@ -162,7 +157,6 @@ function annullaOrdine(button) {
         })
         .then(data => {
             if (data.status === 'success') {
-                // Ricarica la pagina mantenendo i parametri di paginazione
                 window.location.reload();
             } else {
                 alert(data.message || 'Errore durante l\'annullamento dell\'ordine');
@@ -173,7 +167,7 @@ function annullaOrdine(button) {
             alert('Si è verificato un errore durante la richiesta');
         });
     }
-    return false; // Previene ulteriori azioni
+    return false;
 }
 </script>
 {% endblock %}

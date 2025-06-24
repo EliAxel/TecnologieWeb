@@ -29,7 +29,7 @@ function showBootstrapAlertWithIcon(text, type) {
             <div>
                 <strong>${heading}</strong> ${text}
             </div>
-            <button type="button" class="close ml-auto" data-dismiss="alert" aria-label="Close">
+            <button type="button" class="close ml-auto align-self-center" data-dismiss="alert" aria-label="Close" style="margin-top: 3px;">
                 <span aria-hidden="true">&times;</span>
             </button>
         </div>

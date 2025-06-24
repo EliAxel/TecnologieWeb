@@ -1,74 +1,76 @@
-# Django core
-from django.contrib.auth import update_session_auth_hash, logout
+import json
+import uuid
+
+from PIL import Image
+
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
+
+from django.contrib.auth import logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.models import User
 from django.contrib.auth.views import LoginView, LogoutView
 from django.core.paginator import Paginator
-from django.db.models import Q
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, HttpResponseForbidden
+from django.db.models import Avg, Q
+from django.db.models.functions import Floor
+from django.http import (
+    HttpResponse,
+    HttpResponseForbidden,
+    HttpResponseRedirect,
+    JsonResponse,
+)
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views import View
 from django.views.decorators.http import require_POST
-from django.views.generic import TemplateView, CreateView
-from django.db.models import Avg
-from django.db.models.functions import Floor
-from django.shortcuts import (
-    render, 
-    redirect, 
-    get_object_or_404
-)
+from django.views.generic import CreateView, TemplateView
 
-from purchase.models import Iban, Cart
-# Project specific
-from .forms import CustomUserCreationForm
+from progetto_tw.constants import (
+    ALIQUOTE_LIST_VALS,
+    MAX_ANNUNCI_PER_DETTAGLI_VALUE,
+    MAX_ANNU_QTA_MAGAZZINO_VALUE,
+    MAX_COMMNT_RATING_VALUE,
+    MAX_COMMNT_TESTO_CHARS,
+    MAX_IMG_ASPECT_RATIO,
+    MAX_IMG_SIZE,
+    MAX_IMGS_PER_ANNU_VALUE,
+    MAX_PAGINATOR_ANNUNCI_VALUE,
+    MAX_PAGINATOR_BANNED_USERS_VALUE,
+    MAX_PAGINATOR_COMMENTI_ANNUNCIO_VALUE,
+    MAX_PAGINATOR_COMMENTI_DETTAGLI_VALUE,
+    MAX_PAGINATOR_HOME_VALUE,
+    MAX_PAGINATOR_ORDINI_VALUE,
+    MAX_PAGINATOR_RICERCA_VALUE,
+    MAX_PROD_DESC_BR_CHARS,
+    MAX_PROD_DESC_CHARS,
+    MAX_PROD_NOME_CHARS,
+    MAX_PROD_PREZZO_VALUE,
+    MAX_PWD_CHARS,
+    MAX_TAGS_CHARS,
+    MAX_TAGS_N_PER_PROD,
+    MAX_UNAME_CHARS,
+    MIN_CREA_ANNUNCIO_QTA_VALUE,
+    MIN_COMMNT_RATING_VALUE,
+    MIN_IMG_ASPECT_RATIO,
+    MIN_PROD_PREZZO_VALUE,
+    PROD_CONDIZIONE_CHOICES_ID,
+    _MODS_GRP_NAME,
+)
 from progetto_tw.mixins import CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin
+
+from purchase.models import Cart, Iban
+
+from .forms import CustomUserCreationForm
 from .models import (
     Annuncio,
     CommentoAnnuncio,
     ImmagineProdotto,
+    Notification,
     Ordine,
-    Tag,
     Prodotto,
-    Notification
+    Tag,
 )
-from progetto_tw.constants import (
-    MAX_UNAME_CHARS,
-    MAX_PWD_CHARS,
-    MAX_TAGS_CHARS,
-    MAX_TAGS_N_PER_PROD,
-    MAX_IMGS_PER_ANNU_VALUE,
-    MAX_PROD_NOME_CHARS,
-    MAX_PROD_DESC_BR_CHARS,
-    MAX_PROD_DESC_CHARS,
-    MIN_PROD_PREZZO_VALUE,
-    MAX_PROD_PREZZO_VALUE,
-    MAX_ANNU_QTA_MAGAZZINO_VALUE,
-    MAX_COMMNT_TESTO_CHARS,
-    MIN_COMMNT_RATING_VALUE,
-    MAX_COMMNT_RATING_VALUE,
-    MAX_PAGINATOR_HOME_VALUE,
-    MAX_PAGINATOR_ORDINI_VALUE,
-    MAX_PAGINATOR_ANNUNCI_VALUE,
-    MAX_PAGINATOR_RICERCA_VALUE,
-    MAX_PAGINATOR_BANNED_USERS_VALUE,
-    MIN_CREA_ANNUNCIO_QTA_VALUE,
-    ALIQUOTE_LIST_VALS,
-    MAX_IMG_SIZE,
-    MAX_IMG_ASPECT_RATIO,
-    MIN_IMG_ASPECT_RATIO,
-    MAX_ANNUNCI_PER_DETTAGLI_VALUE,
-    MAX_PAGINATOR_COMMENTI_DETTAGLI_VALUE,
-    MAX_PAGINATOR_COMMENTI_ANNUNCIO_VALUE,
-    PROD_CONDIZIONE_CHOICES_ID,
-    _MODS_GRP_NAME
-)
-# Other
-import json
-import uuid
-from PIL import Image
-from channels.layers import get_channel_layer
-from asgiref.sync import async_to_sync
 
 #non callable
 def send_notification(user_id=None,title="", message="", global_notification=False):
@@ -134,7 +136,7 @@ def check_if_annuncio_is_valid(request):
     descrizione_breve = request.POST.get('descrizione_breve').strip()
     prezzo = request.POST.get('prezzo')
     iva = request.POST.get('iva')
-    tag_string = request.POST.get('tags', '')  # è una stringa unica!
+    tag_string = request.POST.get('tags', '')
     immagini = request.FILES.getlist('immagini')
     qta_magazzino = request.POST.get('qta_magazzino', MIN_CREA_ANNUNCIO_QTA_VALUE)
     condizione = request.POST.get('condizione', 'nuovo')
@@ -142,7 +144,6 @@ def check_if_annuncio_is_valid(request):
     if condizione not in PROD_CONDIZIONE_CHOICES_ID:
         return {'evento': 'cond'}
 
-    # Validazione base
     if not nome or not descrizione_breve or not prezzo:
         return {'evento': 'noval'}
     
@@ -169,7 +170,6 @@ def check_if_annuncio_is_valid(request):
     if qta_magazzino < MIN_CREA_ANNUNCIO_QTA_VALUE or qta_magazzino > MAX_ANNU_QTA_MAGAZZINO_VALUE:
         return {'evento': 'qta'}
     
-        # Gestione dei tag (split manuale)
     tag_names = [t.strip().lower() for t in tag_string.split(',') if t.strip()]
     if(len(tag_names)>MAX_TAGS_N_PER_PROD):
         return {'evento': 'tagn'}
@@ -178,7 +178,6 @@ def check_if_annuncio_is_valid(request):
         if (len(nome) > MAX_TAGS_CHARS):
             return {'evento': 'tagchar'}
     
-    # Salva immagini
     if(len(immagini) > MAX_IMGS_PER_ANNU_VALUE):
         return {'evento': 'imgn'}
     
@@ -186,7 +185,7 @@ def check_if_annuncio_is_valid(request):
         immagine = None
         try:
             immagine = Image.open(img)
-            immagine.verify()  # Verifica se è immagine valida
+            immagine.verify()
         except Exception:
             return {'evento': 'imgtype'}
 
@@ -252,7 +251,7 @@ class ProfiloPageView(CustomLoginRequiredMixin, TemplateView):
         if self.request.user.groups.filter(name=_MODS_GRP_NAME).exists():
             user_without_is_active_list = User.objects.filter(is_active=False).order_by('username')
             
-            paginator = Paginator(user_without_is_active_list, MAX_PAGINATOR_BANNED_USERS_VALUE)  # 10 utenti per pagina
+            paginator = Paginator(user_without_is_active_list, MAX_PAGINATOR_BANNED_USERS_VALUE)
         
             page_number = self.request.GET.get('page',1)
             page_obj = paginator.get_page(page_number)
@@ -266,8 +265,6 @@ class ProfiloPageView(CustomLoginRequiredMixin, TemplateView):
             context['user'] = utente
             context['annunci'] = Annuncio.objects.filter(inserzionista=utente).order_by('-data_pubblicazione')
             context['ordini'] = Ordine.objects.filter(utente=utente).order_by('-data_ordine')
-            # Trova tutti gli utenti che hanno fatto ordini su annunci creati dall'utente corrente
-            # e per cui almeno un ordine è "in attesa"
             miei_annunci = Annuncio.objects.filter(inserzionista=utente).values_list('id', flat=True)
             prodotti_miei_annunci = Annuncio.objects.filter(
                 id__in=miei_annunci
@@ -289,7 +286,6 @@ class ProfiloPageView(CustomLoginRequiredMixin, TemplateView):
                     }
                 clienti_dict[cliente]['ordini_da_rifornire'].append(ordine)
 
-            # Lista di oggetti utente con attributo aggiunto "ordini_da_rifornire"
             clienti = []
             for cliente, data in clienti_dict.items():
                 cliente.ordini_da_rifornire = data['ordini_da_rifornire']
@@ -310,7 +306,6 @@ class ProfiloDetailsPageView(View):
         else:
             user = get_object_or_404(User, username=user_profile, is_active=True)
             annunci = Annuncio.objects.filter(inserzionista=user,is_published=True).annotate(avg_rating=Avg('commenti__rating')).order_by('-avg_rating')
-            # Impedisci agli utenti base di vedere i profili dei moderatori
             if user.groups.filter(name=_MODS_GRP_NAME).exists():
                 return HttpResponse(status=404)
         commenti = CommentoAnnuncio.objects.filter(utente=user,annuncio__inserzionista__is_active=True).order_by('-data_pubblicazione')
@@ -342,19 +337,19 @@ class ProfiloEditPageView(CustomLoginRequiredMixin, View):
         username = request.POST.get('username').strip()
         old_password = request.POST.get('old_password')
         if not old_password:
-            return render(request, self.template_name, {'pwd': 'bad'})
+            return render(request, self.template_name, {'evento': 'pwd'})
         else:
             old_password=old_password.strip()
             if not request.user.check_password(old_password):
-                return render(request, self.template_name, {'pwd': 'bad'})
+                return render(request, self.template_name, {'evento': 'pwd'})
                 
         new_password1 = request.POST.get('new_password1').strip()
         new_password2 = request.POST.get('new_password2').strip()
 
         if len(username) > MAX_UNAME_CHARS:
-            return render(request, self.template_name, {'usr': 'bad'})
+            return render(request, self.template_name, {'evento': 'usr'})
         if len(new_password1) > MAX_PWD_CHARS:
-            return render(request, self.template_name, {'pwd': 'bad'})
+            return render(request, self.template_name, {'evento': 'pwd'})
         password_change_form_valid = True
         if new_password1 and new_password2:
             password_change_form=PasswordChangeForm(data={
@@ -366,12 +361,9 @@ class ProfiloEditPageView(CustomLoginRequiredMixin, View):
             if password_change_form_valid: password_change_form.save()
 
         if username != request.user.username:
-            # Verifica se l'username esiste già (escludendo l'utente corrente)
             if User.objects.filter(username=username).exclude(pk=request.user.pk).exists():
-                # Username già esistente, gestisci l'errore (es. mostra un messaggio)
-                return render(request, self.template_name, {'usr': 'bad'})
+                return render(request, self.template_name, {'evento': 'usr'})
             else:
-                # Username disponibile, procedi con l'aggiornamento
                 request.user.username = username
                 request.user.save()
 
@@ -379,7 +371,7 @@ class ProfiloEditPageView(CustomLoginRequiredMixin, View):
             update_session_auth_hash(request, request.user)
             return redirect(f'{reverse("sylvelius:profile")}?evento=profile_edit')
         else:
-            return render(request, self.template_name, {'pwd': 'bad'})
+            return render(request, self.template_name, {'evento': 'pwd'})
 
 class ProfiloDeletePageView(CustomLoginRequiredMixin, View):
     login_url = reverse_lazy('sylvelius:login')
@@ -418,9 +410,8 @@ class ProfiloDeletePageView(CustomLoginRequiredMixin, View):
         Cart.objects.filter(utente=request.user).delete()
         CommentoAnnuncio.objects.filter(utente=request.user).delete()
         Notification.objects.filter(recipient=request.user).delete()
-        logout(request)  # logout PRIMA di eliminare l'utente per evitare problemi
-        user.delete()    # elimina l'utente
-        # 2. Reindirizza a una pagina di successo (es: home page)
+        logout(request)
+        user.delete()
         return redirect('sylvelius:home')
 
 class AnnuncioDetailView(TemplateView):
@@ -500,8 +491,7 @@ class ProfiloOrdiniPageView(CustomLoginRequiredMixin, ModeratoreAccessForbiddenM
         
         ordini_list = Ordine.objects.filter(utente=utente).order_by('-data_ordine')
         
-        paginator = Paginator(ordini_list, MAX_PAGINATOR_ORDINI_VALUE)  # 20 ordini per pagina
-        
+        paginator = Paginator(ordini_list, MAX_PAGINATOR_ORDINI_VALUE)  
         page_number = self.request.GET.get('page',1)
         page_obj = paginator.get_page(page_number)
         
@@ -523,8 +513,7 @@ class ProfiloAnnunciPageView(CustomLoginRequiredMixin, ModeratoreAccessForbidden
         
         annunci_list = Annuncio.objects.filter(inserzionista=utente).order_by('-data_pubblicazione')
         
-        paginator = Paginator(annunci_list, MAX_PAGINATOR_ANNUNCI_VALUE)  # 20 creazioni per pagina
-        
+        paginator = Paginator(annunci_list, MAX_PAGINATOR_ANNUNCI_VALUE)  
         page_number = self.request.GET.get('page')
         page_obj = paginator.get_page(page_number)
         
@@ -552,7 +541,7 @@ class ProfiloCreaAnnuncioPageView(CustomLoginRequiredMixin, ModeratoreAccessForb
         descrizione_breve = request.POST.get('descrizione_breve').strip()
         prezzo = request.POST.get('prezzo')
         iva = request.POST.get('iva')
-        tag_string = request.POST.get('tags', '')  # è una stringa unica!
+        tag_string = request.POST.get('tags', '')
         immagini = request.FILES.getlist('immagini')
         qta_magazzino = request.POST.get('qta_magazzino', MIN_CREA_ANNUNCIO_QTA_VALUE)
         condizione = request.POST.get('condizione', 'nuovo')
@@ -565,7 +554,6 @@ class ProfiloCreaAnnuncioPageView(CustomLoginRequiredMixin, ModeratoreAccessForb
             condizione=condizione,
             iva=int(iva)
         )
-        # Creazione dell'annuncio
         annuncio = Annuncio.objects.create(
             uuid=uuid.uuid4(),
             inserzionista=request.user,
@@ -583,7 +571,6 @@ class ProfiloCreaAnnuncioPageView(CustomLoginRequiredMixin, ModeratoreAccessForb
             
         annuncio.prodotto.tags.set(tag_instances) 
 
-        # Salva immagini
         for img in immagini:
             ImmagineProdotto.objects.create(prodotto=prodotto, immagine=img)
         
@@ -617,7 +604,7 @@ class ProfiloModificaAnnuncioPageView(CustomLoginRequiredMixin, ModeratoreAccess
         descrizione_breve = request.POST.get('descrizione_breve').strip()
         prezzo = request.POST.get('prezzo')
         iva = request.POST.get('iva')
-        tag_string = request.POST.get('tags', '')  # è una stringa unica!
+        tag_string = request.POST.get('tags', '')
         immagini = request.FILES.getlist('immagini')
         qta_magazzino = request.POST.get('qta_magazzino', MIN_CREA_ANNUNCIO_QTA_VALUE)
         condizione = request.POST.get('condizione', 'nuovo')
@@ -650,8 +637,6 @@ class ProfiloModificaAnnuncioPageView(CustomLoginRequiredMixin, ModeratoreAccess
             
         annuncio.prodotto.tags.set(tag_instances)
 
-        # Salva immagini
-        
         if len(immagini) > 0:
             ImmagineProdotto.objects.filter(prodotto=prodotto).delete()
 
@@ -673,8 +658,7 @@ class ProfiloClientiPageView(CustomLoginRequiredMixin, ModeratoreAccessForbidden
         
         ordini_list = Ordine.objects.filter(prodotto__annunci__inserzionista=utente).select_related('prodotto', 'utente').order_by('-data_ordine')
         
-        paginator = Paginator(ordini_list, MAX_PAGINATOR_ORDINI_VALUE)  # 20 ordini per pagina
-        
+        paginator = Paginator(ordini_list, MAX_PAGINATOR_ORDINI_VALUE)  
         page_number = self.request.GET.get('page')
         page_obj = paginator.get_page(page_number)
         
@@ -724,7 +708,6 @@ class RicercaAnnunciView(TemplateView):
         
         if condizione in PROD_CONDIZIONE_CHOICES_ID:
             annunci = annunci.filter(prodotto__condizione=condizione)
-        # Se condizione == 'all' o non valida, non filtrare
         
         if qta_mag == 'qta-pres':
             annunci = annunci.filter(qta_magazzino__gt=0)
@@ -735,7 +718,6 @@ class RicercaAnnunciView(TemplateView):
             try:
                 rating_value = int(rating)
                 if MIN_COMMNT_RATING_VALUE <= rating_value <= MAX_COMMNT_RATING_VALUE:
-                    # Supponiamo che 'rating_value' sia il valore dell'intervallo desiderato (da 0 a 4)
                     annunci = Annuncio.objects.annotate(
                         rating_medio_calc=Avg('commenti__rating'),
                         rating_range=Floor(Avg('commenti__rating'))
@@ -749,12 +731,10 @@ class RicercaAnnunciView(TemplateView):
                     raise ValueError("Rating fuori range")
             except (ValueError, TypeError):
                 if rating == 'none':
-                    # Se 'none', escludi gli annunci con commenti
                     annunci = annunci.exclude(commenti__isnull=False)
                 elif rating == 'starred':
                     annunci = annunci.exclude(commenti__isnull=True)
                 else:
-                    # Se il rating non è valido, non filtrare
                     pass
 
         if prezzo_min:
@@ -800,7 +780,6 @@ class RicercaAnnunciView(TemplateView):
 @require_POST
 @login_required
 def toggle_pubblicazione(request, id):
-    # Trova la creazion dell'utente (che contiene l'annuncio)
     annuncio = get_object_or_404(Annuncio, id=id, inserzionista=request.user)
     annuncio.is_published = not annuncio.is_published
     annuncio.save()
@@ -869,7 +848,6 @@ def aggiungi_commento(request, annuncio_id):
     testo = request.POST.get('testo', '').strip()
     rating = request.POST.get('rating')
 
-    # Validazione
     if (not testo or
         not rating.isdigit() or
         int(rating) < MIN_COMMNT_RATING_VALUE or
@@ -879,7 +857,6 @@ def aggiungi_commento(request, annuncio_id):
             return JsonResponse({"status": "error", "message": "Dati non validi"}, status=400)
         return redirect(reverse('sylvelius:dettagli_annuncio', args=[annuncio.uuid]) + '?evento=commento_bad')
 
-    # Salva il commento
     commento = CommentoAnnuncio.objects.create(
         annuncio=annuncio,
         utente=utente,
@@ -888,11 +865,9 @@ def aggiungi_commento(request, annuncio_id):
     )
     commento.save()
 
-    # Risposta JSON se è una chiamata AJAX
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         return JsonResponse({"status": "success"})
 
-    # Altrimenti redirect classico
     return redirect(reverse('sylvelius:dettagli_annuncio', args=[annuncio.uuid]) + '?evento=commento_bad')
 
 @require_POST
@@ -903,7 +878,6 @@ def modifica_commento(request, commento_id):
     testo = request.POST.get('testo', '').strip()
     rating = request.POST.get('rating')
 
-    # Validazione
     if (not testo or
         not rating.isdigit() or
         int(rating) < MIN_COMMNT_RATING_VALUE or
@@ -913,7 +887,6 @@ def modifica_commento(request, commento_id):
             return JsonResponse({"status": "error", "message": "Dati non validi"}, status=400)
         return redirect(reverse('sylvelius:dettagli_annuncio', args=[commento.annuncio.uuid]) + '?evento=commento_bad')
 
-    # Aggiorna il commento
     commento.testo = testo
     commento.rating = int(rating)
     commento.save()

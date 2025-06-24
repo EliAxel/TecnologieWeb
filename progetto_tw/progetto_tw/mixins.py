@@ -10,9 +10,7 @@ class CustomLoginRequiredMixin(LoginRequiredMixin):
 
 class ModeratoreAccessForbiddenMixin:
     def dispatch(self, request, *args, **kwargs):
-        # Controlla se l'utente è autenticato prima di accedere ai gruppi
         if request.user.is_authenticated:
-            # .exists() è più efficiente che caricare l'intero gruppo
             if request.user.groups.filter(name=_MODS_GRP_NAME).exists():
                 raise PermissionDenied 
         # Se l'utente non è un moderatore, procedi normalmente

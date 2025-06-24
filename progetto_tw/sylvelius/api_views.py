@@ -1,10 +1,10 @@
+from asgiref.sync import sync_to_async
+from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 from django.http import JsonResponse
 from .models import ImmagineProdotto, Notification
-from purchase.models import Cart
-from django.contrib.auth.decorators import login_required
-from asgiref.sync import sync_to_async
-from django.db.models import Q
 from progetto_tw.constants import MAX_MESSAGES_PER_PAGE
+from purchase.models import Cart
 
 async def get_immagine_prodotto(request, prodotto_id):
     immagini = await sync_to_async(list)(ImmagineProdotto.objects.filter(prodotto_id=prodotto_id).order_by('id')[:1])
@@ -14,12 +14,10 @@ async def get_immagine_prodotto(request, prodotto_id):
         return JsonResponse({'url': '/static/img/default_product.png'})
 
 async def get_immagini_prodotto(request, prodotto_id):
-    # Ottieni le immagini in modo asincrono
     immagini = await sync_to_async(list)(
         ImmagineProdotto.objects.filter(prodotto_id=prodotto_id).order_by('id')
     )
     
-    # Costruisci la lista degli URL
     immagini_urls = [img.immagine.url for img in immagini if img.immagine]
     if not immagini_urls:
         immagini_urls = ['/static/img/default_product.png']
@@ -27,12 +25,10 @@ async def get_immagini_prodotto(request, prodotto_id):
     return JsonResponse({'urls': immagini_urls})
 
 async def notifications_api(request):
-    # Verifica l'autenticazione in modo asincrono
     is_authenticated = await sync_to_async(lambda: request.user.is_authenticated)()
     if not is_authenticated:
         return JsonResponse([], safe=False)
     
-    # Ottieni le notifiche in modo asincrono
     notifications = await sync_to_async(list)(
         Notification.objects.filter(
             Q(recipient=request.user) | 

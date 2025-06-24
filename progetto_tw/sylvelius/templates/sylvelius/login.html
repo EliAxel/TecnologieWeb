@@ -69,11 +69,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     form.addEventListener('submit', function(e) {
-        e.preventDefault(); // Previeni invio del form
+        e.preventDefault();
         const username = usernameInput.value.trim();
         const password = passwordInput.value;
 
-        // Controlla che i campi non siano vuoti
         if (!username || !password) {
             if (!username) {
                 usernameError.textContent = "Inserisci l'username.";
@@ -88,7 +87,6 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // Invia la richiesta AJAX per controllare username e password
         fetch("{% url 'sylvelius:check_login_credentials' %}", {
             method: "POST",
             headers: {
@@ -122,7 +120,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 passwordInput.classList.remove("is-invalid");
             }
 
-            // Se tutto è valido, invia il form normalmente
             if (data.exists && data.valid_password && data.is_active) {
                 form.submit();
             }

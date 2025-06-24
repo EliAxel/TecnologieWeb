@@ -2,31 +2,33 @@
 {% load static %}
 {% block title %}Annunci - Sylvelius{% endblock %}
 {% block middle %}
-<script src="{% static 'js/toast.js' %}"></script>
-{% if request.GET.evento == "nascondi" %}
-<script>
-    showBootstrapAlertWithIcon(
-        "","good"
-    );
-</script>
-{% elif request.GET.evento == "elimina" %}
-<script>
-    showBootstrapAlertWithIcon(
-        "Annuncio eliminato con successo!","good"
-    );
-</script>
-{% elif request.GET.evento == 'mod_annuncio' %}
+{% if request.GET.evento %}
+    <script src="{% static 'js/toast.js' %}"></script>
+    {% if request.GET.evento == "nascondi" %}
     <script>
         showBootstrapAlertWithIcon(
-            "Annuncio modificato con successo!","good"
+            "","good"
         );
     </script>
-{% elif request.GET.evento == "iban_imp" %}
-<script>
-    showBootstrapAlertWithIcon(
-        "IBAN impostato con successo!","good"
-    );
-</script>
+    {% elif request.GET.evento == "elimina" %}
+    <script>
+        showBootstrapAlertWithIcon(
+            "Annuncio eliminato con successo!","good"
+        );
+    </script>
+    {% elif request.GET.evento == 'mod_annuncio' %}
+        <script>
+            showBootstrapAlertWithIcon(
+                "Annuncio modificato con successo!","good"
+            );
+        </script>
+    {% elif request.GET.evento == "iban_imp" %}
+    <script>
+        showBootstrapAlertWithIcon(
+            "IBAN impostato con successo!","good"
+        );
+    </script>
+    {% endif %}
 {% endif %}
 <div class="container-fluid mt-5 mb-5">
     <div class="row justify-content-center">
@@ -91,8 +93,7 @@
                     </tbody>
                 </table>
             </div>
-                <!-- Include della paginazione -->
-                {% include "_btn_paginazione.html" %}
+            {% include "_btn_paginazione.html" %}
             {% else %}
                 <div class="alert alert-info">Non hai ancora creato alcun annuncio.</div>
             {% endif %}

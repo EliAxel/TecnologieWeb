@@ -17,12 +17,13 @@ urlpatterns = [
     path("account/profilo/annunci/", views.ProfiloAnnunciPageView.as_view(), name="profile_annunci"),
     path("account/profilo/annunci/crea/", views.ProfiloCreaAnnuncioPageView.as_view(), name="crea_annuncio"),
     path("account/profilo/annunci/modifica/<int:annuncio_id>/", views.ProfiloModificaAnnuncioPageView.as_view(), name="modifica_annuncio"),
-    path("account/profilo/annunci/nascondi/<int:id>/", views.toggle_pubblicazione , name="nascondi_annuncio"),
-    path("account/profilo/annunci/elimina/<int:id>/", views.delete_pubblicazione, name="elimina_annuncio"),
     path("account/profilo/clienti/",views.ProfiloClientiPageView.as_view(), name="profile_clienti"),
     path("annuncio/<str:uuid>/", views.AnnuncioDetailView.as_view(), name="dettagli_annuncio"),
     path("ricerca/", views.RicercaAnnunciView.as_view(), name="ricerca_annunci"),
     # fbv
+    
+    path("account/profilo/annunci/nascondi/<int:id>/", views.toggle_pubblicazione , name="nascondi_annuncio"),
+    path("account/profilo/annunci/elimina/<int:id>/", views.delete_pubblicazione, name="elimina_annuncio"),
     path('check_old_password/', views.check_old_password, name='check_old_password'),
     path("check_username_exists/", views.check_username_exists, name="check_username_exists"),
     path("check_login_credentials/", views.check_login_credentials, name="check_login_credentials"),

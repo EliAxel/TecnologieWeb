@@ -2,19 +2,21 @@
 {% block title %}Clienti - Sylvelius{% endblock %}
 {% load static %}
 {% block avvisi %}
-    <script src="{% static 'js/toast.js' %}"></script>
-    {% if request.GET.evento == 'spedito_ordine' %}
-        <script>
-            showBootstrapAlertWithIcon(
-                "Ordine spedito con successo!","good"
-            );
-        </script>
-    {% elif request.GET.evento == 'completato_ordine' %}
-        <script>
-            showBootstrapAlertWithIcon(
-                "Ordine completato con successo!","good"
-            );
-        </script>
+    {% if request.GET.evento %}
+        <script src="{% static 'js/toast.js' %}"></script>
+        {% if request.GET.evento == 'spedito_ordine' %}
+            <script>
+                showBootstrapAlertWithIcon(
+                    "Ordine spedito con successo!","good"
+                );
+            </script>
+        {% elif request.GET.evento == 'completato_ordine' %}
+            <script>
+                showBootstrapAlertWithIcon(
+                    "Ordine completato con successo!","good"
+                );
+            </script>
+        {% endif %}
     {% endif %}
 {% endblock %}
 {% block nome %}clienti{% endblock %}

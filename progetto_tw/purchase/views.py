@@ -1,36 +1,25 @@
-from django.contrib.auth.decorators import login_required
-from django.urls import reverse, reverse_lazy
-from django.views import View
-from django.views.generic import TemplateView
-from django.http import HttpResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
-from django.shortcuts import get_object_or_404, render, redirect
-from django.core.exceptions import ValidationError
-
-# Project specific
 from django.conf import settings
-from sylvelius.models import (
-    Ordine,
-    Annuncio
-)
-from sylvelius.views import create_notification
-from .models import Invoice, Iban, Cart
-from progetto_tw.mixins import CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin
-# Other
-import json
-import uuid
-import re
-import requests
-from decimal import Decimal
-from requests.auth import HTTPBasicAuth
-
-#non callable
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views import View
-from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from django.views.generic import TemplateView
+
+from sylvelius.models import Ordine, Annuncio
+from sylvelius.views import create_notification
+from .models import Invoice, Iban, Cart
+from progetto_tw.mixins import CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin
+
+import json
+import re
+import requests
+import uuid
+from decimal import Decimal
+from requests.auth import HTTPBasicAuth
 
 def validate_quantity(quantity, annuncio):
     """Valida la quantità e restituisce un redirect in caso di errore o None se tutto ok."""
@@ -75,7 +64,6 @@ def get_invoice_data(request):
     quantity = request.POST.get("quantita")
     if not quantity:
         quantity = request.GET.get("quantita")
-    # Validazione quantità
     error_redirect = validate_quantity(quantity, annuncio)
     if error_redirect:
         return None, None, error_redirect
@@ -112,8 +100,7 @@ def payment_cancelled(request):
 def get_paypal_access_token():
     xxx = settings.xxx
     xxx = settings.xxx
-    PAYPAL_API_BASE = "https://api-m.sandbox.paypal.com"  # o sandbox
-
+    PAYPAL_API_BASE = "https://api-m.sandbox.paypal.com"  
     response = requests.post(
         f"{PAYPAL_API_BASE}/v1/oauth2/token",
         data={"grant_type": "client_credentials"},
@@ -127,7 +114,6 @@ def verify_paypal_webhook(request,body):
     webhook_event = json.loads(body)
     event_type = webhook_event.get("event_type")
 
-    # Scegli il webhook_id corretto in base all'evento
     if event_type == "CHECKOUT.ORDER.APPROVED":
         webhook_id = settings.PAYPAL_COA_ID
     else:
@@ -232,7 +218,7 @@ def paypal_coa(request):
         if not purchase_units:
             return HttpResponse(status=400)
 
-        pu = purchase_units[0]  # prendi il primo purchase unit
+        pu = purchase_units[0]
         invoice_id = pu.get('invoice_id')
 
         invoice_obj = None
@@ -249,7 +235,6 @@ def paypal_coa(request):
         if invoice_obj:
             return invoice_validation(invoice_obj, pu)
         else:
-            # Per ogni invoice associata al carrello, processa come sopra
             invoices = Invoice.objects.filter(cart=cart_obj)
             response = None
             for inv in invoices:
@@ -270,17 +255,13 @@ class SetupIban(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin,Templat
         return context
 
     def validate_iban(self,iban):
-        # Rimuovi spazi e converti in maiuscolo
         iban = iban.replace(' ', '').upper()
         
-        # Verifica la struttura base con regex
         if not re.match(r'^[A-Z]{2}\d{2}[A-Z0-9]{1,30}$', iban):
             raise ValidationError('iban_form')
         
-        # Sposta i primi 4 caratteri alla fine
         rearranged = iban[4:] + iban[:4]
         
-        # Converti le lettere in numeri (A=10, B=11, ..., Z=35)
         digits = []
         for char in rearranged:
             if char.isdigit():
@@ -288,7 +269,6 @@ class SetupIban(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin,Templat
             else:
                 digits.append(str(10 + ord(char) - ord('A')))
         
-        # Unisci tutto in una stringa numerica e calcola il modulo 97
         numeric_iban = int(''.join(digits))
         if numeric_iban % 97 != 1:
             raise ValidationError('iban_contr')
@@ -299,10 +279,8 @@ class SetupIban(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin,Templat
         try:
             self.validate_iban(iban)
             Iban.objects.update_or_create(utente=request.user,defaults={'iban':iban})
-            # Restituisci una risposta di successo
         except ValidationError as e:
             error_message = e.messages[0] if e.messages else str(e)
-            # Restituisci una risposta di errore con il messaggio
             return render(request, self.template_name, {'evento': error_message})
         return redirect(f'{reverse("sylvelius:profile_annunci")}?evento=iban_imp')
 
@@ -345,8 +323,8 @@ class CheckoutPageView(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin,
                 try:
                     Annuncio.objects.get(prodotto=invoice.prodotto)
                 except Annuncio.DoesNotExist:
-                    # Elimina tutte le invoice con lo stesso prodotto
                     Invoice.objects.filter(prodotto=invoice.prodotto, cart=self.request.user.cart).delete() #type:ignore
+            
             context['cart'] = self.request.user.cart  #type:ignore
             context['amount'] = self.request.user.cart.total #type:ignore
             context['paypal_client_id'] = settings.xxx
@@ -357,7 +335,6 @@ def controlla_annuncio_e_quantita(invoice, incremento=1):
     try:
         annuncio = Annuncio.objects.get(prodotto=invoice.prodotto)
     except Annuncio.DoesNotExist:
-        # Elimina tutte le invoice con lo stesso prodotto
         Invoice.objects.filter(prodotto=invoice.prodotto, utente=invoice.utente).delete()
         return redirect(
             reverse("purchase:carrello") +
@@ -366,7 +343,6 @@ def controlla_annuncio_e_quantita(invoice, incremento=1):
 
     nuova_quantita = invoice.quantita + incremento
     if nuova_quantita > annuncio.qta_magazzino:
-        # Imposta la quantità massima disponibile
         invoice.quantita = annuncio.qta_magazzino
         invoice.save()
         return redirect(
@@ -392,7 +368,6 @@ def aumenta_carrello(request, invoice_id):
 @login_required
 def diminuisci_carrello(request, invoice_id):
     invoice = get_object_or_404(Invoice, invoice_id=invoice_id, utente=request.user)
-    # Per diminuzione, non serve controllo magazzino, ma serve controllo esistenza annuncio
     error_redirect, annuncio = controlla_annuncio_e_quantita(invoice, incremento=-1)
     if error_redirect:
         return error_redirect
