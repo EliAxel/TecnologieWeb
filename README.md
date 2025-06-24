@@ -10,6 +10,9 @@ Installazione:
 8. Infine digitare, se su Windows "python.exe .\manage.py runserver" o se su Linux/GNU "python.exe ./manage.py runserver"
 9. Sul browser, cercare nella barra degli indirizzi localhost:8000
 
+Note:
+- PayPal NON funzionerà, mancano le credenziali segrete in .env
+
 Programmi supportati:
 - Python 3.10, 3.11, 3.12
 - Django 5.2.1
