@@ -23,7 +23,6 @@ Programmi supportati:
 - daphne 4.2.0 (server ASGI)
 - pillow 11.2.1 (gestione immagini)
 - python-dotenv 1.1.0 (gestione files .env)
-Le dipendenze varie sono in requirements.txt o Pipfile
 
 Librerie usate:
 - django.*
