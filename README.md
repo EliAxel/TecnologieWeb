@@ -39,3 +39,9 @@ Librerie per il testing:
 - tempfile (generazione file temporanei)
 - shutil (rimozione ad albero file temporanei)
 - unittest.*
+
+Scripts lato template:
+- bootstrap 4.6.1 (abbellimento con css e js)
+- bootstrap-icons 1.10.5 (icone)
+- jquery 3.6.0 (animazioni)
+- paypal (pagamenti)
