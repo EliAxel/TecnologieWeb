@@ -22,7 +22,6 @@ from decimal import Decimal
 from requests.auth import HTTPBasicAuth
 
 def validate_quantity(quantity, annuncio):
-    """Valida la quantità e restituisce un redirect in caso di errore o None se tutto ok."""
     try:
         quantity = int(quantity)
     except ValueError:
@@ -45,7 +44,6 @@ def validate_quantity(quantity, annuncio):
     return None
 
 def create_invoice(request, annuncio, quantity, cart=None):
-    """Crea una nuova fattura e la associa eventualmente a un carrello."""
     invoice_obj = Invoice.objects.create(
         invoice_id=str(uuid.uuid4()),
         utente=request.user,
@@ -56,7 +54,6 @@ def create_invoice(request, annuncio, quantity, cart=None):
     return invoice_obj
 
 def get_invoice_data(request):
-    """Elabora i dati della richiesta e restituisce annuncio, quantità e eventuale errore."""
     annuncio_id = request.POST.get("annuncio_id")
     if not annuncio_id:
         annuncio_id = request.GET.get("annuncio_id")

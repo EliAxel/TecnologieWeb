@@ -540,7 +540,6 @@ class SetUpIBANTests(TestCase):
         self.template_name = 'purchase/setup_iban.html'
 
     def test_get_context_data_authenticated_user_without_iban(self):
-        """Test that context contains user but no iban when user has no iban"""
         request = self.factory.get(self.url)
         request.user = self.user
         
@@ -551,7 +550,6 @@ class SetUpIBANTests(TestCase):
         self.assertNotIn('iban', context)
 
     def test_get_context_data_authenticated_user_with_iban(self):
-        """Test that context contains both user and iban when user has iban"""
         iban_obj = Iban.objects.create(utente=self.user, iban='GB82WEST12345698765432')
         
         request = self.factory.get(self.url)
@@ -585,7 +583,6 @@ class SetUpIBANTests(TestCase):
             # Ripristina la funzione originale
             view.validate_iban = original_validate
     def test_post_valid_iban(self):
-        """Test that a valid IBAN is saved and redirects"""
         self.client.force_login(self.user)
         valid_iban = 'GB82WEST12345698765432'
         
@@ -595,7 +592,6 @@ class SetUpIBANTests(TestCase):
         self.assertRedirects(response, f"{reverse('sylvelius:profile_annunci')}?evento=iban_imp")
 
     def test_post_invalid_iban_format(self):
-        """Test that invalid IBAN format returns error message"""
         self.client.force_login(self.user)
         invalid_iban = 'INVALID_IBAN'
         
@@ -607,7 +603,6 @@ class SetUpIBANTests(TestCase):
         self.assertEqual(response.context['evento'], 'iban_form')
 
     def test_post_invalid_iban_checksum(self):
-        """Test that IBAN with invalid checksum returns error message"""
         self.client.force_login(self.user)
         invalid_checksum_iban = 'GB82WEST12345698765433'
         
@@ -619,7 +614,6 @@ class SetUpIBANTests(TestCase):
         self.assertEqual(response.context['evento'], 'iban_contr')
 
     def test_post_updates_existing_iban(self):
-        """Test that posting updates existing IBAN"""
         Iban.objects.create(utente=self.user, iban='GB82WEST12345698765432')
         self.client.force_login(self.user)
         new_iban = 'DE89370400440532013000'
