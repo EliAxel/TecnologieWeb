@@ -60,7 +60,8 @@ from progetto_tw.constants import (
     MAX_ANNUNCI_PER_DETTAGLI_VALUE,
     MAX_PAGINATOR_COMMENTI_DETTAGLI_VALUE,
     MAX_PAGINATOR_COMMENTI_ANNUNCIO_VALUE,
-    PROD_CONDIZIONE_CHOICES_ID
+    PROD_CONDIZIONE_CHOICES_ID,
+    _MODS_GRP_NAME
 )
 # Other
 import json
@@ -248,7 +249,7 @@ class ProfiloPageView(CustomLoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        if self.request.user.groups.filter(name='moderatori').exists():
+        if self.request.user.groups.filter(name=_MODS_GRP_NAME).exists():
             user_without_is_active_list = User.objects.filter(is_active=False).order_by('username')
             
             paginator = Paginator(user_without_is_active_list, MAX_PAGINATOR_BANNED_USERS_VALUE)  # 10 utenti per pagina
@@ -303,14 +304,14 @@ class ProfiloDetailsPageView(View):
 
     def get(self, request, user_profile):
         context = {}
-        if request.user.groups.filter(name='moderatori').exists():
+        if request.user.groups.filter(name=_MODS_GRP_NAME).exists():
             user = get_object_or_404(User, username=user_profile)
             annunci = Annuncio.objects.filter(inserzionista=user).annotate(avg_rating=Avg('commenti__rating')).order_by('-avg_rating')
         else:
             user = get_object_or_404(User, username=user_profile, is_active=True)
             annunci = Annuncio.objects.filter(inserzionista=user,is_published=True).annotate(avg_rating=Avg('commenti__rating')).order_by('-avg_rating')
             # Impedisci agli utenti base di vedere i profili dei moderatori
-            if user.groups.filter(name='moderatori').exists():
+            if user.groups.filter(name=_MODS_GRP_NAME).exists():
                 return HttpResponse(status=404)
         commenti = CommentoAnnuncio.objects.filter(utente=user,annuncio__inserzionista__is_active=True).order_by('-data_pubblicazione')
         paginator = Paginator(commenti, MAX_PAGINATOR_COMMENTI_DETTAGLI_VALUE) 
@@ -429,7 +430,7 @@ class AnnuncioDetailView(TemplateView):
         context = super().get_context_data(**kwargs)
         user = self.request.user
         annuncio_uuid = self.kwargs['uuid']
-        if self.request.user.groups.filter(name='moderatori').exists():
+        if self.request.user.groups.filter(name=_MODS_GRP_NAME).exists():
             annuncio = get_object_or_404(Annuncio, uuid=annuncio_uuid)
         else:
             annuncio = get_object_or_404(Annuncio, uuid=annuncio_uuid, is_published=True,inserzionista__is_active=True)
@@ -439,7 +440,7 @@ class AnnuncioDetailView(TemplateView):
             utente=user
         ).first() if user.is_authenticated else None
 
-        if self.request.user.groups.filter(name='moderatori').exists():
+        if self.request.user.groups.filter(name=_MODS_GRP_NAME).exists():
             if annUt:
                 commenti = CommentoAnnuncio.objects.filter(
                     annuncio=annuncio
@@ -714,7 +715,7 @@ class RicercaAnnunciView(TemplateView):
                 annunci = annunci.filter(prodotto__tags__nome=tag)
         
         if inserzionista != '':
-            if self.request.user.groups.filter(name='moderatori').exists():
+            if self.request.user.groups.filter(name=_MODS_GRP_NAME).exists():
                 annunci = annunci.filter(inserzionista__username=inserzionista)
             else:
                 annunci = annunci.filter(inserzionista__username=inserzionista,inserzionista__is_active=True,is_published=True)
@@ -810,7 +811,7 @@ def toggle_pubblicazione(request, id):
 @require_POST
 @login_required
 def delete_pubblicazione(request, id):
-    if request.user.groups.filter(name='moderatori').exists():
+    if request.user.groups.filter(name=_MODS_GRP_NAME).exists():
         annuncio = get_object_or_404(Annuncio, id=id)
         annuncio.delete()  
         return redirect(f'{reverse("sylvelius:home")}?evento=elimina_pub')
@@ -925,7 +926,7 @@ def modifica_commento(request, commento_id):
 @require_POST
 @login_required
 def elimina_commento(request, commento_id):
-    if request.user.groups.filter(name='moderatori').exists():
+    if request.user.groups.filter(name=_MODS_GRP_NAME).exists():
         commento = get_object_or_404(CommentoAnnuncio, id=commento_id)
         commento.delete()
     else:
@@ -936,7 +937,7 @@ def elimina_commento(request, commento_id):
 @require_POST
 @login_required
 def espelli_utente(request, is_active, user_id):
-    if request.user.groups.filter(name='moderatori').exists():
+    if request.user.groups.filter(name=_MODS_GRP_NAME).exists():
         user = get_object_or_404(User, id=user_id)
         user.is_active = False if is_active=='ban' else True
         user.save()
@@ -947,7 +948,7 @@ def espelli_utente(request, is_active, user_id):
 @require_POST
 @login_required
 def formatta_utente(request, user_id):
-    if request.user.groups.filter(name='moderatori').exists():
+    if request.user.groups.filter(name=_MODS_GRP_NAME).exists():
         user = get_object_or_404(User, id=user_id)
         if(not user.is_active):
             ordini_ex = Ordine.objects.filter(

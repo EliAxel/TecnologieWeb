@@ -191,10 +191,10 @@
             {% if ha_acquistato and non_ha_commentato %}
                 {% url 'sylvelius:aggiungi_commento' annuncio.id as create_url%}
                 {% include "_card_nuovo_commento.html" with direction=create_url %}
-                <hr class="my-4 border-secondary">
+                <hr class="my-4 border-secondary" style="width: 80%;">
             {% elif not non_ha_commentato %}
                 {% include "_card_commento.html" with commento=get_commento %}
-                <hr class="my-4 border">
+                <hr class="my-4 border" style="width: 80%;">
             {% endif %}
 
             {% for commento in commenti %}
@@ -208,6 +208,7 @@
 </div>
 
 <script src="{% static 'js/imgs_loader.js' %}"></script>
+{% if 'moderatori' not in user.groups.values_list|join:',' %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const MIN_ORDN_QUANTITA_VALUE = {{MIN_ORDN_QUANTITA_VALUE}}
@@ -279,4 +280,5 @@
         {% endif %}
     });
 </script>
+{% endif %}
 {% endblock %}

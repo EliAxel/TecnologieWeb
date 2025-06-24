@@ -57,6 +57,7 @@
 </div>
 
 <!-- PayPal Smart Buttons Script -->
+{% block paypalscript %}
 <script src="https://www.paypal.com/sdk/js?client-id={{ paypal_client_id }}&currency=EUR"></script>
 <script>
     paypal.Buttons({
@@ -90,5 +91,5 @@
 }).render('#paypal-button-container');
 
 </script>
-
+{% endblock %}
 {% endblock %}

@@ -12,10 +12,10 @@ from sylvelius.models import (
 from .models import Iban, Invoice, Cart
 from .views import SetupIban, get_paypal_access_token, verify_paypal_webhook
 from progetto_tw.t_ests_constants import NEXT_PROD_ID
+from progetto_tw.constants import _MODS_GRP_NAME
 import json
 from unittest.mock import patch, MagicMock
 import requests
-from django.conf import settings
 
 # Create your tests here.
 class AnonUrls(TestCase):
@@ -38,7 +38,7 @@ class AnonUrls(TestCase):
 class LoggedUrls(TestCase):
     def setUp(self):
         user = User.objects.create_user(username='testuser', password='Testpass0')
-        group, created = Group.objects.get_or_create(name='moderatori')
+        group, created = Group.objects.get_or_create(name=_MODS_GRP_NAME)
         user.groups.add(group)
         self.client.login(username='testuser', password='Testpass0')
     

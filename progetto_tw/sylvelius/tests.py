@@ -5,7 +5,7 @@ from django.contrib.auth.models import User, Group,AnonymousUser
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from django.conf import settings
-from django.http import HttpResponse, JsonResponse, Http404
+from django.http import HttpResponse, JsonResponse
 from django.core.exceptions import PermissionDenied
 
 # Standard library imports
@@ -24,11 +24,10 @@ from .models import (
     Ordine, Tag, Prodotto, Notification
 )
 from .views import (
-    RicercaAnnunciView, ProfiloDetailsPageView, send_notification, 
+    RicercaAnnunciView, send_notification, 
     mark_notifications_read, create_notification, annulla_ordine_free, 
     check_if_annuncio_is_valid, annulla_ordine
 )
-from .api_views import notifications_api
 from sylvelius.forms import CustomUserCreationForm
 from progetto_tw.mixins import ModeratoreAccessForbiddenMixin
 from purchase.models import Invoice
@@ -39,7 +38,8 @@ from progetto_tw.constants import (
     MAX_PWD_CHARS,
     MAX_PAGINATOR_RICERCA_VALUE,
     MAX_PAGINATOR_COMMENTI_DETTAGLI_VALUE,
-    MAX_ANNUNCI_PER_DETTAGLI_VALUE
+    MAX_ANNUNCI_PER_DETTAGLI_VALUE,
+    _MODS_GRP_NAME
 )
 class AnonUrls(TestCase):
 
@@ -306,7 +306,7 @@ class ModelsTestingStringsCoverage(TestCase):
 class LoggedUrls2(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='testuser', password='Testpass0')
-        self.group, created = Group.objects.get_or_create(name='moderatori')
+        self.group, created = Group.objects.get_or_create(name=_MODS_GRP_NAME)
         self.user.groups.add(self.group)
         self.client.login(username='testuser', password='Testpass0')
     
@@ -356,7 +356,7 @@ class UtilityFunctionsTests(TestCase):
         self.client = Client()
         
         # Crea un gruppo moderatori se non esiste
-        self.moderator_group, _ = Group.objects.get_or_create(name='moderatori')
+        self.moderator_group, _ = Group.objects.get_or_create(name=_MODS_GRP_NAME)
         
         # Configurazione per i test con immagini
         self.temp_media_dir = tempfile.mkdtemp()
@@ -607,7 +607,7 @@ class ViewTests(TestCase):
         self.user2 = User.objects.create_user(
             username='testuser2', password='testpass123'
         )
-        self.group = Group.objects.create(name='moderatori')
+        self.group = Group.objects.create(name=_MODS_GRP_NAME)
         self.client = Client()
         
         # Crea un prodotto e un annuncio per i test
@@ -741,7 +741,7 @@ class ViewTests(TestCase):
         moderator = User.objects.create_user(
             username='moderator', password='modpass123'
         )
-        moderator_group = Group.objects.get(name='moderatori')
+        moderator_group = Group.objects.get(name=_MODS_GRP_NAME)
         moderator.groups.add(moderator_group)
         
         self.client.login(username='moderator', password='modpass123')
@@ -1052,7 +1052,7 @@ class FunctionBasedViewTests(TestCase):
         self.user = User.objects.create_user(
             username='testuser', password='testpass123'
         )
-        self.groups = Group.objects.create(name='moderatori')
+        self.groups = Group.objects.create(name=_MODS_GRP_NAME)
         self.client = Client()
         
         # Crea un prodotto e un annuncio per i test
@@ -1388,7 +1388,7 @@ class FunctionBasedViewTests(TestCase):
         moderator = User.objects.create_user(
             username='moderator', password='modpass123'
         )
-        moderator_group = Group.objects.get(name='moderatori')
+        moderator_group = Group.objects.get(name=_MODS_GRP_NAME)
         moderator.groups.add(moderator_group)
         
         self.client.login(username='moderator', password='modpass123')
@@ -1437,7 +1437,7 @@ class FunctionBasedViewTests(TestCase):
         moderator = User.objects.create_user(
             username='moderator', password='modpass123'
         )
-        moderator_group = Group.objects.get(name='moderatori')
+        moderator_group = Group.objects.get(name=_MODS_GRP_NAME)
         moderator.groups.add(moderator_group)
         
         self.client.login(username='moderator', password='modpass123')
@@ -1812,7 +1812,7 @@ class ProfiloEditTests(TestCase):
         self.user = User.objects.create_user(
             username='testuser', password='testpass123'
         )
-        self.group = Group.objects.create(name='moderatori')
+        self.group = Group.objects.create(name=_MODS_GRP_NAME)
         self.client = Client()
         
         # Crea un prodotto e un annuncio per i test
@@ -2433,7 +2433,7 @@ class RicercaAnnunciViewTest(TestCase):
     def test_filtro_inserzionista_con_moderatore(self):
         # Creiamo un utente moderatore
         moderator = get_user_model().objects.create_user(username='moderator', password='12345')
-        moderator.groups.create(name='moderatori')
+        moderator.groups.create(name=_MODS_GRP_NAME)
         
         # Creiamo un annuncio non pubblicato
         prod_privato = Prodotto.objects.create(
@@ -2534,7 +2534,7 @@ class TestModeratoreAccessForbiddenMixin(TestCase):
         cls.moderatore_user = User.objects.create_user(username='moderatore', password='test123')
         
         # Creazione gruppo moderatori
-        moderatori_group = Group.objects.create(name='moderatori')
+        moderatori_group = Group.objects.create(name=_MODS_GRP_NAME)
         cls.moderatore_user.groups.add(moderatori_group)
         
         # View di test che usa il mixin
@@ -2567,7 +2567,7 @@ class TestModeratoreAccessForbiddenMixin(TestCase):
             self.test_view(request)
 
     def test_controllo_gruppo_moderatori(self):
-        """Verifica che il controllo funzioni solo per il gruppo 'moderatori'"""
+        """Verifica che il controllo funzioni solo per il gruppo _MODS_GRP_NAME"""
         # Creiamo un altro gruppo e utente
         altro_group = Group.objects.create(name='altro_gruppo')
         user = User.objects.create_user(username='altro', password='test123')
@@ -2596,7 +2596,7 @@ class ProfiloDetailsPageViewTest(TestCase):
         )
         
         # Crea gruppo moderatori e aggiungi l'utente moderatore
-        moderator_group = Group.objects.create(name='moderatori')
+        moderator_group = Group.objects.create(name=_MODS_GRP_NAME)
         self.moderator_user.groups.add(moderator_group)
         
         # Crea prodotti e annunci
@@ -2691,7 +2691,7 @@ class ProfiloDetailsPageViewTest(TestCase):
             password='modpass123',
             is_active=True
         )
-        another_moderator.groups.add(Group.objects.get(name='moderatori'))
+        another_moderator.groups.add(Group.objects.get(name=_MODS_GRP_NAME))
         
         url = reverse('sylvelius:dettagli_profilo', kwargs={'user_profile': another_moderator.username})
         self.client.force_login(self.moderator_user)

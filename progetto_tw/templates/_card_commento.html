@@ -59,7 +59,7 @@
               });
             </script>
             {% endif %}
-            {% elif commento.utente == request.user %}
+          {% elif commento.utente == request.user %}
             <small id="modifica-commento-{{ commento.id }}" data-comment-id="{{ commento.id }}" class="ml-2 text-muted" style="cursor: pointer;">Modifica</small>
             <small id="cancella-commento-{{ commento.id }}" data-comment-id="{{ commento.id }}" class="ml-2 text-danger" style="cursor: pointer;">Elimina</small>
 
@@ -83,6 +83,7 @@
               });
             </script>
           {% endif %}
+          {% if commento.utente == request.user or 'moderatori' in user.groups.values_list|join:',' %}
           <script>
               document.getElementById("cancella-commento-{{ commento.id }}").addEventListener("click", function() {
                 const confirmSubmit = confirm("Sei sicuro di voler eliminare questo commento?");
@@ -113,7 +114,8 @@
                 });
               });
             </script>
-        </div>
+            {% endif %}
+          </div>
         <p class="mb-0" style="word-break: break-word;">{{ commento.testo }}</p>
       </div>
     </div>

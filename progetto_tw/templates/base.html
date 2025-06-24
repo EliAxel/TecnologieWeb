@@ -26,7 +26,7 @@
     {% endblock %}
         <div class="container-fluid">
             <!-- Logo (sempre allineato a sinistra) -->
-            <a class="navbar-brand text-white d-flex align-items-center mr-auto" href="{% url 'sylvelius:home' %}" style="font-family: 'Copperplate', 'Copperplate Gothic Light', fantasy; font-size: 1.1rem; font-weight: bold;">
+            <a class="navbar-brand d-flex align-items-center mr-auto" href="{% url 'sylvelius:home' %}">
                 <img src="{% if 'moderatori' in user.groups.values_list|join:',' %}
                     {% static 'img/splash_art_admin.png' %}
                 {% else %}
