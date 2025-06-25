@@ -1,9 +1,9 @@
 # Sylvelius
 Installazione:
 1. Clonare l'intero progetto in una cartella
-2. Installare python ad una versione superiore alla 3.10 (progetto testato fino alla versione 3.12)
+2. Installare python ad una versione uguale o superiore alla 3.10 (progetto testato fino alla versione 3.12 compresa)
 3. Installare pipenv alla versione 2025.0.3 o superiori
-4. Eseguire da riga di comando nella stessa cartella contenente Pipfile e Pipfile.lock "pipenv install"
+4. Eseguire da riga di comando nella stessa cartella contenente Pipfile e Pipfile.lock "pipenv install" dopo aver impostato su Pipfile la versione di python scelta fra le disponibili
 5. Eseguire "pipenv shell"
 6. Successivamente se su Windows, digitare "cd .\progetto_tw\", altrimenti su Linux/GNU "cd ./progetto_tw/"
 7. Andare a ./progetto_tw/urls.py e commentare sia delete_db() che init_db()
