@@ -72,6 +72,11 @@ from .models import (
     Tag,
 )
 
+@require_POST
+@login_required
+def mark_notifications_read(request):
+    Notification.objects.filter(recipient=request.user, read=False).update(read=True)
+    return JsonResponse({'status': 'ok'})
 #non callable
 def send_notification(user_id=None,title="", message="", global_notification=False):
     channel_layer = get_channel_layer()
@@ -84,10 +89,6 @@ def send_notification(user_id=None,title="", message="", global_notification=Fal
         async_to_sync(channel_layer.group_send)( #type: ignore
             f"user_{user_id}", {"type": "send_notification", "title":title, "message": message}
         )
-@require_POST
-def mark_notifications_read(request):
-    Notification.objects.filter(recipient=request.user, read=False).update(read=True)
-    return JsonResponse({'status': 'ok'})
 #non callable
 def create_notification(recipient=None, title="", message="", is_global=False, sender=None):
     # Salva nel database
@@ -229,7 +230,7 @@ class RegistrazionePageView(CreateView):
         return response
     
     def form_invalid(self, form):
-        return HttpResponseRedirect(reverse('sylvelius:register') + '?auth=evento')
+        return HttpResponseRedirect(reverse('sylvelius:register') + '?auth=notok')
     
     def get_success_url(self):
             return reverse('sylvelius:login') + '?reg=ok'

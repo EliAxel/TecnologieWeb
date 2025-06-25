@@ -76,7 +76,10 @@ class PurchasePageView(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin,
         if error_redirect:
             return error_redirect
         
-        invoice = create_invoice(request, annuncio, quantity)
+        carrello, created = Cart.objects.get_or_create(utente=request.user)
+        if created:
+            carrello.uuid = f'{uuid.uuid4()}'
+        invoice = create_invoice(request, annuncio, quantity, carrello)
         product = annuncio.prodotto # type: ignore
         
         context = {
