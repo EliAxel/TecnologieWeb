@@ -596,7 +596,7 @@ class ViewTests(TestCase):
         self.user2 = User.objects.create_user(
             username='testuser2', password='testpass123'
         )
-        self.group = Group.objects.create(name=_MODS_GRP_NAME)
+        self.group, _ = Group.objects.get_or_create(name=_MODS_GRP_NAME)
         self.client = Client()
         
         self.tag = Tag.objects.create(nome='test')
@@ -1004,7 +1004,7 @@ class FunctionBasedViewTests(TestCase):
         self.user = User.objects.create_user(
             username='testuser', password='testpass123'
         )
-        self.groups = Group.objects.create(name=_MODS_GRP_NAME)
+        self.groups, _ = Group.objects.get_or_create(name=_MODS_GRP_NAME)
         self.client = Client()
         
         self.prodotto = Prodotto.objects.create(
@@ -1701,7 +1701,7 @@ class ProfiloEditTests(TestCase):
         self.user = User.objects.create_user(
             username='testuser', password='testpass123'
         )
-        self.group = Group.objects.create(name=_MODS_GRP_NAME)
+        self.group, _ = Group.objects.get_or_create(name=_MODS_GRP_NAME)
         self.client = Client()
         
         self.tag = Tag.objects.create(nome='test')
@@ -1851,7 +1851,7 @@ class RicercaAnnunciViewTest(TestCase):
         cls.user2 = get_user_model().objects.create_user(username='inactiveuser', password='12345', is_active=False)
         
         # Creazione gruppo moderatori
-        cls.moderator_group = Group.objects.create(name=_MODS_GRP_NAME)
+        cls.moderator_group, _ = Group.objects.get_or_create(name=_MODS_GRP_NAME)
         cls.moderator = get_user_model().objects.create_user(username='moderator', password='12345')
         cls.moderator.groups.add(cls.moderator_group)
         
@@ -2281,7 +2281,7 @@ class RicercaAnnunciModeratoreTest(TestCase):
         cls.user = get_user_model().objects.create_user(username='testuser', password='12345')
         
         # Crea gruppo moderatori e utente moderatore
-        cls.moderator_group = Group.objects.create(name=_MODS_GRP_NAME)
+        cls.moderator_group, _ = Group.objects.get_or_create(name=_MODS_GRP_NAME)
         cls.moderator = get_user_model().objects.create_user(username='moderator', password='12345')
         cls.moderator.groups.add(cls.moderator_group)
         
@@ -2372,7 +2372,7 @@ class TestModeratoreAccessForbiddenMixin(TestCase):
         cls.normal_user = User.objects.create_user(username='normale', password='test123')
         cls.moderatore_user = User.objects.create_user(username='moderatore', password='test123')
         
-        moderatori_group = Group.objects.create(name=_MODS_GRP_NAME)
+        moderatori_group, _ = Group.objects.get_or_create(name=_MODS_GRP_NAME)
         cls.moderatore_user.groups.add(moderatori_group)
         
         class TestView(ModeratoreAccessForbiddenMixin, View):
@@ -2430,7 +2430,7 @@ class ProfiloDetailsPageViewTest(TestCase):
             is_active=True
         )
         
-        moderator_group = Group.objects.create(name=_MODS_GRP_NAME)
+        moderator_group, _ = Group.objects.get_or_create(name=_MODS_GRP_NAME)
         self.moderator_user.groups.add(moderator_group)
         
         self.prodotto1 = Prodotto.objects.create(

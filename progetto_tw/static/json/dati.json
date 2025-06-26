@@ -11,9 +11,16 @@
     "password": "Sylvi001"
   },
   {
+    "id": 3,
+    "username": "Adam",
+    "password": "Aduser01",
+    "group": "moderatori"
+  },
+  {
     "id": 1,
     "username": "EliAxel",
-    "password": "Eliama01"
+    "password": "Eliama01",
+    "staff": "True"
   }
   ],
   "prodotti": [

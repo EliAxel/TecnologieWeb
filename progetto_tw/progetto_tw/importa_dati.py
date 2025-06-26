@@ -1,8 +1,9 @@
 import json
 import uuid
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from sylvelius.models import Annuncio, CommentoAnnuncio, ImmagineProdotto, Ordine, Tag, Prodotto, Notification
 from purchase.models import Invoice, Cart
+from progetto_tw.constants import _MODS_GRP_NAME
 
 def delete_db():
     ImmagineProdotto.objects.all().delete()
@@ -30,6 +31,17 @@ def init_db():
         if created:
             user.set_password(users['password'])
             user.save()
+        
+        mod = users.get('group')
+        if mod:
+            grp, _ = Group.objects.get_or_create(name=_MODS_GRP_NAME)
+            user.groups.add(grp)
+        
+        staff = users.get('staff')
+        if staff:
+            user.is_staff = True
+            user.is_superuser = True
+            user.save(force_update=True)
     
     # Importa Prodotti
     for prodotto_data in dati.get('prodotti', []):
