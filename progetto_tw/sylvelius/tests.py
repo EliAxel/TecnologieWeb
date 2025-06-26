@@ -343,10 +343,13 @@ class UtilityFunctionsTests(TestCase):
         self.user = User.objects.create_user(
             username='testuser', password='testpass123'
         )
+        self.usermod = User.objects.create_user(
+            username='moduser', password='testpass123'
+        )
         self.client = Client()
         
         self.moderator_group, _ = Group.objects.get_or_create(name=_MODS_GRP_NAME)
-        
+        self.usermod.groups.add(self.moderator_group)
         self.temp_media_dir = tempfile.mkdtemp()
         settings.MEDIA_ROOT = self.temp_media_dir
         
@@ -423,6 +426,22 @@ class UtilityFunctionsTests(TestCase):
             prodotto=prodotto,
             stato_consegna='da spedire'
         )
+        prodotto2 = Prodotto.objects.create(
+            nome="Prodotto Test",
+            descrizione_breve="Descrizione breve",
+            prezzo=10.00
+        )
+        annuncio2 = Annuncio.objects.create(
+            inserzionista=venditore,
+            prodotto=prodotto2,
+            qta_magazzino=5
+        )
+        
+        ordine2 = Ordine.objects.create(
+            utente=self.user,
+            prodotto=prodotto2,
+            stato_consegna='spedito'
+        )
         
         request = self.factory.post('/')
         request.user = self.user
@@ -470,6 +489,12 @@ class UtilityFunctionsTests(TestCase):
             "status": "error", 
             "message": "Ordine non trovato o già spedito"
         })
+        
+        request.user = self.usermod
+        response = annulla_ordine_free(request, ordine2.id) #type:ignore
+        self.assertEqual(response.status_code, 200)
+        response_data = json.loads(response.content.decode())
+        self.assertEqual(response_data, {"status": "success"})
     
     def test_check_if_annuncio_is_valid(self):
         post_data = {

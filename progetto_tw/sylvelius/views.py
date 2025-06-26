@@ -119,15 +119,22 @@ def annulla_ordine_free(request, order_id):
             "status": "error",
             "message": "Ordine non trovato o già spedito"
         }, status=400)
-    if((request.user == ordine.utente or request.user == ordine.prodotto.annunci.inserzionista) and ordine.stato_consegna=='da spedire'): #type:ignore
-        ordine.stato_consegna = 'annullato'
-        ordine.save()
-        if request.user == ordine.utente:
+    if((request.user == ordine.utente or request.user == ordine.prodotto.annunci.inserzionista or request.user.groups.filter(name=_MODS_GRP_NAME).exists())): #type:ignore
+        if request.user == ordine.utente and ordine.stato_consegna=='da spedire':
+            ordine.stato_consegna = 'annullato'
+            ordine.save()
             create_notification(recipient=ordine.prodotto.annunci.inserzionista,title="Ordine annullato", sender=request.user, #type:ignore
                                 message=f"Il tuo ordine di {ordine.prodotto.nome} è stato annullato dal compratore")
-        if request.user == ordine.prodotto.annunci.inserzionista:#type:ignore
+        if ordine.stato_consegna=='da spedire' and request.user == ordine.prodotto.annunci.inserzionista:#type:ignore
+            ordine.stato_consegna = 'annullato'
+            ordine.save()
             create_notification(recipient=ordine.utente,title="Ordine rifiutato", sender=request.user, #type:ignore
-                                message=f"Il tuo ordine di {ordine.prodotto.nome} è stato rifiutato dal venditore")
+                                message=f"Il tuo ordine di {ordine.prodotto.nome} è stato rifiutato dal venditore, riceverai un rimborso a breve")
+        if request.user.groups.filter(name=_MODS_GRP_NAME).exists() and (ordine.stato_consegna=='da spedire' or ordine.stato_consegna=='spedito'):
+            ordine.stato_consegna = 'annullato'
+            ordine.save()
+            create_notification(recipient=ordine.utente,title="Ordine cancellato", sender=request.user, #type:ignore
+                                message=f"Il tuo ordine di {ordine.prodotto.nome} è stato cancellato da un moderatore, riceverai un rimborso a breve")
         return JsonResponse({"status": "success"})
     else: return JsonResponse({"status": "error", "message": "Ordine non trovato o già spedito"}, status=400)
 #non callable
@@ -394,11 +401,8 @@ class ProfiloDeletePageView(CustomLoginRequiredMixin, View):
             ).exists()):
             return render(request, self.template_name,{"evento":"shipd"})
         
-        ordine_ex=Ordine.objects.filter(utente=user,stato_consegna="da spedire")
-        ordine_in=Ordine.objects.filter(
-            prodotto__annunci__inserzionista=user,
-            stato_consegna='da spedire'
-            )
+        ordine_ex=Ordine.objects.filter(utente=user)
+        ordine_in=Ordine.objects.filter(prodotto__annunci__inserzionista=user)
         
         for ordine in ordine_ex:
             annulla_ordine_free(request,ordine.id) #type:ignore
@@ -925,13 +929,10 @@ def formatta_utente(request, user_id):
     if request.user.groups.filter(name=_MODS_GRP_NAME).exists():
         user = get_object_or_404(User, id=user_id)
         if(not user.is_active):
-            ordini_ex = Ordine.objects.filter(
-                Q(prodotto__annunci__inserzionista=user) &
-                Q(stato_consegna='da spedire')
-            )
+            ordini_ex = Ordine.objects.filter(prodotto__annunci__inserzionista=user)
             for ordine in ordini_ex:
                 annulla_ordine_free(request,ordine.id)# type: ignore
-            ordine_in = Ordine.objects.filter(utente=user.id)# type: ignore
+            ordine_in = Ordine.objects.filter(utente=user)
             for ordine in ordine_in:
                 annulla_ordine_free(request,ordine.id)# type: ignore
             ordine_in.delete()
