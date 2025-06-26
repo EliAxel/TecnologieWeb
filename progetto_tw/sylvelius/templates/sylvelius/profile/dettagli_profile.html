@@ -78,6 +78,15 @@
                                     <small class="text-muted" style='word-break: break-word'>
                                         {{ commento.annuncio.prodotto.nome }}
                                     </small>
+                                    {% if not commento.annuncio.is_published %}
+                                    <small class="ml-1" style="color:{{ADMIN_SECONDARY_COLOR}};">ANNUNCIO NASCOSTO</small>
+                                    {% endif %}
+                                    {% if not commento.annuncio.is_published and not commento.annuncio.inserzionista.is_active %}
+                                    <small class="text-muted ml-1">e</small>
+                                    {% endif %}
+                                    {% if not commento.annuncio.inserzionista.is_active %}
+                                    <small class="ml-1" style="color:{{ADMIN_SECONDARY_COLOR}};">INSERZIONISTA BANDITO</small>
+                                    {% endif %}
                                 </a>
                             </div>
                             {% include "_card_commento.html" with commento=commento %}

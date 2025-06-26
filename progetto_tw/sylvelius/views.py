@@ -312,13 +312,14 @@ class ProfiloDetailsPageView(View):
         if request.user.groups.filter(name=_MODS_GRP_NAME).exists():
             user = get_object_or_404(User, username=user_profile)
             annunci = Annuncio.objects.filter(inserzionista=user).annotate(avg_rating=Avg('commenti__rating')).order_by('-avg_rating')
+            commenti = CommentoAnnuncio.objects.filter(utente=user).order_by('-data_pubblicazione')
         else:
             user = get_object_or_404(User, username=user_profile, is_active=True)
             annunci = Annuncio.objects.filter(inserzionista=user,is_published=True).annotate(avg_rating=Avg('commenti__rating')).order_by('-avg_rating')
+            commenti = CommentoAnnuncio.objects.filter(utente=user,annuncio__inserzionista__is_active=True,annuncio__is_published=True).order_by('-data_pubblicazione')
         if user.groups.filter(name=_MODS_GRP_NAME).exists():
             return HttpResponse(status=404)
         
-        commenti = CommentoAnnuncio.objects.filter(utente=user,annuncio__inserzionista__is_active=True,annuncio__is_published=True).order_by('-data_pubblicazione')
         paginator = Paginator(commenti, MAX_PAGINATOR_COMMENTI_DETTAGLI_VALUE) 
         
         page_number = self.request.GET.get('page',1)
