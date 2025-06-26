@@ -303,47 +303,6 @@ def add_to_cart(request):
         "?evento=carrello"
     )
 
-class CarrelloPageView(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin,TemplateView):
-    template_name = "purchase/carrello.html"
-    login_url = reverse_lazy('sylvelius:login')
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        if Cart.objects.filter(utente=self.request.user).exists(): #type:ignore
-            for invoice in self.request.user.cart.invoices.all():  #type:ignore
-                try:
-                    Annuncio.objects.get(prodotto=invoice.prodotto,inserzionista__is_active=True)
-                except Annuncio.DoesNotExist:
-                    inv = Invoice.objects.filter(prodotto=invoice.prodotto, cart=self.request.user.cart)#type:ignore
-                    for invc in inv:
-                        create_notification(recipient=invc.utente, title='Articolo nel carrello rimosso', 
-                                            message='L\'annuncio relativo all\'articolo è stato rimosso o l\'inserzionista è stato bandito.')
-                    inv.delete()
-            context['cart'] = self.request.user.cart #type:ignore
-        return context
-
-class CheckoutPageView(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin,TemplateView):
-    template_name = "purchase/checkout.html"
-    login_url = reverse_lazy('sylvelius:login')
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        if Cart.objects.filter(utente = self.request.user).exists():
-            for invoice in self.request.user.cart.invoices.all():  #type:ignore
-                try:
-                    Annuncio.objects.get(prodotto=invoice.prodotto,inserzionista__is_active=True)
-                except Annuncio.DoesNotExist:
-                    inv = Invoice.objects.filter(prodotto=invoice.prodotto, cart=self.request.user.cart)#type:ignore
-                    for invc in inv:
-                        create_notification(recipient=invc.utente, title='Articolo nel carrello rimosso', 
-                                            message='L\'annuncio relativo all\'articolo è stato rimosso o l\'inserzionista è stato bandito.')
-                    inv.delete()
-            
-            context['cart'] = self.request.user.cart  #type:ignore
-            context['amount'] = self.request.user.cart.total #type:ignore
-            context['paypal_client_id'] = settings.xxx
-            context['invoice_id'] = self.request.user.cart.uuid #type:ignore
-        return context
 # non callable
 def controlla_annuncio_e_quantita(invoice, incremento=1):
     try:
@@ -365,6 +324,55 @@ def controlla_annuncio_e_quantita(invoice, incremento=1):
         ), annuncio
 
     return None, annuncio
+
+class CarrelloPageView(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin,View):
+    template_name = "purchase/carrello.html"
+    login_url = reverse_lazy('sylvelius:login')
+
+    def get(self, request):
+        context = {}
+        if Cart.objects.filter(utente=request.user).exists(): #type:ignore
+            for invoice in request.user.cart.invoices.all():  #type:ignore
+                try:
+                    Annuncio.objects.get(prodotto=invoice.prodotto,inserzionista__is_active=True)
+                except Annuncio.DoesNotExist:
+                    inv = Invoice.objects.filter(prodotto=invoice.prodotto, cart=request.user.cart)#type:ignore
+                    for invc in inv:
+                        create_notification(recipient=invc.utente, title='Articolo nel carrello rimosso', 
+                                            message='L\'annuncio relativo all\'articolo è stato rimosso o l\'inserzionista è stato bandito.')
+                    inv.delete()
+                error_redirect, annuncio = controlla_annuncio_e_quantita(invoice, incremento=0)
+                if error_redirect:
+                    return error_redirect
+                
+            context['cart'] = request.user.cart #type:ignore
+        return render(request, self.template_name, context)
+
+class CheckoutPageView(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin,View):
+    template_name = "purchase/checkout.html"
+    login_url = reverse_lazy('sylvelius:login')
+
+    def get(self,request):
+        context = {}
+        if Cart.objects.filter(utente = request.user).exists():
+            for invoice in request.user.cart.invoices.all():  #type:ignore
+                try:
+                    Annuncio.objects.get(prodotto=invoice.prodotto,inserzionista__is_active=True)
+                except Annuncio.DoesNotExist:
+                    inv = Invoice.objects.filter(prodotto=invoice.prodotto, cart=request.user.cart)#type:ignore
+                    for invc in inv:
+                        create_notification(recipient=invc.utente, title='Articolo nel carrello rimosso', 
+                                            message='L\'annuncio relativo all\'articolo è stato rimosso o l\'inserzionista è stato bandito.')
+                    inv.delete()
+                error_redirect, annuncio = controlla_annuncio_e_quantita(invoice, incremento=0)
+                if error_redirect:
+                    return error_redirect
+                            
+            context['cart'] = request.user.cart  #type:ignore
+            context['amount'] = request.user.cart.total #type:ignore
+            context['paypal_client_id'] = settings.xxx
+            context['invoice_id'] = request.user.cart.uuid #type:ignore
+        return render(request, self.template_name, context)
 
 @require_POST
 @login_required

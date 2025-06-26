@@ -7,7 +7,7 @@
     {% if request.GET.evento == "troppi_articoli" %}
     <script>
         showBootstrapAlertWithIcon(
-            "Non si possono acquistare più articoli di così","warning"
+            "Il numero di articoli eccede la quantità disponibile","warning"
         );
     </script>
     {% elif request.GET.evento == "articoli_inesistenti" %}
