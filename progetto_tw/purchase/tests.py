@@ -828,6 +828,35 @@ class CartTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotIn('cart', response.context)
 
+    def test_carrello_page_view_removes_invalid_items(self):
+        """Test che verifica che gli articoli non più disponibili vengano rimossi"""
+        prodotto3 = Prodotto.objects.create(
+            nome='Prodotto da cancellare',
+            descrizione_breve='Descrizione breve',
+            prezzo=19.99,
+            iva=22,
+            condizione='usato'
+        )
+        annuncio3 = Annuncio.objects.create(
+            inserzionista=self.user,
+            prodotto=prodotto3,
+            qta_magazzino=5,
+            uuid=str(uuid.uuid4())
+        )
+        invoice3 = Invoice.objects.create(
+            invoice_id=str(uuid.uuid4()),
+            utente=self.user,
+            quantita=1,
+            prodotto=prodotto3,
+            cart=self.cart
+        )
+        
+        annuncio3.delete()
+        
+        response = self.client.get(reverse('purchase:carrello'))
+        
+        self.assertFalse(Invoice.objects.filter(invoice_id=invoice3.invoice_id).exists())
+
     def test_checkout_page_view_with_cart(self):
         """Test visualizzazione pagina checkout con carrello esistente"""
         with patch('purchase.views.settings') as mock_settings:

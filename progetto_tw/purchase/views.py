@@ -310,6 +310,15 @@ class CarrelloPageView(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin,
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if Cart.objects.filter(utente=self.request.user).exists(): #type:ignore
+            for invoice in self.request.user.cart.invoices.all():  #type:ignore
+                try:
+                    Annuncio.objects.get(prodotto=invoice.prodotto,inserzionista__is_active=True)
+                except Annuncio.DoesNotExist:
+                    inv = Invoice.objects.filter(prodotto=invoice.prodotto, cart=self.request.user.cart)#type:ignore
+                    for invc in inv:
+                        create_notification(recipient=invc.utente, title='Articolo nel carrello rimosso', 
+                                            message='L\'annuncio relativo all\'articolo è stato rimosso o l\'inserzionista è stato bandito.')
+                    inv.delete()
             context['cart'] = self.request.user.cart #type:ignore
         return context
 
@@ -322,9 +331,13 @@ class CheckoutPageView(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin,
         if Cart.objects.filter(utente = self.request.user).exists():
             for invoice in self.request.user.cart.invoices.all():  #type:ignore
                 try:
-                    Annuncio.objects.get(prodotto=invoice.prodotto)
+                    Annuncio.objects.get(prodotto=invoice.prodotto,inserzionista__is_active=True)
                 except Annuncio.DoesNotExist:
-                    Invoice.objects.filter(prodotto=invoice.prodotto, cart=self.request.user.cart).delete() #type:ignore
+                    inv = Invoice.objects.filter(prodotto=invoice.prodotto, cart=self.request.user.cart)#type:ignore
+                    for invc in inv:
+                        create_notification(recipient=invc.utente, title='Articolo nel carrello rimosso', 
+                                            message='L\'annuncio relativo all\'articolo è stato rimosso o l\'inserzionista è stato bandito.')
+                    inv.delete()
             
             context['cart'] = self.request.user.cart  #type:ignore
             context['amount'] = self.request.user.cart.total #type:ignore
