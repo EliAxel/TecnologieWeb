@@ -141,6 +141,11 @@
                     {% for value, label in PROD_CONDIZIONE_CHOICES %}
                         <option value="{{ value }}">{{ label }}</option>
                     {% endfor %}
+                    {% if 'moderatori' in request.user.groups.values_list|join:',' %}
+                        {% for value, label in ADMIN_PROD_CONDIZIONE_CHOICES %}
+                            <option style="color:{{ADMIN_SECONDARY_COLOR}};"value="{{ value }}">{{ label }}</option>
+                        {% endfor %}
+                    {% endif %}
                 </select>
             </div>
             <div class="form-group col-md-3">

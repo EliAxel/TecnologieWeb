@@ -55,6 +55,7 @@ from progetto_tw.constants import (
     MIN_IMG_ASPECT_RATIO,
     MIN_PROD_PREZZO_VALUE,
     PROD_CONDIZIONE_CHOICES_ID,
+    ADMIN_PROD_CONDIZIONE_CHOICES_ID,
     _MODS_GRP_NAME,
 )
 from progetto_tw.mixins import CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin
@@ -314,9 +315,10 @@ class ProfiloDetailsPageView(View):
         else:
             user = get_object_or_404(User, username=user_profile, is_active=True)
             annunci = Annuncio.objects.filter(inserzionista=user,is_published=True).annotate(avg_rating=Avg('commenti__rating')).order_by('-avg_rating')
-            if user.groups.filter(name=_MODS_GRP_NAME).exists():
-                return HttpResponse(status=404)
-        commenti = CommentoAnnuncio.objects.filter(utente=user,annuncio__inserzionista__is_active=True).order_by('-data_pubblicazione')
+        if user.groups.filter(name=_MODS_GRP_NAME).exists():
+            return HttpResponse(status=404)
+        
+        commenti = CommentoAnnuncio.objects.filter(utente=user,annuncio__inserzionista__is_active=True,annuncio__is_published=True).order_by('-data_pubblicazione')
         paginator = Paginator(commenti, MAX_PAGINATOR_COMMENTI_DETTAGLI_VALUE) 
         
         page_number = self.request.GET.get('page',1)
@@ -713,6 +715,11 @@ class RicercaAnnunciView(TemplateView):
         
         if condizione in PROD_CONDIZIONE_CHOICES_ID:
             annunci = annunci.filter(prodotto__condizione=condizione)
+        elif condizione in ADMIN_PROD_CONDIZIONE_CHOICES_ID:
+            if condizione == 'nascosto':
+                annunci = annunci.filter(is_published=False)
+            else:
+                annunci = annunci.filter(inserzionista__is_active=False)
         
         if qta_mag == 'qta-pres':
             annunci = annunci.filter(qta_magazzino__gt=0)

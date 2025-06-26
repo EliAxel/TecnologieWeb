@@ -2352,6 +2352,20 @@ class RicercaAnnunciModeratoreTest(TestCase):
         self.assertIn(self.annuncio_pubblicato, annunci)
         self.assertNotIn(self.annuncio_privato, annunci)
 
+        self.client.force_login(self.moderator)
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'), {'condition': 'nascosto'})
+        annunci = response.context['annunci']
+        self.assertEqual(len(annunci), 1)
+        self.assertIn(self.annuncio_privato, annunci)
+        
+        self.user.is_active = False
+        self.user.save()
+        response = self.client.get(reverse('sylvelius:ricerca_annunci'), {'condition': 'bandito'})
+        annunci = response.context['annunci']
+        self.assertEqual(len(annunci), 2)
+        self.assertIn(self.annuncio_pubblicato, annunci)
+        self.assertIn(self.annuncio_privato, annunci)
+
 class TestModeratoreAccessForbiddenMixin(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -2507,7 +2521,7 @@ class ProfiloDetailsPageViewTest(TestCase):
         url = reverse('sylvelius:dettagli_profilo', kwargs={'user_profile': another_moderator.username})
         self.client.force_login(self.moderator_user)
         response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 404)
         
     def test_pagination_of_comments(self):
         """Test che i commenti siano paginati correttamente"""

@@ -302,7 +302,6 @@ def add_to_cart(request):
         reverse("sylvelius:dettagli_annuncio", kwargs={"uuid": annuncio.uuid}) +  # type: ignore
         "?evento=carrello"
     )
-
 # non callable
 def controlla_annuncio_e_quantita(invoice, incremento=1):
     try:
@@ -312,7 +311,7 @@ def controlla_annuncio_e_quantita(invoice, incremento=1):
         return redirect(
             reverse("purchase:carrello") +
             "?evento=articoli_inesistenti"
-        ), None
+        )
 
     nuova_quantita = invoice.quantita + incremento
     if nuova_quantita > annuncio.qta_magazzino:
@@ -321,9 +320,30 @@ def controlla_annuncio_e_quantita(invoice, incremento=1):
         return redirect(
             reverse("purchase:carrello") +
             "?evento=troppi_articoli"
-        ), annuncio
+        )
 
-    return None, annuncio
+    return None
+# non callable
+def carrello_or_checkout_integrity(request):
+    redirects = redirect(
+        reverse("purchase:carrello") +
+        "?evento=articoli_inesistenti"
+    )
+    deleted = False 
+    for invoice in request.user.cart.invoices.all():  #type:ignore
+        try:
+            Annuncio.objects.get(prodotto=invoice.prodotto,inserzionista__is_active=True,is_published=True)
+        except Annuncio.DoesNotExist:
+            inv = Invoice.objects.filter(prodotto=invoice.prodotto, cart=request.user.cart)#type:ignore
+            for invc in inv:
+                create_notification(recipient=invc.utente, title='Articolo nel carrello rimosso', 
+                                    message='L\'annuncio relativo all\'articolo è stato rimosso/nascosto o l\'inserzionista è stato bandito.')
+            inv.delete()
+            deleted = True
+        error_redirect = controlla_annuncio_e_quantita(invoice, incremento=0)
+        if error_redirect:
+            return error_redirect
+    return redirects if deleted else None
 
 class CarrelloPageView(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin,View):
     template_name = "purchase/carrello.html"
@@ -332,19 +352,10 @@ class CarrelloPageView(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin,
     def get(self, request):
         context = {}
         if Cart.objects.filter(utente=request.user).exists(): #type:ignore
-            for invoice in request.user.cart.invoices.all():  #type:ignore
-                try:
-                    Annuncio.objects.get(prodotto=invoice.prodotto,inserzionista__is_active=True)
-                except Annuncio.DoesNotExist:
-                    inv = Invoice.objects.filter(prodotto=invoice.prodotto, cart=request.user.cart)#type:ignore
-                    for invc in inv:
-                        create_notification(recipient=invc.utente, title='Articolo nel carrello rimosso', 
-                                            message='L\'annuncio relativo all\'articolo è stato rimosso o l\'inserzionista è stato bandito.')
-                    inv.delete()
-                error_redirect, annuncio = controlla_annuncio_e_quantita(invoice, incremento=0)
-                if error_redirect:
-                    return error_redirect
-                
+            err = carrello_or_checkout_integrity(request)
+            if err:
+                return err
+
             context['cart'] = request.user.cart #type:ignore
         return render(request, self.template_name, context)
 
@@ -355,19 +366,10 @@ class CheckoutPageView(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin,
     def get(self,request):
         context = {}
         if Cart.objects.filter(utente = request.user).exists():
-            for invoice in request.user.cart.invoices.all():  #type:ignore
-                try:
-                    Annuncio.objects.get(prodotto=invoice.prodotto,inserzionista__is_active=True)
-                except Annuncio.DoesNotExist:
-                    inv = Invoice.objects.filter(prodotto=invoice.prodotto, cart=request.user.cart)#type:ignore
-                    for invc in inv:
-                        create_notification(recipient=invc.utente, title='Articolo nel carrello rimosso', 
-                                            message='L\'annuncio relativo all\'articolo è stato rimosso o l\'inserzionista è stato bandito.')
-                    inv.delete()
-                error_redirect, annuncio = controlla_annuncio_e_quantita(invoice, incremento=0)
-                if error_redirect:
-                    return error_redirect
-                            
+            err = carrello_or_checkout_integrity(request)
+            if err:
+                return err
+            
             context['cart'] = request.user.cart  #type:ignore
             context['amount'] = request.user.cart.total #type:ignore
             context['paypal_client_id'] = settings.xxx
@@ -378,7 +380,7 @@ class CheckoutPageView(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin,
 @login_required
 def aumenta_carrello(request, invoice_id):
     invoice = get_object_or_404(Invoice, invoice_id=invoice_id, utente=request.user)
-    error_redirect, annuncio = controlla_annuncio_e_quantita(invoice, incremento=1)
+    error_redirect = controlla_annuncio_e_quantita(invoice, incremento=1)
     if error_redirect:
         return error_redirect
 
@@ -390,7 +392,7 @@ def aumenta_carrello(request, invoice_id):
 @login_required
 def diminuisci_carrello(request, invoice_id):
     invoice = get_object_or_404(Invoice, invoice_id=invoice_id, utente=request.user)
-    error_redirect, annuncio = controlla_annuncio_e_quantita(invoice, incremento=-1)
+    error_redirect = controlla_annuncio_e_quantita(invoice, incremento=-1)
     if error_redirect:
         return error_redirect
 

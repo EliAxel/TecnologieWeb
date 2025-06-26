@@ -46,6 +46,12 @@
         <!-- Colonna Sinistra: Testo -->
         <div class="col-md-6">
             <h2 style="word-break: break-word;">{{ annuncio.prodotto.nome }}</h2>
+            {% if not annuncio.is_published %}
+            <h5 style="color:{{ADMIN_SECONDARY_COLOR}};">ANNUNCIO NASCOSTO</h5>
+            {% endif %}
+            {% if not annuncio.inserzionista.is_active %}
+            <h5 style="color:{{ADMIN_SECONDARY_COLOR}};">UTENTE BANDITO</h5>
+            {% endif %}
             <p class="text-muted mb-1">
                 Pubblicato il {{ annuncio.data_pubblicazione|date:"d/m/Y" }} da 
                 <a href="{% url 'sylvelius:dettagli_profilo' annuncio.inserzionista.username %}">

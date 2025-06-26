@@ -27,8 +27,12 @@ PROD_CONDIZIONE_CHOICES = [ #ONLY ADD NEW ITEMS
     ("nuovo", "Nuovo"),
     ("usato", "Usato"),
 ]
+ADMIN_PROD_CONDIZIONE_CHOICES =[
+    ("nascosto", "Nascosto"),
+    ("bandito", "Utente bandito"),
+]
 PROD_CONDIZIONE_CHOICES_ID = [id for id, _ in PROD_CONDIZIONE_CHOICES]
-
+ADMIN_PROD_CONDIZIONE_CHOICES_ID = [id for id, _ in ADMIN_PROD_CONDIZIONE_CHOICES]
 
 MIN_ANNU_QTA_MAGAZZINO_VALUE = 0
 MAX_ANNU_QTA_MAGAZZINO_VALUE = 2000000

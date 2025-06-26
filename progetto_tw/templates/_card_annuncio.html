@@ -17,6 +17,12 @@
                         <strong>{{ annuncio.prodotto.nome }}</strong>
                     </a>
                 </h5>
+                {% if not annuncio.is_published %}
+                <h5 style="color:{{ADMIN_SECONDARY_COLOR}};">ANNUNCIO NASCOSTO</h5>
+                {% endif %}
+                {% if not annuncio.inserzionista.is_active %}
+                <h5 style="color:{{ADMIN_SECONDARY_COLOR}};">UTENTE BANDITO</h5>
+                {% endif %}
                 <p class="card-text">
                     {{ annuncio.prodotto.descrizione_breve|truncatechars:MAX_TRUNCATED_CARDS_CHARS }}
                 </p>

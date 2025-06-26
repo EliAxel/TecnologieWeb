@@ -17,7 +17,16 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="w-100 text-center">
-                            <h2 class="mb-1">{{ user_profile.username }}</h2>
+                            <h2 class="mb-1">{{ user_profile.username }}</h2> 
+                            {% if not user_profile.is_active %}
+                            <h5 style="color:{{ADMIN_SECONDARY_COLOR}};">UTENTE BANDITO</h5>
+                            {% elif 'moderatori' in user.groups.values_list|join:',' %}
+                            <form action="{% url 'sylvelius:espelli_utente' 'ban' user_profile.id %}" method="post" class="d-inline-block" onclick="return confirm('Sei sicuro di voler espellere questo utente?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn" style="background-color:{{ADMIN_SECONDARY_COLOR}};" id="ban-user">
+                                    Espelli utente</button>
+                            </form>
+                            {% endif %}
                             <p class="text-muted mb-1">Membro dal {{ user_profile.date_joined|date:"d/m/Y" }}</p>
                             <div class="d-flex justify-content-center">
                                 <span class="badge bg-primary me-2 mr-1">
