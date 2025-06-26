@@ -89,6 +89,8 @@ class PurchaseTests(TestCase):
         self.client.login(username='testuser', password='Testpass0')
         response = self.client.get(f'/pagamento/?annuncio_id={self.uuid1}&quantita=1')
         self.assertEqual(response.status_code, 200)
+        response = self.client.get(f'/pagamento/?annuncio_id={self.uuid1}&quantita=1')
+        self.assertEqual(response.status_code, 200)
 
         response = self.client.get(f'/pagamento/?annuncio_id={self.uuid2}&quantita=1')
         self.assertRedirects(
