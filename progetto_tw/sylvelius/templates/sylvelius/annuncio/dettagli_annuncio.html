@@ -169,7 +169,7 @@
     <div class="row mt-5">
         <div class="col-12">
             {% if annuncio.prodotto.descrizione %}
-                <p style="word-break: break-word;">{{ annuncio.prodotto.descrizione }}</p>
+                <p style="word-break: break-word; white-space: pre-line; text-align: left;">{{ annuncio.prodotto.descrizione|linebreaksbr }}</p>
             {% else %}
                 <h2 class="text-muted mb-5">Nessuna descrizione</h2>
             {% endif %}

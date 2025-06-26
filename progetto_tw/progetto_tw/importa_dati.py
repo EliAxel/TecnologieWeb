@@ -42,6 +42,10 @@ def init_db():
                 'condizione' : prodotto_data['condizione']
             }
         )
+        descr = prodotto_data.get('descrizione')
+        if descr:
+            prodotto.descrizione = descr
+            prodotto.save()
 
         # Gestione dei tag
         tag_names = prodotto_data.get('tag', [])

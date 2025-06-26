@@ -79,6 +79,7 @@ class PurchasePageView(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin,
         carrello, created = Cart.objects.get_or_create(utente=request.user)
         if created:
             carrello.uuid = f'{uuid.uuid4()}'
+        carrello.save()
         invoice = create_invoice(request, annuncio, quantity, carrello)
         product = annuncio.prodotto # type: ignore
         
