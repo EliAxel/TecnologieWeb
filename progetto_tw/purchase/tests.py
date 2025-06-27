@@ -692,7 +692,7 @@ class CartTests(TestCase):
             reverse('purchase:add_to_cart'),
             {'annuncio_id': self.annuncio.uuid, 'quantita': 2}
         )        
-        self.assertEqual(self.cart.invoices.count(), 2) #type:ignore
+        self.assertEqual(self.cart.invoices.count(), 1) #type:ignore
         
         self.assertEqual(response.status_code, 302)
         self.assertIn(str(self.annuncio.uuid), response.url) #type:ignore

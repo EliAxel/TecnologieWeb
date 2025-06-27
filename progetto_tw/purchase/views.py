@@ -21,6 +21,7 @@ import uuid
 from decimal import Decimal
 from requests.auth import HTTPBasicAuth
 
+# non callable
 def validate_quantity(quantity, annuncio):
     try:
         quantity = int(quantity)
@@ -42,17 +43,19 @@ def validate_quantity(quantity, annuncio):
         )
     
     return None
-
+# non callable
 def create_invoice(request, annuncio, quantity, cart=None):
-    invoice_obj = Invoice.objects.create(
-        invoice_id=str(uuid.uuid4()),
+    invoice_obj, created = Invoice.objects.update_or_create(
         utente=request.user,
-        quantita=quantity,
         prodotto=annuncio.prodotto,
-        cart=cart
+        cart=cart,
+        defaults={
+            "quantita": quantity,
+            "invoice_id": str(uuid.uuid4()) if not Invoice.objects.filter(utente=request.user, prodotto=annuncio.prodotto, cart=cart).exists() else Invoice.objects.get(utente=request.user, prodotto=annuncio.prodotto, cart=cart).invoice_id
+        }
     )
     return invoice_obj
-
+# non callable
 def get_invoice_data(request):
     annuncio_id = request.POST.get("annuncio_id")
     if not annuncio_id:
@@ -66,28 +69,33 @@ def get_invoice_data(request):
         return None, None, error_redirect
     
     return annuncio, int(quantity), None
+# non callable
+def create_cart_get_invoice(request):
+    annuncio, quantity, error_redirect = get_invoice_data(request)
+    if error_redirect:
+        return error_redirect, None
+    
+    carrello, created = Cart.objects.get_or_create(utente=request.user)
+    if created:
+        carrello.uuid = f'{uuid.uuid4()}' 
+        carrello.save()
+    
+    return None, create_invoice(request, annuncio, quantity, cart=carrello)
 
 class PurchasePageView(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin, View):
     template_name = "purchase/payment_process.html"
     login_url = reverse_lazy('sylvelius:login')
 
     def get(self, request):
-        annuncio, quantity, error_redirect = get_invoice_data(request)
-        if error_redirect:
-            return error_redirect
-        
-        carrello, created = Cart.objects.get_or_create(utente=request.user)
-        if created:
-            carrello.uuid = f'{uuid.uuid4()}'
-        carrello.save()
-        invoice = create_invoice(request, annuncio, quantity, carrello)
-        product = annuncio.prodotto # type: ignore
-        
+        err, invoice = create_cart_get_invoice(request)
+        if err:
+            return err
+        product = invoice.prodotto# type: ignore
         context = {
-            "amount": product.prezzo * Decimal(quantity), # type: ignore
-            "item_name": product.nome,
-            "invoice_id": invoice.invoice_id,
-            "quantity": quantity,
+            "amount": product.prezzo * Decimal(invoice.quantita), # type: ignore
+            "item_name": product.nome, # type: ignore
+            "invoice_id": invoice.invoice_id, # type: ignore
+            "quantity": invoice.quantita, # type: ignore
             "paypal_client_id": settings.xxx,
         }
         return render(request, self.template_name, context)
@@ -286,20 +294,14 @@ class SetupIban(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin,Templat
         return redirect(f'{reverse("sylvelius:profile_annunci")}?evento=iban_imp')
 
 @require_POST
-@login_required
+@login_required 
 def add_to_cart(request):
-    annuncio, quantity, error_redirect = get_invoice_data(request)
-    if error_redirect:
-        return error_redirect
-    
-    carrello, created = Cart.objects.get_or_create(utente=request.user)
-    if created:
-        carrello.uuid = f'{uuid.uuid4()}' 
-    carrello.save()
-    create_invoice(request, annuncio, quantity, cart=carrello)
+    err, invoice = create_cart_get_invoice(request)
+    if err:
+        return err
     
     return redirect(
-        reverse("sylvelius:dettagli_annuncio", kwargs={"uuid": annuncio.uuid}) +  # type: ignore
+        reverse("sylvelius:dettagli_annuncio", kwargs={"uuid": invoice.prodotto.annunci.uuid}) + #type: ignore
         "?evento=carrello"
     )
 # non callable
@@ -406,6 +408,6 @@ def diminuisci_carrello(request, invoice_id):
 @require_POST
 @login_required
 def rimuovi_da_carrello(request, invoice_id):
-    invoice = get_object_or_404(Invoice,invoice_id=invoice_id)
+    invoice = get_object_or_404(Invoice,invoice_id=invoice_id, utente=request.user)
     invoice.delete()
     return redirect(reverse("purchase:carrello") + '?evento=rimosso')
