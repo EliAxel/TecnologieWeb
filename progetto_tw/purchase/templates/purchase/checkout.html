@@ -11,7 +11,10 @@
 {% block sottotitolo %}
     {% for invoice in cart.invoices.all %}
         <p>Stai acquistando: <strong style="word-break: break-word;">{{ invoice.prodotto.nome }}</strong> (Quantità: {{ invoice.quantita }})</p>
-    {% empty %}
-        {% block paypalscript %}{% endblock %}
     {% endfor %}
+{% endblock %}
+{% block paypalscript %}
+    {% if cart.invoices.all %}
+        {{ block.super }}
+    {% endif %}
 {% endblock %}
