@@ -65,8 +65,8 @@ class PurchaseTests(TestCase):
             condizione="nuovo"
         )
 
-        self.uuid1= uuid.uuid4(),
-        self.uuid2= uuid.uuid4(),
+        self.uuid1 = uuid.uuid4()  # Rimossa la virgola che creava una tupla
+        self.uuid2 = uuid.uuid4()  # Rimossa la virgola che creava una tupla
 
         Annuncio.objects.create(
             id=_NEXT_PROD_ID,
@@ -87,12 +87,29 @@ class PurchaseTests(TestCase):
 
     def test_purchases(self):
         self.client.login(username='testuser', password='Testpass0')
-        response = self.client.get(f'/pagamento/?annuncio_id={self.uuid1}&quantita=1')
+        
+        # Test 1: Quantità valida (1)
+        response = self.client.post(
+            reverse('purchase:purchase'),
+            {'annuncio_id': self.uuid1, 'quantita': '1'},
+            follow=True
+        )
         self.assertEqual(response.status_code, 200)
-        response = self.client.get(f'/pagamento/?annuncio_id={self.uuid1}&quantita=1')
+        
+        # Test 2: Altra quantità valida (1)
+        response = self.client.post(
+            reverse('purchase:purchase'),
+            {'annuncio_id': self.uuid1, 'quantita': '1'},
+            follow=True
+        )
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.get(f'/pagamento/?annuncio_id={self.uuid2}&quantita=1')
+        # Test 3: Quantità non disponibile (0 disponibile)
+        response = self.client.post(
+            reverse('purchase:purchase'),
+            {'annuncio_id': self.uuid2, 'quantita': '1'},
+            follow=True
+        )
         self.assertRedirects(
             response,
             expected_url=f'{reverse("sylvelius:dettagli_annuncio",kwargs={"uuid": self.uuid2})}?evento=ordine_grosso', 
@@ -100,7 +117,12 @@ class PurchaseTests(TestCase):
             target_status_code=200 
         )
 
-        response = self.client.get(f'/pagamento/?annuncio_id={self.uuid1}&quantita=0')
+        # Test 4: Quantità 0
+        response = self.client.post(
+            reverse('purchase:purchase'),
+            {'annuncio_id': self.uuid1, 'quantita': '0'},
+            follow=True
+        )
         self.assertRedirects(
             response,
             expected_url=f'{reverse("sylvelius:dettagli_annuncio",kwargs={"uuid": self.uuid1})}?evento=ordine_piccolo', 
@@ -108,14 +130,19 @@ class PurchaseTests(TestCase):
             target_status_code=200 
         )
 
-        response = self.client.get(f'/pagamento/?annuncio_id={self.uuid1}&quantita=err')
+        # Test 5: Quantità non numerica
+        response = self.client.post(
+            reverse('purchase:purchase'),
+            {'annuncio_id': self.uuid1, 'quantita': 'err'},
+            follow=True
+        )
         self.assertRedirects(
             response,
             expected_url=f'{reverse("sylvelius:dettagli_annuncio",kwargs={"uuid": self.uuid1})}?evento=non_intero', 
             status_code=302,
             target_status_code=200 
         )
-
+        
 class PayPalCOATests(TestCase):
     def setUp(self):
         Ordine.objects.all().delete()
@@ -879,7 +906,7 @@ class CartTests(TestCase):
         """Test visualizzazione pagina checkout con carrello esistente"""
         with patch('purchase.views.settings') as mock_settings:
             mock_settings.xxx = 'test_client_id'
-            response = self.client.get(reverse('purchase:checkout'))
+            response = self.client.post(reverse('purchase:checkout'))
         
         self.assertEqual(response.status_code, 200)
         self.assertIn('cart', response.context)
@@ -916,7 +943,7 @@ class CartTests(TestCase):
         
         annuncio2.delete()
         
-        response = self.client.get(reverse('purchase:checkout'))
+        response = self.client.post(reverse('purchase:checkout'))
         
         self.assertFalse(Invoice.objects.filter(uuid=invoice2.uuid).exists())
         
@@ -924,7 +951,7 @@ class CartTests(TestCase):
         """Test visualizzazione pagina checkout senza carrello esistente"""
         Cart.objects.filter(utente=self.user).delete()
         
-        response = self.client.get(reverse('purchase:checkout'))
+        response = self.client.post(reverse('purchase:checkout'))
         
         self.assertEqual(response.status_code, 200)
         self.assertNotIn('cart', response.context)

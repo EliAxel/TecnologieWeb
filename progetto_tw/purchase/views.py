@@ -7,6 +7,8 @@ from django.urls import reverse, reverse_lazy
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from django.views.decorators.cache import cache_control
+from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
 
 from sylvelius.models import Ordine, Annuncio
@@ -58,12 +60,8 @@ def create_invoice(request, annuncio, quantity, cart=None):
 # non callable
 def get_invoice_data(request):
     annuncio_id = request.POST.get("annuncio_id")
-    if not annuncio_id:
-        annuncio_id = request.GET.get("annuncio_id")
     annuncio = get_object_or_404(Annuncio, uuid=annuncio_id, is_published=True)
     quantity = request.POST.get("quantita")
-    if not quantity:
-        quantity = request.GET.get("quantita")
     error_redirect = validate_quantity(quantity, annuncio)
     if error_redirect:
         return None, None, error_redirect
@@ -82,11 +80,12 @@ def create_cart_get_invoice(request):
     
     return None, create_invoice(request, annuncio, quantity, cart=carrello)
 
+@method_decorator(cache_control(no_cache=True, must_revalidate=True, no_store=True), name='dispatch')
 class PurchasePageView(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin, View):
     template_name = "purchase/payment_process.html"
     login_url = reverse_lazy('sylvelius:login')
 
-    def get(self, request):
+    def post(self, request):
         err, invoice = create_cart_get_invoice(request)
         if err:
             return err
@@ -361,11 +360,12 @@ class CarrelloPageView(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin,
             context['cart'] = request.user.cart #type:ignore
         return render(request, self.template_name, context)
 
+@method_decorator(cache_control(no_cache=True, must_revalidate=True, no_store=True), name='dispatch')
 class CheckoutPageView(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin,View):
     template_name = "purchase/checkout.html"
     login_url = reverse_lazy('sylvelius:login')
 
-    def get(self,request):
+    def post(self,request):
         context = {}
         if Cart.objects.filter(utente = request.user).exists():
             err = carrello_or_checkout_integrity(request)

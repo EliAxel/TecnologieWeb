@@ -88,7 +88,8 @@
                                     <td class="align-middle">€{{ invoice.total|floatformat:2 }}</td>
                                     <td class="align-middle">
                                         <div class="d-flex flex-row align-items-center justify-content-center">
-                                            <form action="{% url 'purchase:purchase' %}" method="get" class="d-inline-block mr-1">
+                                            <form action="{% url 'purchase:purchase' %}" method="post" class="d-inline-block mr-1">
+                                                {% csrf_token %}
                                                 <input type="hidden" name="annuncio_id" value="{{ invoice.prodotto.annunci.uuid }}">
                                                 <input type="hidden" name="quantita" value="{{ invoice.quantita }}">
                                                 <button type="submit" class="btn btn-sm btn-primary">
@@ -126,9 +127,12 @@
                 <div class="d-flex justify-content-between mt-4">
                     <a class="btn btn-outline-secondary" style='visibility:hidden'>
                     </a>
-                    <a href="{% url 'purchase:checkout' %}" class="btn btn-primary">
-                        Procedi al checkout <i class="bi bi-arrow-right"></i>
-                    </a>
+                    <form method="post" action="{% url 'purchase:checkout' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary">
+                            Procedi al checkout <i class="bi bi-arrow-right"></i>
+                        </button>
+                    </form>
                 </div>
             {% else %}
                 <div class="text-center py-5">

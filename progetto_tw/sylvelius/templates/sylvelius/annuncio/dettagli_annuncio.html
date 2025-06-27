@@ -7,279 +7,269 @@
 {% block title %}{{ annuncio.prodotto.nome }} - Sylvelius{% endblock %}
 
 {% block middle %}
-{% if request.GET.evento %}
-    <script src="{% static 'js/toast.js' %}"></script>
-    {% if request.GET.evento == "commento_bad" %}
-    <script>
-        showBootstrapAlertWithIcon(
-            "Errore nella gestione dei commenti.","bad"
-        );
-    </script>
-    {% elif request.GET.evento == 'ordine_grosso'%}
-    <script>
-        showBootstrapAlertWithIcon(
-            "Le scorte del prodotto sono diminuite!","bad"
-        );
-    </script>
-    {% elif request.GET.evento == 'ordine_piccolo'%}
-    <script>
-        showBootstrapAlertWithIcon(
-            "Le scorte del prodotto sono finite!","bad"
-        );
-    </script>
-    {% elif request.GET.evento == 'non_intero'%}
-    <script>
-        showBootstrapAlertWithIcon(
-            "La quantità non è un numero","bad"
-        );
-    </script>
-    {% elif request.GET.evento == 'carrello'%}
-    <script>
-        showBootstrapAlertWithIcon(
-            "Ordine aggiunto al carrello!","good"
-        );
-    </script>
+    {% if request.GET.evento %}
+        <script src="{% static 'js/toast.js' %}"></script>
+        {% if request.GET.evento == "commento_bad" %}
+            <script>
+                showBootstrapAlertWithIcon(
+                    "Errore nella gestione dei commenti.","bad"
+                );
+            </script>
+        {% elif request.GET.evento == 'ordine_grosso' %}
+            <script>
+                showBootstrapAlertWithIcon(
+                    "Le scorte del prodotto sono diminuite!","bad"
+                );
+            </script>
+        {% elif request.GET.evento == 'ordine_piccolo' %}
+            <script>
+                showBootstrapAlertWithIcon(
+                    "Le scorte del prodotto sono finite!","bad"
+                );
+            </script>
+        {% elif request.GET.evento == 'non_intero' %}
+            <script>
+                showBootstrapAlertWithIcon(
+                    "La quantità non è un numero","bad"
+                );
+            </script>
+        {% elif request.GET.evento == 'carrello' %}
+            <script>
+                showBootstrapAlertWithIcon(
+                    "Ordine aggiunto al carrello!","good"
+                );
+            </script>
+        {% endif %}
     {% endif %}
-{% endif %}
-<div class="container mt-5 mb-5">
-    <div class="row">
-        <!-- Colonna Sinistra: Testo -->
-        <div class="col-md-6">
-            <h2 style="word-break: break-word;">{{ annuncio.prodotto.nome }}</h2>
-            {% if not annuncio.is_published %}
-            <h5 style="color:{{ADMIN_SECONDARY_COLOR}};">ANNUNCIO NASCOSTO</h5>
-            {% endif %}
-            {% if not annuncio.inserzionista.is_active %}
-            <h5 style="color:{{ADMIN_SECONDARY_COLOR}};">UTENTE BANDITO</h5>
-            {% endif %}
-            <p class="text-muted mb-1">
-                Pubblicato il {{ annuncio.data_pubblicazione|date:"d/m/Y" }} da 
-                <a href="{% url 'sylvelius:dettagli_profilo' annuncio.inserzionista.username %}">
-                    {{ annuncio.inserzionista.username }}
-                </a>
-            </p>
-            <span class="text-muted mb-4">
-                Condizione: 
-            </span>
-            {% if annuncio.prodotto.condizione == 'nuovo' %}
-                <span class="badge bg-success text-white">Nuovo</span>
-            {% elif annuncio.prodotto.condizione == 'usato' %}
-                <span class="badge bg-warning text-dark">Usato</span>
-            {% endif %}
+    <div class="container mt-5 mb-5">
+        <div class="row">
+            <!-- Colonna Sinistra: Testo -->
+            <div class="col-md-6">
+                <h2 style="word-break: break-word;">{{ annuncio.prodotto.nome }}</h2>
+                {% if not annuncio.is_published %}
+                    <h5 style="color:{{ADMIN_SECONDARY_COLOR}};">ANNUNCIO NASCOSTO</h5>
+                {% endif %}
+                {% if not annuncio.inserzionista.is_active %}
+                    <h5 style="color:{{ADMIN_SECONDARY_COLOR}};">UTENTE BANDITO</h5>
+                {% endif %}
+                <p class="text-muted mb-1">
+                    Pubblicato il {{ annuncio.data_pubblicazione|date:"d/m/Y" }} da 
+                    <a href="{% url 'sylvelius:dettagli_profilo' annuncio.inserzionista.username %}">
+                        {{ annuncio.inserzionista.username }}
+                    </a>
+                </p>
+                <span class="text-muted mb-4">
+                    Condizione: 
+                </span>
+                {% if annuncio.prodotto.condizione == 'nuovo' %}
+                    <span class="badge bg-success text-white">Nuovo</span>
+                {% elif annuncio.prodotto.condizione == 'usato' %}
+                    <span class="badge bg-warning text-dark">Usato</span>
+                {% endif %}
 
-            {% if annuncio.prodotto.descrizione_breve %}
-                <p class="lead" style="word-break: break-word;">{{ annuncio.prodotto.descrizione_breve }}</p>
-            {% endif %}
-            {% if annuncio.rating_medio == INVALID_COMMNT_RATING_VALUE %}
-                <div>Nessuna recensione</div>
-            {% else %}
                 {% if annuncio.prodotto.descrizione_breve %}
-                    {% include "_txt_stars_medie.html" %}
-                    <p class="text-muted mb-4">Rating medio: {{ annuncio.rating_medio|floatformat:1 }} stelle (Voti: {{annuncio.rating_count}})</p>
+                    <p class="lead" style="word-break: break-word;">{{ annuncio.prodotto.descrizione_breve }}</p>
                 {% endif %}
-            {% endif %}
-
-            <h4 class="text-primary mt-4">€ <span id="unit-price-{{ annuncio.id }}">{{ annuncio.prodotto.prezzo|intcomma }}</span> 
-                <small class="text-muted">/unità</small>
-            </h4>
-            <h5 id="total-price-container-{{ annuncio.id }}" style="visibility: hidden;">Totale: <span id="total-price-{{ annuncio.id }}" class="text-success">{{ annuncio.prodotto.prezzo }}</span> €</h5>
-            <p class="text-muted">Disponibilità: {{ annuncio.qta_magazzino }} unità</p>
-
-            <!-- Selezione quantità -->
-             {% if 'moderatori' in user.groups.values_list|join:',' %}
-            <div class="mt-4 mb-4">
-                <form action="{% url 'sylvelius:elimina_annuncio' annuncio.id %}" method="post" class="d-inline-block">
-                    <button class="btn d-inline-block" style="background-color:{{ADMIN_SECONDARY_COLOR}};" onclick="return confirm('Sei sicuro di voler eliminare questo annuncio?');">
-                    {% csrf_token %}
-                    Cancella annuncio</button>
-                </form>
-                {% if annuncio.inserzionista.is_active %}
-                <form action="{% url 'sylvelius:espelli_utente' 'ban' annuncio.inserzionista.id %}" method="post" class="d-inline-block" onclick="return confirm('Sei sicuro di voler espellere questo utente?');">
-                    {% csrf_token %}
-                    <button type="submit" class="btn" style="background-color:{{ADMIN_SECONDARY_COLOR}};" id="ban-user">
-                        Espelli utente</button>
-                </form>
-                {% endif %}
-            </div>   
-            {% else %}
-            {% if annuncio.qta_magazzino > 0 %}
-            <div class="form-group d-flex justify-content-center align-items-center mt-3 mb-3">
-                <label class="mr-3" for="quantity-select-{{ annuncio.id }}">Quantità:</label>
-                <input type="number" class="form-control w-auto" size="7" id="quantity-select-{{ annuncio.id }}" required max="{{ annuncio.qta_magazzino }}" name="qta_magazzino" min="{{MIN_ORDN_QUANTITA_VALUE}}" step="1" value="{{MIN_ORDN_QUANTITA_VALUE}}">
-            </div>
-
-            <!-- Azioni -->
-            
-            <div class="mt-4 mb-4">
-                {% if request.user.is_authenticated %}
-                <form action="{% url 'purchase:add_to_cart' %}" method="post" class="d-inline-block" id="cart-form-{{ annuncio.id }}" style=''>
-                    {% csrf_token %}
-                    <input type="hidden" name="annuncio_id" value="{{ annuncio.uuid }}">
-                    <input type="hidden" name="quantita" value="{{MIN_ORDN_QUANTITA_VALUE}}" id="cart-quantity-input-{{ annuncio.id }}">
-                    <button type="submit" class="btn text-white d-inline-block" id="cart-btn" style="background-color:{{SECONDARY_COLOR}};">
-                        <i class="bi bi-cart"></i>
-                        Aggiungi al carrello
-                    </button>
-                </form>
-                {% endif %}
-                <form action="{% url 'purchase:purchase' %}" method="get" class="d-inline-block" id="purchase-form-{{ annuncio.id }}">
-                    <input type="hidden" name="annuncio_id" value="{{ annuncio.uuid }}">
-                    <input type="hidden" name="quantita" value="{{MIN_ORDN_QUANTITA_VALUE}}" id="quantity-input-{{ annuncio.id }}">
-                    <button type="submit" class="btn text-white" style="background-color:{{SECONDARY_COLOR}};" id="buy-now">Acquista ora</button>
-                </form>
-            </div>
-            {% endif %}
-            {% endif %}
-        </div>
-
-        <!-- Colonna Destra: Carosello -->
-        <div class="col-md-6">
-            {% if annuncio.prodotto.immagini.all %}
-                <div id="caroselloProdotto-{{ annuncio.id }}" class="carousel slide" data-ride="carousel" data-interval="false">
-                    <div class="carousel-inner">
-                        {% for immagine in annuncio.prodotto.immagini.all %}
-                            <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                                <img
-                                    data-index="{{ forloop.counter0 }}"
-                                    data-prodotto-id="{{ annuncio.prodotto.id }}"
-                                    class="d-block w-100 rounded shadow immagine-carosello"
-                                    src="{% static 'img/default_loading.png' %}"
-                                    alt="Immagine prodotto"
-                                    style="word-break: break-word;"
-                                >
-                            </div>
-                        {% endfor %}
-                    </div>
-
-                    <!-- Pulsanti di navigazione -->
-                    {% if annuncio.prodotto.immagini.count > 1 %}
-                        <a class="carousel-control-prev" href="#caroselloProdotto-{{ annuncio.id }}" role="button" data-slide="prev">
-                            <span class="carousel-control-prev-icon bg-dark rounded-circle p-3" aria-hidden="true"></span>
-                            <span class="sr-only">Precedente</span>
-                        </a>
-                        <a class="carousel-control-next" href="#caroselloProdotto-{{ annuncio.id }}" role="button" data-slide="next">
-                            <span class="carousel-control-next-icon bg-dark rounded-circle p-3" aria-hidden="true"></span>
-                            <span class="sr-only">Successivo</span>
-                        </a>
+                {% if annuncio.rating_medio == INVALID_COMMNT_RATING_VALUE %}
+                    <div>Nessuna recensione</div>
+                {% else %}
+                    {% if annuncio.prodotto.descrizione_breve %}
+                        {% include "_txt_stars_medie.html" %}
+                        <p class="text-muted mb-4">Rating medio: {{ annuncio.rating_medio|floatformat:1 }} stelle (Voti: {{annuncio.rating_count}})</p>
                     {% endif %}
-                </div>
-            {% else %}
-                <img src="{% static 'img/default_product_big.png' %}" class="img-fluid rounded shadow" alt="Immagine prodotto">
-            {% endif %}
-        </div>
-    </div>
+                {% endif %}
 
-    <!-- Commenti -->
-    <div class="row mt-5">
-        <div class="col-12">
-            {% if annuncio.prodotto.descrizione %}
-                <p style="word-break: break-word; white-space: pre-line; text-align: left;">{{ annuncio.prodotto.descrizione|linebreaksbr }}</p>
-            {% else %}
-                <h2 class="text-muted mb-5">Nessuna descrizione</h2>
-            {% endif %}
-            <div>Categorie:</div>
-            {% if annuncio.prodotto.tags.count >= 1 %}
-                {% for tag in annuncio.prodotto.tags.all %}
-                    <span class="badge text-white" style="background-color:{% if 'moderatori' in user.groups.values_list|join:',' %}
-    {{ADMIN_TERTIARY_COLOR}}
-{% else %}
-    {{TERTIARY_COLOR}}
-{% endif %}">{{ tag.nome }}</span>
+                <h4 class="text-primary mt-4">€ <span id="unit-price-{{ annuncio.id }}">{{ annuncio.prodotto.prezzo|intcomma }}</span> 
+                    <small class="text-muted">/unità</small>
+                </h4>
+                <h5 id="total-price-container-{{ annuncio.id }}" style="visibility: hidden;">Totale: <span id="total-price-{{ annuncio.id }}" class="text-success">{{ annuncio.prodotto.prezzo }}</span> €</h5>
+
+                <!-- Selezione quantità -->
+                {% if 'moderatori' in user.groups.values_list|join:',' %}
+                    <div class="mt-4 mb-4">
+                        <form action="{% url 'sylvelius:elimina_annuncio' annuncio.id %}" method="post" class="d-inline-block">
+                            <button class="btn d-inline-block" style="background-color:{{ADMIN_SECONDARY_COLOR}};" onclick="return confirm('Sei sicuro di voler eliminare questo annuncio?');">
+                                {% csrf_token %}
+                                Cancella annuncio
+                            </button>
+                        </form>
+                        {% if annuncio.inserzionista.is_active %}
+                            <form action="{% url 'sylvelius:espelli_utente' 'ban' annuncio.inserzionista.id %}" method="post" class="d-inline-block" onclick="return confirm('Sei sicuro di voler espellere questo utente?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn" style="background-color:{{ADMIN_SECONDARY_COLOR}};" id="ban-user">
+                                    Espelli utente
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>   
+                {% else %}
+                    {% if annuncio.qta_magazzino > 0 and request.user.is_authenticated %}
+                        <p class="text-muted">Disponibilità: {{ annuncio.qta_magazzino }} unità</p>
+                        <div class="form-group d-flex justify-content-center align-items-center mt-3 mb-3">
+                            <label class="mr-3" for="quantity-select-{{ annuncio.id }}">Quantità:</label>
+                            <input type="number" class="form-control w-auto" size="7" id="quantity-select-{{ annuncio.id }}" required max="{{ annuncio.qta_magazzino }}" name="qta_magazzino" min="{{MIN_ORDN_QUANTITA_VALUE}}" step="1" value="{{MIN_ORDN_QUANTITA_VALUE}}">
+                        </div>
+
+                        <!-- Azioni -->
+                        <div class="mt-4 mb-4">
+                            <form action="{% url 'purchase:add_to_cart' %}" method="post" class="d-inline-block" id="cart-form-{{ annuncio.id }}" style=''>
+                                {% csrf_token %}
+                                <input type="hidden" name="annuncio_id" value="{{ annuncio.uuid }}">
+                                <input type="hidden" name="quantita" value="{{MIN_ORDN_QUANTITA_VALUE}}" id="cart-quantity-input-{{ annuncio.id }}">
+                                <button type="submit" class="btn text-white d-inline-block" id="cart-btn" style="background-color:{{SECONDARY_COLOR}};">
+                                    <i class="bi bi-cart"></i>
+                                    Aggiungi al carrello
+                                </button>
+                            </form>
+                            <form action="{% url 'purchase:purchase' %}" method="post" class="d-inline-block" id="purchase-form-{{ annuncio.id }}">
+                                {% csrf_token %}
+                                <input type="hidden" name="annuncio_id" value="{{ annuncio.uuid }}">
+                                <input type="hidden" name="quantita" value="{{MIN_ORDN_QUANTITA_VALUE}}" id="quantity-input-{{ annuncio.id }}">
+                                <button type="submit" class="btn text-white" style="background-color:{{SECONDARY_COLOR}};" id="buy-now">Acquista ora</button>
+                            </form>
+                        </div>
+                    {% endif %}
+                {% endif %}
+            </div>
+
+            <!-- Colonna Destra: Carosello -->
+            <div class="col-md-6">
+                {% if annuncio.prodotto.immagini.all %}
+                    <div id="caroselloProdotto-{{ annuncio.id }}" class="carousel slide" data-ride="carousel" data-interval="false">
+                        <div class="carousel-inner">
+                            {% for immagine in annuncio.prodotto.immagini.all %}
+                                <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                    <img
+                                        data-index="{{ forloop.counter0 }}"
+                                        data-prodotto-id="{{ annuncio.prodotto.id }}"
+                                        class="d-block w-100 rounded shadow immagine-carosello"
+                                        src="{% static 'img/default_loading.png' %}"
+                                        alt="Immagine prodotto"
+                                        style="word-break: break-word;"
+                                    >
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Pulsanti di navigazione -->
+                        {% if annuncio.prodotto.immagini.count > 1 %}
+                            <a class="carousel-control-prev" href="#caroselloProdotto-{{ annuncio.id }}" role="button" data-slide="prev">
+                                <span class="carousel-control-prev-icon bg-dark rounded-circle p-3" aria-hidden="true"></span>
+                                <span class="sr-only">Precedente</span>
+                            </a>
+                            <a class="carousel-control-next" href="#caroselloProdotto-{{ annuncio.id }}" role="button" data-slide="next">
+                                <span class="carousel-control-next-icon bg-dark rounded-circle p-3" aria-hidden="true"></span>
+                                <span class="sr-only">Successivo</span>
+                            </a>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <img src="{% static 'img/default_product_big.png' %}" class="img-fluid rounded shadow" alt="Immagine prodotto">
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Commenti -->
+        <div class="row mt-5">
+            <div class="col-12">
+                {% if annuncio.prodotto.descrizione %}
+                    <p style="word-break: break-word; white-space: pre-line; text-align: left;">{{ annuncio.prodotto.descrizione|linebreaksbr }}</p>
+                {% else %}
+                    <h2 class="text-muted mb-5">Nessuna descrizione</h2>
+                {% endif %}
+                <div>Categorie:</div>
+                {% if annuncio.prodotto.tags.count >= 1 %}
+                    {% for tag in annuncio.prodotto.tags.all %}
+                        <span class="badge text-white" style="background-color:{% if 'moderatori' in user.groups.values_list|join:',' %}
+                            {{ADMIN_TERTIARY_COLOR}}
+                        {% else %}
+                            {{TERTIARY_COLOR}}
+                        {% endif %}">{{ tag.nome }}</span>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">Nessuna categoria specificata.</p>
+                {% endif %}
+                <h4 class="mb-4 mt-2">💬 Commenti degli utenti 💬</h4>
+                
+                {% if ha_acquistato and non_ha_commentato %}
+                    {% url 'sylvelius:aggiungi_commento' annuncio.id as create_url %}
+                    {% include "_card_nuovo_commento.html" with direction=create_url %}
+                    <hr class="my-4 border-secondary" style="width: 80%;">
+                {% elif not non_ha_commentato %}
+                    {% include "_card_commento.html" with commento=get_commento %}
+                    <hr class="my-4 border" style="width: 80%;">
+                {% endif %}
+
+                {% for commento in commenti %}
+                    {% include "_card_commento.html" %}
+                {% empty %}
+                    <p class="text-muted">Nessun commento per questo annuncio.</p>
                 {% endfor %}
-            {% else %}
-                <p class="text-muted">Nessuna categoria specificata.</p>
-            {% endif %}
-            <h4 class="mb-4 mt-2">💬 Commenti degli utenti 💬</h4>
-            
-            {% if ha_acquistato and non_ha_commentato %}
-                {% url 'sylvelius:aggiungi_commento' annuncio.id as create_url%}
-                {% include "_card_nuovo_commento.html" with direction=create_url %}
-                <hr class="my-4 border-secondary" style="width: 80%;">
-            {% elif not non_ha_commentato %}
-                {% include "_card_commento.html" with commento=get_commento %}
-                <hr class="my-4 border" style="width: 80%;">
-            {% endif %}
-
-            {% for commento in commenti %}
-                {% include "_card_commento.html" %}
-            {% empty %}
-                <p class="text-muted">Nessun commento per questo annuncio.</p>
-            {% endfor %}
-            {% include "_btn_paginazione.html" %}
+                {% include "_btn_paginazione.html" %}
+            </div>
         </div>
     </div>
-</div>
 
-<script src="{% static 'js/imgs_loader.js' %}"></script>
-{% if 'moderatori' not in user.groups.values_list|join:',' %}
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const MIN_ORDN_QUANTITA_VALUE = {{MIN_ORDN_QUANTITA_VALUE}}
-        const MAX_PROD_PREZZO_DIGITS_DECIMAL = {{MAX_PROD_PREZZO_DIGITS_DECIMAL.1}}
-        const quantitySelect = document.getElementById('quantity-select-{{ annuncio.id }}');
-        const quantityInput = document.getElementById('quantity-input-{{ annuncio.id }}');
-        const unitPriceElement = document.getElementById('unit-price-{{ annuncio.id }}');
-        const totalPriceElement = document.getElementById('total-price-{{ annuncio.id }}');
-        const totalPriceContainer = document.getElementById('total-price-container-{{ annuncio.id }}');
-        const form = document.getElementById('purchase-form-{{ annuncio.id }}')
-        {% if request.user.is_authenticated %}
-            const quantityInputCart = document.getElementById('cart-quantity-input-{{ annuncio.id }}');
-            const formCart = document.getElementById('cart-form-{{ annuncio.id }}')
-        {% endif %}
-        
-        const originalPrice = parseFloat("{{ annuncio.prodotto.prezzo }}");
-        
-        function updatePrices() {
-            if(quantitySelect.value === ""){
-                document.getElementById("buy-now").disabled = true;
-                {% if request.user.is_authenticated %}
-                document.getElementById("cart-btn").disabled = true;
-                {% endif %}
-                totalPriceContainer.style.visibility = 'hidden';
-                return;
-            } else {
-                document.getElementById("buy-now").disabled = false;
-                {% if request.user.is_authenticated %}
-                document.getElementById("cart-btn").disabled = false;
-                {% endif %}
-            }
-            let quantity = parseInt(quantitySelect.value);
+    <script src="{% static 'js/imgs_loader.js' %}"></script>
+    {% if 'moderatori' not in user.groups.values_list|join:',' and request.user.is_authenticated %}
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const MIN_ORDN_QUANTITA_VALUE = {{MIN_ORDN_QUANTITA_VALUE}}
+                const MAX_PROD_PREZZO_DIGITS_DECIMAL = {{MAX_PROD_PREZZO_DIGITS_DECIMAL.1}}
+                const quantitySelect = document.getElementById('quantity-select-{{ annuncio.id }}');
+                const quantityInput = document.getElementById('quantity-input-{{ annuncio.id }}');
+                const unitPriceElement = document.getElementById('unit-price-{{ annuncio.id }}');
+                const totalPriceElement = document.getElementById('total-price-{{ annuncio.id }}');
+                const totalPriceContainer = document.getElementById('total-price-container-{{ annuncio.id }}');
+                const form = document.getElementById('purchase-form-{{ annuncio.id }}')
+                const quantityInputCart = document.getElementById('cart-quantity-input-{{ annuncio.id }}');
+                const formCart = document.getElementById('cart-form-{{ annuncio.id }}')
+                
+                const originalPrice = parseFloat("{{ annuncio.prodotto.prezzo }}");
+                
+                function updatePrices() {
+                    if(quantitySelect.value === ""){
+                        document.getElementById("buy-now").disabled = true;
+                        document.getElementById("cart-btn").disabled = true;
+                        totalPriceContainer.style.visibility = 'hidden';
+                        return;
+                    } else {
+                        document.getElementById("buy-now").disabled = false;
+                        document.getElementById("cart-btn").disabled = false;
+                    }
+                    let quantity = parseInt(quantitySelect.value);
 
-            if (isNaN(quantity) || quantity < MIN_ORDN_QUANTITA_VALUE) {
-                quantity = MIN_ORDN_QUANTITA_VALUE;
-            } else if (quantity > {{ annuncio.qta_magazzino }}) {
-                quantity = {{ annuncio.qta_magazzino }};
-            }
+                    if (isNaN(quantity) || quantity < MIN_ORDN_QUANTITA_VALUE) {
+                        quantity = MIN_ORDN_QUANTITA_VALUE;
+                    } else if (quantity > {{ annuncio.qta_magazzino }}) {
+                        quantity = {{ annuncio.qta_magazzino }};
+                    }
 
-            quantitySelect.value = quantity;
-            quantityInput.value = quantity;
-            {% if request.user.is_authenticated %}
-            quantityInputCart.value = quantity;
-            {% endif %}
+                    quantitySelect.value = quantity;
+                    quantityInput.value = quantity;
+                    quantityInputCart.value = quantity;
 
-            const totalPrice = originalPrice * quantity;
-            totalPriceElement.textContent = totalPrice.toLocaleString('it-IT', { minimumFractionDigits: MAX_PROD_PREZZO_DIGITS_DECIMAL, maximumFractionDigits: MAX_PROD_PREZZO_DIGITS_DECIMAL });
+                    const totalPrice = originalPrice * quantity;
+                    totalPriceElement.textContent = totalPrice.toLocaleString('it-IT', { minimumFractionDigits: MAX_PROD_PREZZO_DIGITS_DECIMAL, maximumFractionDigits: MAX_PROD_PREZZO_DIGITS_DECIMAL });
 
-            if (quantity === 1) {
-                totalPriceContainer.style.visibility = 'hidden';
-            } else {
-                totalPriceContainer.style.visibility = '';
-            }
-        }
+                    if (quantity === 1) {
+                        totalPriceContainer.style.visibility = 'hidden';
+                    } else {
+                        totalPriceContainer.style.visibility = '';
+                    }
+                }
 
-        quantitySelect.addEventListener('input', updatePrices);
-        updatePrices();
-        form.addEventListener('submit', function(e) {
-            const quantity = parseInt(quantitySelect.value);
-            quantityInput.value = quantity;
-        });
-        {% if request.user.is_authenticated %}
-        formCart.addEventListener('submit', function(e) {
-            const quantity = parseInt(quantitySelect.value);
-            quantityInputCart.value = quantity;
-        });
-        {% endif %}
-    });
-</script>
-{% endif %}
+                quantitySelect.addEventListener('input', updatePrices);
+                updatePrices();
+                form.addEventListener('submit', function(e) {
+                    const quantity = parseInt(quantitySelect.value);
+                    quantityInput.value = quantity;
+                });
+                formCart.addEventListener('submit', function(e) {
+                    const quantity = parseInt(quantitySelect.value);
+                    quantityInputCart.value = quantity;
+                });
+            });
+        </script>
+    {% endif %}
 {% endblock %}

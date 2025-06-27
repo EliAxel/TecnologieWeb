@@ -1,9 +1,17 @@
 {% extends 'purchase/payment_process.html'%}
 {% load static %}
 {% load humanize %}
-{% block titolo %}<h2 class="mb-4">Pagamento di: €{{ amount|intcomma }}</h2>{% endblock %}
+{% block titolo %}
+    {% if cart.invoices.all %}
+        <h2 class="mb-4">Pagamento di: €{{ amount|intcomma }}</h2>
+    {% else %}
+        <h2 class="mb-4">Carrello vuoto</h2>
+    {% endif %}
+{% endblock %}
 {% block sottotitolo %}
     {% for invoice in cart.invoices.all %}
         <p>Stai acquistando: <strong style="word-break: break-word;">{{ invoice.prodotto.nome }}</strong> (Quantità: {{ invoice.quantita }})</p>
+    {% empty %}
+        {% block paypalscript %}{% endblock %}
     {% endfor %}
 {% endblock %}
