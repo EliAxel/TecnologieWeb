@@ -87,12 +87,21 @@
                                     </td>
                                     <td class="align-middle">€{{ invoice.total|floatformat:2 }}</td>
                                     <td class="align-middle">
-                                        <form method="post" action="{% url 'purchase:rimuovi_da_carrello' invoice.uuid %}" class="save-scroll-form">
-                                            {% csrf_token %}
-                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Vuoi rimuovere l\'articolo?')">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </form>
+                                        <div class="d-flex flex-row align-items-center justify-content-center">
+                                            <form action="{% url 'purchase:purchase' %}" method="get" class="d-inline-block mr-1">
+                                                <input type="hidden" name="annuncio_id" value="{{ invoice.prodotto.annunci.uuid }}">
+                                                <input type="hidden" name="quantita" value="{{ invoice.quantita }}">
+                                                <button type="submit" class="btn btn-sm btn-primary">
+                                                    <i class="bi bi-cart"></i>
+                                                </button>
+                                            </form>
+                                            <form method="post" action="{% url 'purchase:rimuovi_da_carrello' invoice.uuid %}" class="save-scroll-form">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Vuoi rimuovere l\'articolo?')">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             {% endfor %}
