@@ -4,7 +4,7 @@ from sylvelius.models import Prodotto
 
 # Create your models here.
 class Invoice(models.Model):
-    invoice_id = models.CharField(max_length=MAX_ORDN_INVOICE_CHARS, unique=True)
+    uuid = models.CharField(max_length=MAX_ORDN_INVOICE_CHARS, unique=True)
     utente = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='invoices', null=True)
     quantita = models.PositiveIntegerField()
     prodotto = models.ForeignKey(Prodotto, on_delete=models.CASCADE, related_name='invoices', null=True)

@@ -12,7 +12,8 @@ urlpatterns = [
     path('add_to_cart/', views.add_to_cart, name='add_to_cart'),
     path('carrello/', views.CarrelloPageView.as_view(), name='carrello'),
     path('checkout/', views.CheckoutPageView.as_view(), name='checkout'),
-    path('aumenta_cart/<str:invoice_id>/', views.aumenta_carrello, name='aumenta_carrello'),
-    path('diminuisci_cart/<str:invoice_id>/', views.diminuisci_carrello, name='diminuisci_carrello'),
-    path('rimuovi_da_cart/<str:invoice_id>/', views.rimuovi_da_carrello, name='rimuovi_da_carrello'),
+    path('aumenta_carrello/<str:uuid>/', views.aumenta_carrello, name='aumenta_carrello'),
+    path('diminuisci_carrello/<str:uuid>/', views.diminuisci_carrello, name='diminuisci_carrello'),
+    path('rimuovi_da_carrello/<str:uuid>/', views.rimuovi_da_carrello, name='rimuovi_da_carrello'),
+    path('rimuovi_carrello/<str:cart_id>/', views.rimuovi_carrello, name='rimuovi_carrello'),
 ]

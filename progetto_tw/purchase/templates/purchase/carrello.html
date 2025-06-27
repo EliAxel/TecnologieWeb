@@ -16,6 +16,18 @@
             "L'articolo non è più in vendita","bad"
         );
     </script>
+    {% elif request.GET.evento == "rimosso" %}
+    <script>
+        showBootstrapAlertWithIcon(
+            "Articolo rimosso","good"
+        );
+    </script>
+    {% elif request.GET.evento == "rimossi" %}
+    <script>
+        showBootstrapAlertWithIcon(
+            "Articoli rimossi","good"
+        );
+    </script>
     {% endif %}
 {% endif %}
 <div class="container-fluid mt-5 mb-5">
@@ -58,14 +70,14 @@
                                     <td class="align-middle">€{{ invoice.prodotto.prezzo }}</td>
                                     <td class="align-middle text-center">
                                         <div class="d-flex justify-content-center align-items-center">
-                                            <form method="post" action="{% url 'purchase:diminuisci_carrello' invoice.invoice_id %}" class="mr-2 save-scroll-form">
+                                            <form method="post" action="{% url 'purchase:diminuisci_carrello' invoice.uuid %}" class="mr-2 save-scroll-form">
                                                 {% csrf_token %}
                                                 <button type="submit" class="btn btn-sm btn-outline-secondary" {% if invoice.quantita <= 1 %}disabled{% endif %}>
                                                     <i class="bi bi-dash"></i>
                                                 </button>
                                             </form>
                                             <span class="mx-2">{{ invoice.quantita }}</span>
-                                            <form method="post" action="{% url 'purchase:aumenta_carrello' invoice.invoice_id %}" class="ml-2 save-scroll-form">
+                                            <form method="post" action="{% url 'purchase:aumenta_carrello' invoice.uuid %}" class="ml-2 save-scroll-form">
                                                 {% csrf_token %}
                                                 <button type="submit" class="btn btn-sm btn-outline-secondary">
                                                     <i class="bi bi-plus"></i>
@@ -75,10 +87,10 @@
                                     </td>
                                     <td class="align-middle">€{{ invoice.total|floatformat:2 }}</td>
                                     <td class="align-middle">
-                                        <form method="post" action="{% url 'purchase:rimuovi_da_carrello' invoice.invoice_id %}" class="save-scroll-form">
+                                        <form method="post" action="{% url 'purchase:rimuovi_da_carrello' invoice.uuid %}" class="save-scroll-form">
                                             {% csrf_token %}
-                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Vuoi rimuovere l\'ordine?')">
-                                                <i class="bi bi-trash"></i> Rimuovi
+                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Vuoi rimuovere l\'articolo?')">
+                                                <i class="bi bi-trash"></i>
                                             </button>
                                         </form>
                                     </td>
@@ -89,6 +101,14 @@
                             <tr>
                                 <td colspan="3" class="text-right"><strong>Totale complessivo:</strong></td>
                                 <td colspan="2"><strong>€{{ cart.total|floatformat:2 }}</strong></td>
+                                <td colspan="1">
+                                <form method="post" action="{% url 'purchase:rimuovi_carrello' cart.uuid %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Vuoi rimuovere tutti gli articoli?')">
+                                        Rimuovi tutto
+                                    </button>
+                                </form>
+                            </td>
                             </tr>
                         </tfoot>
                     </table>

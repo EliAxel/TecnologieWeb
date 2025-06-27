@@ -124,7 +124,7 @@ class PayPalCOATests(TestCase):
         self.prodotto = Prodotto.objects.create(nome='Prodotto Test',descrizione_breve='testtest', prezzo=10.0)
         self.annuncio = Annuncio.objects.create(prodotto=self.prodotto,inserzionista=self.user, qta_magazzino=5)
         self.invoice = Invoice.objects.create(
-            invoice_id='INV-123',
+            uuid='INV-123',
             utente=self.user,
             prodotto=self.prodotto,
             quantita=2
@@ -330,7 +330,7 @@ class PayPalCOATests(TestCase):
         cart = Cart.objects.create(uuid='CART-123', utente=self.user)
         
         invoice1 = Invoice.objects.create(
-            invoice_id='INV-001',
+            uuid='INV-001',
             utente=self.user,
             prodotto=self.prodotto,
             quantita=1,
@@ -341,7 +341,7 @@ class PayPalCOATests(TestCase):
         annuncio2 = Annuncio.objects.create(prodotto=prodotto2, inserzionista=self.user, qta_magazzino=10)
         
         invoice2 = Invoice.objects.create(
-            invoice_id='INV-002',
+            uuid='INV-002',
             utente=self.user,
             prodotto=prodotto2,
             quantita=3,
@@ -392,7 +392,7 @@ class PayPalCOATests(TestCase):
         self.annuncio.save()
         
         invoice1 = Invoice.objects.create(
-            invoice_id='INV-001',
+            uuid='INV-001',
             utente=self.user,
             prodotto=self.prodotto,
             quantita=2,
@@ -661,7 +661,7 @@ class CartTests(TestCase):
         )
         
         self.invoice = Invoice.objects.create(
-            invoice_id=str(uuid.uuid4()),
+            uuid=str(uuid.uuid4()),
             utente=self.user,
             quantita=2,
             prodotto=self.prodotto,
@@ -718,7 +718,7 @@ class CartTests(TestCase):
     def test_aumenta_carrello(self):
         """Test incremento quantità articolo nel carrello"""
         response = self.client.post(
-            reverse('purchase:aumenta_carrello', kwargs={'invoice_id': self.invoice.invoice_id})
+            reverse('purchase:aumenta_carrello', kwargs={'uuid': self.invoice.uuid})
         )
         
         self.invoice.refresh_from_db()
@@ -730,7 +730,7 @@ class CartTests(TestCase):
     def test_aumenta_carrello_non_existent_annuncio(self):
         """Test incremento quantità articolo nel carrello"""
         inv_err = Invoice.objects.create(
-            invoice_id=str(uuid.uuid4()),
+            uuid=str(uuid.uuid4()),
             utente=self.user,
             quantita=1,
             prodotto=self.prodotto,  
@@ -738,7 +738,7 @@ class CartTests(TestCase):
         )
         inv_err.prodotto.annunci.delete() # type: ignore
         response = self.client.post(
-            reverse('purchase:aumenta_carrello', kwargs={'invoice_id': inv_err.invoice_id})
+            reverse('purchase:aumenta_carrello', kwargs={'uuid': inv_err.uuid})
         )
         
         self.assertEqual(response.status_code, 302)
@@ -749,7 +749,7 @@ class CartTests(TestCase):
         self.invoice.save()
         
         response = self.client.post(
-            reverse('purchase:aumenta_carrello', kwargs={'invoice_id': self.invoice.invoice_id})
+            reverse('purchase:aumenta_carrello', kwargs={'uuid': self.invoice.uuid})
         )
         
         self.invoice.refresh_from_db()
@@ -761,7 +761,7 @@ class CartTests(TestCase):
     def test_diminuisci_carrello(self):
         """Test decremento quantità articolo nel carrello"""
         response = self.client.post(
-            reverse('purchase:diminuisci_carrello', kwargs={'invoice_id': self.invoice.invoice_id})
+            reverse('purchase:diminuisci_carrello', kwargs={'uuid': self.invoice.uuid})
         )
         
         self.invoice.refresh_from_db()
@@ -773,7 +773,7 @@ class CartTests(TestCase):
     def test_diminuisci_carrello_non_existent_annuncio(self):
         """Test decremento quantità articolo nel carrello"""
         inv_err = Invoice.objects.create(
-            invoice_id=str(uuid.uuid4()),
+            uuid=str(uuid.uuid4()),
             utente=self.user,
             quantita=1,
             prodotto=self.prodotto,  
@@ -781,7 +781,7 @@ class CartTests(TestCase):
         )
         inv_err.prodotto.annunci.delete() # type: ignore
         response = self.client.post(
-            reverse('purchase:diminuisci_carrello', kwargs={'invoice_id': inv_err.invoice_id})
+            reverse('purchase:diminuisci_carrello', kwargs={'uuid': inv_err.uuid})
         )
         
         self.assertEqual(response.status_code, 302)
@@ -792,10 +792,10 @@ class CartTests(TestCase):
         self.invoice.save()
         
         response = self.client.post(
-            reverse('purchase:diminuisci_carrello', kwargs={'invoice_id': self.invoice.invoice_id})
+            reverse('purchase:diminuisci_carrello', kwargs={'uuid': self.invoice.uuid})
         )
         
-        self.assertFalse(Invoice.objects.filter(invoice_id=self.invoice.invoice_id).exists())
+        self.assertFalse(Invoice.objects.filter(uuid=self.invoice.uuid).exists())
         
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse('purchase:carrello')) #type:ignore
@@ -803,13 +803,31 @@ class CartTests(TestCase):
     def test_rimuovi_da_carrello(self):
         """Test rimozione articolo dal carrello"""
         response = self.client.post(
-            reverse('purchase:rimuovi_da_carrello', kwargs={'invoice_id': self.invoice.invoice_id})
+            reverse('purchase:rimuovi_da_carrello', kwargs={'uuid': self.invoice.uuid})
         )
         
-        self.assertFalse(Invoice.objects.filter(invoice_id=self.invoice.invoice_id).exists())
+        self.assertFalse(Invoice.objects.filter(uuid=self.invoice.uuid).exists())
         
         self.assertEqual(response.status_code, 302)
         self.assertIn('?evento=rimosso', response.url) #type:ignore
+
+    def test_rimuovi_carrello(self):
+        """Test rimozione articoli dal carrello"""
+        self.invoice = Invoice.objects.create(
+            uuid=str(uuid.uuid4()),
+            utente=self.user,
+            quantita=2,
+            prodotto=self.prodotto,
+            cart=self.cart
+        )
+        response = self.client.post(
+            reverse('purchase:rimuovi_carrello', kwargs={'cart_id': self.cart.uuid})
+        )
+        
+        self.assertFalse(Invoice.objects.filter(uuid=self.invoice.uuid).exists())
+        
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('?evento=rimossi', response.url) #type:ignore
 
     def test_carrello_page_view_with_cart(self):
         """Test visualizzazione pagina carrello con carrello esistente"""
@@ -844,7 +862,7 @@ class CartTests(TestCase):
             uuid=str(uuid.uuid4())
         )
         invoice3 = Invoice.objects.create(
-            invoice_id=str(uuid.uuid4()),
+            uuid=str(uuid.uuid4()),
             utente=self.user,
             quantita=1,
             prodotto=prodotto3,
@@ -855,7 +873,7 @@ class CartTests(TestCase):
         
         response = self.client.get(reverse('purchase:carrello'))
         
-        self.assertFalse(Invoice.objects.filter(invoice_id=invoice3.invoice_id).exists())
+        self.assertFalse(Invoice.objects.filter(uuid=invoice3.uuid).exists())
 
     def test_checkout_page_view_with_cart(self):
         """Test visualizzazione pagina checkout con carrello esistente"""
@@ -867,11 +885,11 @@ class CartTests(TestCase):
         self.assertIn('cart', response.context)
         self.assertIn('amount', response.context)
         self.assertIn('paypal_client_id', response.context)
-        self.assertIn('invoice_id', response.context)
+        self.assertIn('uuid', response.context)
         self.assertEqual(response.context['cart'], self.cart)
         self.assertEqual(response.context['amount'], self.cart.total)
         self.assertEqual(response.context['paypal_client_id'], 'test_client_id')
-        self.assertEqual(response.context['invoice_id'], self.cart.uuid)
+        self.assertEqual(response.context['uuid'], self.cart.uuid)
 
     def test_checkout_page_view_removes_invalid_items(self):
         """Test che verifica che gli articoli non più disponibili vengano rimossi"""
@@ -889,7 +907,7 @@ class CartTests(TestCase):
             uuid=str(uuid.uuid4())
         )
         invoice2 = Invoice.objects.create(
-            invoice_id=str(uuid.uuid4()),
+            uuid=str(uuid.uuid4()),
             utente=self.user,
             quantita=1,
             prodotto=prodotto2,
@@ -900,7 +918,7 @@ class CartTests(TestCase):
         
         response = self.client.get(reverse('purchase:checkout'))
         
-        self.assertFalse(Invoice.objects.filter(invoice_id=invoice2.invoice_id).exists())
+        self.assertFalse(Invoice.objects.filter(uuid=invoice2.uuid).exists())
         
     def test_checkout_page_view_without_cart(self):
         """Test visualizzazione pagina checkout senza carrello esistente"""

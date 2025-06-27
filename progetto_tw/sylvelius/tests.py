@@ -258,7 +258,7 @@ class ModelsTestingStringsCoverage(TestCase):
         )
 
         invoice=Invoice.objects.create(
-            invoice_id=uuid.uuid4(),
+            uuid=uuid.uuid4(),
             utente=self.user, #type: ignore
             quantita=3,
             prodotto=Prodotto.objects.get(id=_NEXT_PROD_ID)
@@ -274,7 +274,7 @@ class ModelsTestingStringsCoverage(TestCase):
 
         Ordine.objects.create(
             id=_NEXT_PROD_ID,
-            invoice = invoice.invoice_id,
+            invoice = invoice.uuid,
             utente = invoice.utente, 
             prodotto = invoice.prodotto,
             quantita = invoice.quantita,

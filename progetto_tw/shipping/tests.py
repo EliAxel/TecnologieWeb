@@ -69,7 +69,7 @@ class SpedizionePageViewTests(TestCase):
         )
 
         invoice=Invoice.objects.create(
-            invoice_id=uuid.uuid4(),
+            uuid=uuid.uuid4(),
             utente=self.user, #type: ignore
             quantita=3,
             prodotto=Prodotto.objects.get(id=_NEXT_PROD_ID)
@@ -85,7 +85,7 @@ class SpedizionePageViewTests(TestCase):
 
         Ordine.objects.create(
             id=_NEXT_PROD_ID,
-            invoice = invoice.invoice_id,
+            invoice = invoice.uuid,
             utente = invoice.utente, 
             prodotto = invoice.prodotto,
             quantita = invoice.quantita,
@@ -93,14 +93,14 @@ class SpedizionePageViewTests(TestCase):
             luogo_consegna = mock
         )
         invoice=Invoice.objects.create(
-            invoice_id=uuid.uuid4(),
+            uuid=uuid.uuid4(),
             utente=self.user, #type: ignore
             quantita=3,
             prodotto=Prodotto.objects.get(id=_NEXT_PROD_ID)
         )
         Ordine.objects.create(
             id=_NEXT_PROD_ID+1,
-            invoice = invoice.invoice_id,
+            invoice = invoice.uuid,
             utente = invoice.utente, 
             prodotto = invoice.prodotto,
             quantita = invoice.quantita,
@@ -108,14 +108,14 @@ class SpedizionePageViewTests(TestCase):
             luogo_consegna = mock
         )
         invoice=Invoice.objects.create(
-            invoice_id=uuid.uuid4(),
+            uuid=uuid.uuid4(),
             utente=self.user2, #type: ignore
             quantita=3,
             prodotto=Prodotto.objects.get(id=_NEXT_PROD_ID+2)
         )
         Ordine.objects.create(
             id=_NEXT_PROD_ID+2,
-            invoice = invoice.invoice_id,
+            invoice = invoice.uuid,
             utente = invoice.utente, 
             prodotto = invoice.prodotto,
             quantita = invoice.quantita,
@@ -197,7 +197,7 @@ class ImpostaSpeditoTests(TestCase):
         )
 
         invoice=Invoice.objects.create(
-            invoice_id=uuid.uuid4(),
+            uuid=uuid.uuid4(),
             utente=self.user, #type: ignore
             quantita=3,
             prodotto=Prodotto.objects.get(id=_NEXT_PROD_ID)
@@ -213,7 +213,7 @@ class ImpostaSpeditoTests(TestCase):
 
         Ordine.objects.create(
             id=_NEXT_PROD_ID,
-            invoice = invoice.invoice_id,
+            invoice = invoice.uuid,
             utente = invoice.utente, 
             prodotto = invoice.prodotto,
             quantita = invoice.quantita,
@@ -221,14 +221,14 @@ class ImpostaSpeditoTests(TestCase):
             luogo_consegna = mock
         )
         invoice=Invoice.objects.create(
-            invoice_id=uuid.uuid4(),
+            uuid=uuid.uuid4(),
             utente=self.user, #type: ignore
             quantita=3,
             prodotto=Prodotto.objects.get(id=_NEXT_PROD_ID)
         )
         Ordine.objects.create(
             id=_NEXT_PROD_ID+1,
-            invoice = invoice.invoice_id,
+            invoice = invoice.uuid,
             utente = invoice.utente, 
             prodotto = invoice.prodotto,
             quantita = invoice.quantita,
@@ -236,14 +236,14 @@ class ImpostaSpeditoTests(TestCase):
             luogo_consegna = mock
         )
         invoice=Invoice.objects.create(
-            invoice_id=uuid.uuid4(),
+            uuid=uuid.uuid4(),
             utente=self.user2, #type: ignore
             quantita=3,
             prodotto=Prodotto.objects.get(id=_NEXT_PROD_ID+2)
         )
         Ordine.objects.create(
             id=_NEXT_PROD_ID+2,
-            invoice = invoice.invoice_id,
+            invoice = invoice.uuid,
             utente = invoice.utente, 
             prodotto = invoice.prodotto,
             quantita = invoice.quantita,
@@ -339,7 +339,7 @@ class ImpostaCompletatoTests(TestCase):
         )
 
         invoice=Invoice.objects.create(
-            invoice_id=uuid.uuid4(),
+            uuid=uuid.uuid4(),
             utente=self.user, #type: ignore
             quantita=3,
             prodotto=Prodotto.objects.get(id=_NEXT_PROD_ID)
@@ -355,7 +355,7 @@ class ImpostaCompletatoTests(TestCase):
 
         Ordine.objects.create(
             id=_NEXT_PROD_ID,
-            invoice = invoice.invoice_id,
+            invoice = invoice.uuid,
             utente = invoice.utente, 
             prodotto = invoice.prodotto,
             quantita = invoice.quantita,
@@ -363,14 +363,14 @@ class ImpostaCompletatoTests(TestCase):
             luogo_consegna = mock
         )
         invoice=Invoice.objects.create(
-            invoice_id=uuid.uuid4(),
+            uuid=uuid.uuid4(),
             utente=self.user, #type: ignore
             quantita=3,
             prodotto=Prodotto.objects.get(id=_NEXT_PROD_ID)
         )
         Ordine.objects.create(
             id=_NEXT_PROD_ID+1,
-            invoice = invoice.invoice_id,
+            invoice = invoice.uuid,
             utente = invoice.utente, 
             prodotto = invoice.prodotto,
             quantita = invoice.quantita,
@@ -378,14 +378,14 @@ class ImpostaCompletatoTests(TestCase):
             luogo_consegna = mock
         )
         invoice=Invoice.objects.create(
-            invoice_id=uuid.uuid4(),
+            uuid=uuid.uuid4(),
             utente=self.user2, #type: ignore
             quantita=3,
             prodotto=Prodotto.objects.get(id=_NEXT_PROD_ID+2)
         )
         Ordine.objects.create(
             id=_NEXT_PROD_ID+2,
-            invoice = invoice.invoice_id,
+            invoice = invoice.uuid,
             utente = invoice.utente, 
             prodotto = invoice.prodotto,
             quantita = invoice.quantita,

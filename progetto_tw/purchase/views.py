@@ -51,7 +51,7 @@ def create_invoice(request, annuncio, quantity, cart=None):
         cart=cart,
         defaults={
             "quantita": quantity,
-            "invoice_id": str(uuid.uuid4()) if not Invoice.objects.filter(utente=request.user, prodotto=annuncio.prodotto, cart=cart).exists() else Invoice.objects.get(utente=request.user, prodotto=annuncio.prodotto, cart=cart).invoice_id
+            "uuid": str(uuid.uuid4()) if not Invoice.objects.filter(utente=request.user, prodotto=annuncio.prodotto, cart=cart).exists() else Invoice.objects.get(utente=request.user, prodotto=annuncio.prodotto, cart=cart).uuid
         }
     )
     return invoice_obj
@@ -94,7 +94,7 @@ class PurchasePageView(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin,
         context = {
             "amount": product.prezzo * Decimal(invoice.quantita), # type: ignore
             "item_name": product.nome, # type: ignore
-            "invoice_id": invoice.invoice_id, # type: ignore
+            "uuid": invoice.uuid, # type: ignore
             "quantity": invoice.quantita, # type: ignore
             "paypal_client_id": settings.xxx,
         }
@@ -186,7 +186,7 @@ def invoice_validation(invoice_obj, pu):
         utente=user,
         prodotto=prodotto,
         quantita=quantita,
-        invoice=invoice_obj.invoice_id,
+        invoice=invoice_obj.uuid,
         stato_consegna=stato
     )
 
@@ -228,16 +228,16 @@ def paypal_coa(request):
             return HttpResponse(status=400)
 
         pu = purchase_units[0]
-        invoice_id = pu.get('invoice_id')
+        uuid = pu.get('invoice_id')
 
         invoice_obj = None
         cart_obj = None
 
         try:
-            invoice_obj = Invoice.objects.get(invoice_id=invoice_id)
+            invoice_obj = Invoice.objects.get(uuid=uuid)
         except Invoice.DoesNotExist:
             try:
-                cart_obj = Cart.objects.get(uuid=invoice_id)
+                cart_obj = Cart.objects.get(uuid=uuid)
             except Cart.DoesNotExist:
                 return HttpResponse(status=404)
         
@@ -375,13 +375,13 @@ class CheckoutPageView(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin,
             context['cart'] = request.user.cart  #type:ignore
             context['amount'] = request.user.cart.total #type:ignore
             context['paypal_client_id'] = settings.xxx
-            context['invoice_id'] = request.user.cart.uuid #type:ignore
+            context['uuid'] = request.user.cart.uuid #type:ignore
         return render(request, self.template_name, context)
 
 @require_POST
 @login_required
-def aumenta_carrello(request, invoice_id):
-    invoice = get_object_or_404(Invoice, invoice_id=invoice_id, utente=request.user)
+def aumenta_carrello(request, uuid):
+    invoice = get_object_or_404(Invoice, uuid=uuid, utente=request.user)
     error_redirect = controlla_annuncio_e_quantita(invoice, incremento=1)
     if error_redirect:
         return error_redirect
@@ -392,8 +392,8 @@ def aumenta_carrello(request, invoice_id):
 
 @require_POST
 @login_required
-def diminuisci_carrello(request, invoice_id):
-    invoice = get_object_or_404(Invoice, invoice_id=invoice_id, utente=request.user)
+def diminuisci_carrello(request, uuid):
+    invoice = get_object_or_404(Invoice, uuid=uuid, utente=request.user)
     error_redirect = controlla_annuncio_e_quantita(invoice, incremento=-1)
     if error_redirect:
         return error_redirect
@@ -407,7 +407,16 @@ def diminuisci_carrello(request, invoice_id):
 
 @require_POST
 @login_required
-def rimuovi_da_carrello(request, invoice_id):
-    invoice = get_object_or_404(Invoice,invoice_id=invoice_id, utente=request.user)
+def rimuovi_da_carrello(request, uuid):
+    invoice = get_object_or_404(Invoice,uuid=uuid, utente=request.user)
     invoice.delete()
     return redirect(reverse("purchase:carrello") + '?evento=rimosso')
+
+@require_POST
+@login_required
+def rimuovi_carrello(request, cart_id):
+    cart = get_object_or_404(Cart,uuid=cart_id,utente=request.user)
+    for invoice in cart.invoices.all():  # type: ignore
+        invoice.delete()
+    
+    return redirect(reverse("purchase:carrello") + '?evento=rimossi')
