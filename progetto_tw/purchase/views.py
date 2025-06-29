@@ -95,7 +95,7 @@ class PurchasePageView(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin,
             "item_name": product.nome, # type: ignore
             "uuid": invoice.uuid, # type: ignore
             "quantity": invoice.quantita, # type: ignore
-            "paypal_client_id": settings.xxx,
+            "paypal_client_id": settings.PAYPAL_CLIENT_ID,
         }
         return render(request, self.template_name, context)
 
@@ -106,13 +106,13 @@ def payment_cancelled(request):
     return render(request, 'purchase/payment_cancelled.html')
 # non callable
 def get_paypal_access_token():
-    xxx = settings.xxx
-    xxx = settings.xxx
+    PAYPAL_CLIENT_ID = settings.PAYPAL_CLIENT_ID
+    PAYPAL_SECRET = settings.PAYPAL_SECRET
     PAYPAL_API_BASE = "https://api-m.sandbox.paypal.com"  
     response = requests.post(
         f"{PAYPAL_API_BASE}/v1/oauth2/token",
         data={"grant_type": "client_credentials"},
-        auth=HTTPBasicAuth(xxx, xxx),
+        auth=HTTPBasicAuth(PAYPAL_CLIENT_ID, PAYPAL_SECRET),
     )
 
     response.raise_for_status()
@@ -374,7 +374,7 @@ class CheckoutPageView(CustomLoginRequiredMixin, ModeratoreAccessForbiddenMixin,
             
             context['cart'] = request.user.cart  #type:ignore
             context['amount'] = request.user.cart.total #type:ignore
-            context['paypal_client_id'] = settings.xxx
+            context['paypal_client_id'] = settings.PAYPAL_CLIENT_ID
             context['uuid'] = request.user.cart.uuid #type:ignore
         return render(request, self.template_name, context)
 

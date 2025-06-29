@@ -146,6 +146,6 @@ MEDIA_URL = '/media/'
 
 # settings.py
 PAYPAL_TEST = True  # Usa l'ambiente sandbox per i test
-xxx= os.getenv('xxx')
-xxx= os.getenv('xxx')
+PAYPAL_CLIENT_ID= os.getenv('PAYPAL_CLIENT_ID')
+PAYPAL_SECRET= os.getenv('PAYPAL_SECRET')
 PAYPAL_COA_ID = os.getenv('PAYPAL_COA_ID')

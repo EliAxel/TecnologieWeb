@@ -905,7 +905,7 @@ class CartTests(TestCase):
     def test_checkout_page_view_with_cart(self):
         """Test visualizzazione pagina checkout con carrello esistente"""
         with patch('purchase.views.settings') as mock_settings:
-            mock_settings.xxx = 'test_client_id'
+            mock_settings.PAYPAL_CLIENT_ID = 'test_client_id'
             response = self.client.post(reverse('purchase:checkout'))
         
         self.assertEqual(response.status_code, 200)
