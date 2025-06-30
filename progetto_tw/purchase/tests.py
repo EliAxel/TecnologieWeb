@@ -967,3 +967,68 @@ class CartTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn('count', response.json())
         self.assertEqual(response.json()['count'], 0) # type: ignore
+
+class ModelStrTests(TestCase):
+    def setUp(self):
+        # Creazione dati di test comuni
+        self.user = User.objects.create_user(username='testuser', password='12345')
+        self.prodotto = Prodotto.objects.create(
+            nome='Prodotto Test',
+            descrizione_breve='Descrizione breve',
+            prezzo=10.00,
+            iva=22,
+            condizione='nuovo'
+        )
+        self.cart = Cart.objects.create(utente=self.user, uuid='cart-uuid-123')
+
+    def test_invoice_str_with_user_and_product(self):
+        invoice = Invoice.objects.create(
+            uuid='inv-123',
+            utente=self.user,
+            prodotto=self.prodotto,
+            quantita=2,
+            cart=self.cart
+        )
+        self.assertEqual(
+            str(invoice),
+            'inv-123 - testuser (Prodotto Test)'
+        )
+
+    def test_invoice_str_without_user_and_product(self):
+        invoice = Invoice.objects.create(
+            uuid='inv-456',
+            utente=None,
+            prodotto=None,
+            quantita=1,
+            cart=self.cart
+        )
+        self.assertEqual(
+            str(invoice),
+            'inv-456 - utente(prodotto)'
+        )
+
+    def test_iban_str_with_iban(self):
+        iban = Iban.objects.create(
+            utente=self.user,
+            iban='IT60X0542811101000000123456'
+        )
+        self.assertEqual(
+            str(iban),
+            'IT60X0542811101000000123456 - testuser'
+        )
+
+    def test_iban_str_without_iban(self):
+        iban = Iban.objects.create(
+            utente=self.user,
+            iban=None
+        )
+        self.assertEqual(
+            str(iban),
+            'IBAN - testuser'
+        )
+
+    def test_cart_str(self):
+        self.assertEqual(
+            str(self.cart),
+            'Carrello di testuser'
+        )

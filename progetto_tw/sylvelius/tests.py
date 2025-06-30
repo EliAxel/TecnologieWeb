@@ -220,6 +220,7 @@ class UrlsWithData(TestCase):
         self.assertEqual(data['urls'][0],"/static/img/default_product.png")
 
 class ModelsTestingStringsCoverage(TestCase):
+
     def setUp(self):
         tag1 = Tag.objects.create(nome='Tag01')
         tag2 = Tag.objects.create(nome='Tag02')
@@ -282,16 +283,25 @@ class ModelsTestingStringsCoverage(TestCase):
             luogo_consegna = mock
         )
         
+        Notification.objects.create(
+            id=_NEXT_PROD_ID,
+            recipient=self.user,
+            title='test',
+            message='message'
+        )
+        
     def test_to_string(self):
         self.assertEqual(Tag.objects.get(nome="tag01").__str__(),"tag01")
+        self.assertEqual(Prodotto.objects.get(id=_NEXT_PROD_ID).__str__(),"Prodotto di Test")
         self.assertEqual(Prodotto.objects.get(id=_NEXT_PROD_ID).immagini.first().__str__(),"Immagine di Prodotto di Test") #type: ignore
-        self.assertEqual(Annuncio.objects.get(id=_NEXT_PROD_ID).__str__(),"Prodotto di Test")
+        self.assertEqual(Annuncio.objects.get(id=_NEXT_PROD_ID).__str__(),"Prodotto di Test - testuser")
         self.assertEqual(CommentoAnnuncio.objects.get(id=_NEXT_PROD_ID).__str__(),"testuser su Prodotto di Test - 4/5")
         self.assertEqual(Annuncio.objects.get(id=_NEXT_PROD_ID).rating_medio,4)
         self.assertEqual(Annuncio.objects.get(id=_NEXT_PROD_ID).rating_count,1)
         self.assertEqual(Ordine.objects.get(id=_NEXT_PROD_ID).__str__(),"testuser - Prodotto di Test")
         self.assertEqual(Ordine.objects.get(id=_NEXT_PROD_ID).totale,300.00)
         self.assertEqual(Ordine.objects.get(id=_NEXT_PROD_ID).json_to_string,'{"address_line_1": "Via test", "admin_area_2": "Roma", "postal_code": "46029", "admin_area_1": "RM", "country_code": "IT"}')
+        self.assertEqual(Notification.objects.get(id=_NEXT_PROD_ID).__str__(), "testuser" + " HA RICEVUTO " + "test" + " CON MESSAGGIO " + "message")
 
 class LoggedUrls2(TestCase):
     def setUp(self):

@@ -46,12 +46,21 @@ class Prodotto(models.Model):
     condizione = models.CharField(choices=PROD_CONDIZIONE_CHOICES, default='nuovo')
     tags = models.ManyToManyField(Tag, related_name='prodotti', blank=True)
 
+    def __str__(self):
+        return self.nome
+    
+    class Meta:
+        verbose_name_plural = "Prodotti"
+
 class ImmagineProdotto(models.Model):
     prodotto = models.ForeignKey(Prodotto, on_delete=models.CASCADE, related_name='immagini')
     immagine = models.ImageField(upload_to='prodotti/immagini/', blank=True, null=True)
 
     def __str__(self):
         return f"Immagine di {self.prodotto.nome}"
+    
+    class Meta:
+        verbose_name_plural = "Immagini Prodotti"
 
 class Annuncio(models.Model):
     uuid = models.CharField(max_length=MAX_ANNU_UUID_CHARS, unique=True, blank=True, null=True)
@@ -68,10 +77,11 @@ class Annuncio(models.Model):
     is_published = models.BooleanField(default=True)
 
     def __str__(self):
-        return self.prodotto.nome
+        return self.prodotto.nome + " - " + self.inserzionista.username
     
     class Meta:
         ordering = ['-data_pubblicazione']
+        verbose_name_plural = "Annunci"
 
     @property
     def rating_medio(self):
@@ -95,6 +105,9 @@ class CommentoAnnuncio(models.Model):
 
     def __str__(self):
         return f"{self.utente.username} su {self.annuncio.prodotto.nome} - {self.rating}/5"
+    
+    class Meta:
+        verbose_name_plural = "Commenti Annunci"
 
 class Ordine(models.Model):
     invoice = models.CharField(max_length=MAX_ORDN_INVOICE_CHARS, unique=True, blank=True, null=True)
@@ -117,6 +130,9 @@ class Ordine(models.Model):
     def json_to_string(self):
         return json.dumps(self.luogo_consegna)
     
+    class Meta:
+        verbose_name_plural = "Ordini"
+    
 class Notification(models.Model):
     recipient = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='notifications', null=True, blank=True)
     sender = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True, related_name='sent_notifications')
@@ -129,3 +145,7 @@ class Notification(models.Model):
 
     class Meta:
         ordering = ['created_at']
+
+    def __str__(self):
+        utnt = "utente" if not self.recipient else self.recipient.username
+        return utnt + " HA RICEVUTO " + self.title + " CON MESSAGGIO " + self.message
