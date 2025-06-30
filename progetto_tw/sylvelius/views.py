@@ -399,13 +399,13 @@ class ProfiloDeletePageView(CustomLoginRequiredMixin, View):
         if(Ordine.objects.filter(utente=user,stato_consegna="spedito").exists()):
             return render(request, self.template_name,{"evento":"ship"})
         if(Ordine.objects.filter(
-            prodotto__annunci__inserzionista=user,
+            prodotto__annuncio__inserzionista=user,
             stato_consegna='spedito'
             ).exists()):
             return render(request, self.template_name,{"evento":"shipd"})
         
         ordine_ex=Ordine.objects.filter(utente=user)
-        ordine_in=Ordine.objects.filter(prodotto__annunci__inserzionista=user)
+        ordine_in=Ordine.objects.filter(prodotto__annuncio__inserzionista=user)
         
         for ordine in ordine_ex:
             annulla_ordine_free(request,ordine.id) #type:ignore
@@ -664,7 +664,7 @@ class ProfiloClientiPageView(CustomLoginRequiredMixin, ModeratoreAccessForbidden
         utente = self.request.user
         context['user'] = utente
         
-        ordini_list = Ordine.objects.filter(prodotto__annunci__inserzionista=utente).select_related('prodotto', 'utente').order_by('-data_ordine')
+        ordini_list = Ordine.objects.filter(prodotto__annuncio__inserzionista=utente).select_related('prodotto', 'utente').order_by('-data_ordine')
         
         paginator = Paginator(ordini_list, MAX_PAGINATOR_ORDINI_VALUE)  
         page_number = self.request.GET.get('page')
@@ -937,7 +937,7 @@ def formatta_utente(request, user_id):
     if request.user.groups.filter(name=_MODS_GRP_NAME).exists():
         user = get_object_or_404(User, id=user_id)
         if(not user.is_active):
-            ordini_ex = Ordine.objects.filter(prodotto__annunci__inserzionista=user)
+            ordini_ex = Ordine.objects.filter(prodotto__annuncio__inserzionista=user)
             for ordine in ordini_ex:
                 annulla_ordine_free(request,ordine.id)# type: ignore
             ordine_in = Ordine.objects.filter(utente=user)

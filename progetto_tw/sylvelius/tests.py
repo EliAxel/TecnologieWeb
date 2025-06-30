@@ -1429,7 +1429,7 @@ class FunctionBasedViewTests(TestCase):
             self.assertFalse(Annuncio.objects.filter(inserzionista=banned_user).exists())
             self.assertFalse(CommentoAnnuncio.objects.filter(utente=banned_user).exists())
             self.assertFalse(Ordine.objects.filter(utente=banned_user).exists())
-            self.assertFalse(Ordine.objects.filter(prodotto__annunci__inserzionista=banned_user).exists())
+            self.assertFalse(Ordine.objects.filter(prodotto__annuncio__inserzionista=banned_user).exists())
     @patch('sylvelius.views.annulla_ordine_free')
     def test_annulla_ordine(self, mock_annulla_ordine_free):
         mock_annulla_ordine_free.return_value = JsonResponse({"status": "success"})

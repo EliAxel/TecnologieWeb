@@ -15,7 +15,7 @@ class SpedizionePageView(CustomLoginRequiredMixin,ModeratoreAccessForbiddenMixin
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        ordine = get_object_or_404(Ordine,id=self.request.GET.get('ordine'),prodotto__annunci__inserzionista=self.request.user, stato_consegna='da spedire', utente__is_active=True)
+        ordine = get_object_or_404(Ordine,id=self.request.GET.get('ordine'),prodotto__annuncio__inserzionista=self.request.user, stato_consegna='da spedire', utente__is_active=True)
         context['page'] = self.request.GET.get('page')
         context['ordine'] = ordine
         return context
@@ -23,7 +23,7 @@ class SpedizionePageView(CustomLoginRequiredMixin,ModeratoreAccessForbiddenMixin
 @login_required
 @require_POST
 def imposta_spedito(request, ordine_id):
-    ordine = get_object_or_404(Ordine,id=ordine_id,prodotto__annunci__inserzionista=request.user, stato_consegna='da spedire')
+    ordine = get_object_or_404(Ordine,id=ordine_id,prodotto__annuncio__inserzionista=request.user, stato_consegna='da spedire')
     ordine.stato_consegna = 'spedito'
     ordine.save()
     page = request.GET.get('page')
@@ -37,7 +37,7 @@ def imposta_spedito(request, ordine_id):
 @login_required
 @require_POST
 def imposta_completato(request, ordine_id):
-    ordine = get_object_or_404(Ordine,id=ordine_id,prodotto__annunci__inserzionista=request.user, stato_consegna='da spedire')
+    ordine = get_object_or_404(Ordine,id=ordine_id,prodotto__annuncio__inserzionista=request.user, stato_consegna='da spedire')
     ordine.stato_consegna = 'consegnato'
     ordine.save()
     create_notification(recipient=ordine.utente,title="Ordine consegnato!", sender=request.user,
