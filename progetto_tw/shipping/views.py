@@ -29,7 +29,7 @@ def imposta_spedito(request, ordine_id):
     page = request.GET.get('page')
     create_notification(recipient=ordine.utente,title="Ordine spedito!", sender=request.user,
                                     message=f"Il tuo ordine di {ordine.prodotto.nome} è stato spedito!")
-    create_notification(recipient=ordine.prodotto.annunci.inserzionista,title="Ordine spedito!", sender=request.user,#type:ignore
+    create_notification(recipient=ordine.prodotto.annuncio.inserzionista,title="Ordine spedito!", sender=request.user,#type:ignore
                                     message=f"Il tuo ordine di {ordine.prodotto.nome} per {ordine.utente} è stato spedito!")
 
     return redirect(f'{reverse("sylvelius:profile_clienti")}?page={page}&evento=spedito_ordine')
@@ -42,7 +42,7 @@ def imposta_completato(request, ordine_id):
     ordine.save()
     create_notification(recipient=ordine.utente,title="Ordine consegnato!", sender=request.user,
                                     message=f"Il tuo ordine di {ordine.prodotto.nome} è stato consegnato!")
-    create_notification(recipient=ordine.prodotto.annunci.inserzionista,title="Ordine consegnato!", sender=request.user, #type:ignore
+    create_notification(recipient=ordine.prodotto.annuncio.inserzionista,title="Ordine consegnato!", sender=request.user, #type:ignore
                                     message=f"Il tuo ordine di {ordine.prodotto.nome} per {ordine.utente} è stato consegnato!")
     page = request.GET.get('page')
     return redirect(f'{reverse("sylvelius:profile_clienti")}?page={page}&evento=completato_ordine')

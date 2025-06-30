@@ -61,7 +61,7 @@
                                     </td>
                                     <td>
                                         <div>
-                                            <a {% if invoice.prodotto.annunci %}href="{% url 'sylvelius:dettagli_annuncio' invoice.prodotto.annunci.uuid %}"{%endif%} class="mb-1" style="word-break: break-word; font-size: 1.25rem; font-weight: 500; line-height: 1.2; text-decoration: none;">
+                                            <a {% if invoice.prodotto.annuncio %}href="{% url 'sylvelius:dettagli_annuncio' invoice.prodotto.annuncio.uuid %}"{%endif%} class="mb-1" style="word-break: break-word; font-size: 1.25rem; font-weight: 500; line-height: 1.2; text-decoration: none;">
                                                 {{ invoice.prodotto.nome|truncatechars:MAX_TRUNCATED_CARRELLO_CHARS }}
                                             </a>
                                             <p class="text-muted mb-0" style="word-break: break-word;">{{ invoice.prodotto.descrizione_breve|truncatechars:MAX_TRUNCATED_CARRELLO_CHARS }}</p>
@@ -90,7 +90,7 @@
                                         <div class="d-flex flex-row align-items-center justify-content-center">
                                             <form action="{% url 'purchase:purchase' %}" method="post" class="d-inline-block mr-1">
                                                 {% csrf_token %}
-                                                <input type="hidden" name="annuncio_id" value="{{ invoice.prodotto.annunci.uuid }}">
+                                                <input type="hidden" name="annuncio_id" value="{{ invoice.prodotto.annuncio.uuid }}">
                                                 <input type="hidden" name="quantita" value="{{ invoice.quantita }}">
                                                 <button type="submit" class="btn btn-sm btn-primary">
                                                     <i class="bi bi-cart"></i>

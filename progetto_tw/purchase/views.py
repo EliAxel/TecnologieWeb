@@ -300,7 +300,7 @@ def add_to_cart(request):
         return err
     
     return redirect(
-        reverse("sylvelius:dettagli_annuncio", kwargs={"uuid": invoice.prodotto.annunci.uuid}) + #type: ignore
+        reverse("sylvelius:dettagli_annuncio", kwargs={"uuid": invoice.prodotto.annuncio.uuid}) + #type: ignore
         "?evento=carrello"
     )
 # non callable

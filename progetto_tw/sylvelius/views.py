@@ -120,13 +120,13 @@ def annulla_ordine_free(request, order_id):
             "status": "error",
             "message": "Ordine non trovato o già spedito"
         }, status=400)
-    if((request.user == ordine.utente or request.user == ordine.prodotto.annunci.inserzionista or request.user.groups.filter(name=_MODS_GRP_NAME).exists())): #type:ignore
+    if((request.user == ordine.utente or request.user == ordine.prodotto.annuncio.inserzionista or request.user.groups.filter(name=_MODS_GRP_NAME).exists())): #type:ignore
         if request.user == ordine.utente and ordine.stato_consegna=='da spedire':
             ordine.stato_consegna = 'annullato'
             ordine.save()
-            create_notification(recipient=ordine.prodotto.annunci.inserzionista,title="Ordine annullato", sender=request.user, #type:ignore
+            create_notification(recipient=ordine.prodotto.annuncio.inserzionista,title="Ordine annullato", sender=request.user, #type:ignore
                                 message=f"Il tuo ordine di {ordine.prodotto.nome} è stato annullato dal compratore")
-        if ordine.stato_consegna=='da spedire' and request.user == ordine.prodotto.annunci.inserzionista:#type:ignore
+        if ordine.stato_consegna=='da spedire' and request.user == ordine.prodotto.annuncio.inserzionista:#type:ignore
             ordine.stato_consegna = 'annullato'
             ordine.save()
             create_notification(recipient=ordine.utente,title="Ordine rifiutato", sender=request.user, #type:ignore

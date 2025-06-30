@@ -56,7 +56,7 @@ class ImmagineProdotto(models.Model):
 class Annuncio(models.Model):
     uuid = models.CharField(max_length=MAX_ANNU_UUID_CHARS, unique=True, blank=True, null=True)
     inserzionista = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='annunci')
-    prodotto = models.OneToOneField(Prodotto, on_delete=models.CASCADE, related_name='annunci')
+    prodotto = models.OneToOneField(Prodotto, on_delete=models.CASCADE, related_name='annuncio')
     data_pubblicazione = models.DateTimeField(auto_now_add=True)
     qta_magazzino = models.PositiveIntegerField(
         validators=[

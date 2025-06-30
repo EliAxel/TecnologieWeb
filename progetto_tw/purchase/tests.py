@@ -763,7 +763,7 @@ class CartTests(TestCase):
             prodotto=self.prodotto,  
             cart=self.cart
         )
-        inv_err.prodotto.annunci.delete() # type: ignore
+        inv_err.prodotto.annuncio.delete() # type: ignore
         response = self.client.post(
             reverse('purchase:aumenta_carrello', kwargs={'uuid': inv_err.uuid})
         )
@@ -806,7 +806,7 @@ class CartTests(TestCase):
             prodotto=self.prodotto,  
             cart=self.cart
         )
-        inv_err.prodotto.annunci.delete() # type: ignore
+        inv_err.prodotto.annuncio.delete() # type: ignore
         response = self.client.post(
             reverse('purchase:diminuisci_carrello', kwargs={'uuid': inv_err.uuid})
         )
