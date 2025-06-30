@@ -15,7 +15,7 @@ from django.core.paginator import Paginator
 from django.db.models import Avg, Q
 from django.db.models.functions import Floor
 from django.http import (
-    HttpResponse,
+    Http404,
     HttpResponseForbidden,
     HttpResponseRedirect,
     JsonResponse,
@@ -25,7 +25,8 @@ from django.urls import reverse, reverse_lazy
 from django.views import View
 from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, TemplateView
-
+from django.views.generic.detail import DetailView
+from django.views.generic.edit import UpdateView, DeleteView
 from progetto_tw.constants import (
     ALIQUOTE_LIST_VALS,
     MAX_ANNUNCI_PER_DETTAGLI_VALUE,
@@ -304,120 +305,138 @@ class ProfiloPageView(CustomLoginRequiredMixin, TemplateView):
 
         return context
 
-class ProfiloDetailsPageView(View):
+class ProfiloDetailsPageView(DetailView):
+    model = User
     template_name = 'sylvelius/profile/dettagli_profile.html'
+    slug_field = 'username'
+    slug_url_kwarg = 'user_profile'
+    context_object_name = 'user_profile'
 
-    def get(self, request, user_profile):
-        context = {}
-        if request.user.groups.filter(name=_MODS_GRP_NAME).exists():
-            user = get_object_or_404(User, username=user_profile)
+    def get_object(self, queryset=None):
+        if self.request.user.groups.filter(name=_MODS_GRP_NAME).exists():
+            user = get_object_or_404(User, username=self.kwargs.get(self.slug_url_kwarg))
+        else:
+            user = get_object_or_404(User, username=self.kwargs.get(self.slug_url_kwarg), is_active=True)
+        if user.groups.filter(name=_MODS_GRP_NAME).exists():
+            raise Http404()
+        return user
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.object # type: ignore
+        if self.request.user.groups.filter(name=_MODS_GRP_NAME).exists():
             annunci = Annuncio.objects.filter(inserzionista=user).annotate(avg_rating=Avg('commenti__rating')).order_by('-avg_rating')
             commenti = CommentoAnnuncio.objects.filter(utente=user).order_by('-data_pubblicazione')
         else:
-            user = get_object_or_404(User, username=user_profile, is_active=True)
-            annunci = Annuncio.objects.filter(inserzionista=user,is_published=True).annotate(avg_rating=Avg('commenti__rating')).order_by('-avg_rating')
-            commenti = CommentoAnnuncio.objects.filter(utente=user,annuncio__inserzionista__is_active=True,annuncio__is_published=True).order_by('-data_pubblicazione')
-        if user.groups.filter(name=_MODS_GRP_NAME).exists():
-            return HttpResponse(status=404)
-        
-        paginator = Paginator(commenti, MAX_PAGINATOR_COMMENTI_DETTAGLI_VALUE) 
-        
-        page_number = self.request.GET.get('page',1)
+            annunci = Annuncio.objects.filter(inserzionista=user, is_published=True).annotate(avg_rating=Avg('commenti__rating')).order_by('-avg_rating')
+            commenti = CommentoAnnuncio.objects.filter(
+                utente=user,
+                annuncio__inserzionista__is_active=True,
+                annuncio__is_published=True
+            ).order_by('-data_pubblicazione')
+
+        paginator = Paginator(commenti, MAX_PAGINATOR_COMMENTI_DETTAGLI_VALUE)
+        page_number = self.request.GET.get('page', 1)
         page_obj = paginator.get_page(page_number)
-        
-        context = {
-            'user_profile': user,
-            'annunci': annunci[:MAX_ANNUNCI_PER_DETTAGLI_VALUE],
-            'annunci_count': annunci.count(),
-            'commenti_count': commenti.count(),
-        }
+
+        context['annunci'] = annunci[:MAX_ANNUNCI_PER_DETTAGLI_VALUE]
+        context['annunci_count'] = annunci.count()
+        context['commenti_count'] = commenti.count()
         context['commenti'] = page_obj.object_list
         context['page'] = page_obj.number
         context['has_next'] = page_obj.has_next()
         context['has_previous'] = page_obj.has_previous()
-        return render(request, self.template_name, context)
+        return context
     
-class ProfiloEditPageView(CustomLoginRequiredMixin, View):
+class ProfiloEditPageView(CustomLoginRequiredMixin, UpdateView):
+    model = User
     template_name = "sylvelius/profile/profile_edit.html"
     login_url = reverse_lazy('sylvelius:login')
+    fields = [] # Form troppo complicato per farlo gestire a Django
 
-    def get(self, request):
+    def get_object(self, queryset=None):
+        return self.request.user
+
+    def get(self, request, *args, **kwargs):
         return render(request, self.template_name)
-    
-    def post(self, request):
-        username = request.POST.get('username').strip()
-        old_password = request.POST.get('old_password')
-        if not old_password:
+
+    def post(self, request, *args, **kwargs):
+        user = self.get_object()
+        username = request.POST.get('username', '').strip()
+        old_password = request.POST.get('old_password', '').strip()
+        new_password1 = request.POST.get('new_password1', '').strip()
+        new_password2 = request.POST.get('new_password2', '').strip()
+
+        if not old_password or not user.check_password(old_password):
             return render(request, self.template_name, {'evento': 'pwd'})
-        else:
-            old_password=old_password.strip()
-            if not request.user.check_password(old_password):
-                return render(request, self.template_name, {'evento': 'pwd'})
-                
-        new_password1 = request.POST.get('new_password1').strip()
-        new_password2 = request.POST.get('new_password2').strip()
 
         if len(username) > MAX_UNAME_CHARS:
             return render(request, self.template_name, {'evento': 'usr'})
-        if len(new_password1) > MAX_PWD_CHARS:
+        if new_password1 and len(new_password1) > MAX_PWD_CHARS:
             return render(request, self.template_name, {'evento': 'pwd'})
+
         password_change_form_valid = True
         if new_password1 and new_password2:
-            password_change_form=PasswordChangeForm(data={
+            password_change_form = PasswordChangeForm(data={
                 'old_password': old_password,
                 'new_password1': new_password1,
                 'new_password2': new_password2
-            },user=request.user)
+            }, user=user) # type: ignore
             password_change_form_valid = password_change_form.is_valid()
-            if password_change_form_valid: password_change_form.save()
+            if password_change_form_valid:
+                password_change_form.save()
 
-        if username != request.user.username:
-            if User.objects.filter(username=username).exclude(pk=request.user.pk).exists():
+        if username != user.username:
+            if User.objects.filter(username=username).exclude(pk=user.pk).exists():
                 return render(request, self.template_name, {'evento': 'usr'})
             else:
-                request.user.username = username
-                request.user.save()
+                user.username = username
+                user.save()
 
         if password_change_form_valid:
-            update_session_auth_hash(request, request.user)
+            update_session_auth_hash(request, user) # type: ignore
             return redirect(f'{reverse("sylvelius:profile")}?evento=profile_edit')
         else:
             return render(request, self.template_name, {'evento': 'pwd'})
 
-class ProfiloDeletePageView(CustomLoginRequiredMixin, View):
+class ProfiloDeletePageView(CustomLoginRequiredMixin, DeleteView):
+    model = User
     login_url = reverse_lazy('sylvelius:login')
     template_name = "sylvelius/profile/profile_delete.html"
+    context_object_name = 'user'
 
-    def get(self, request):
-        context = {
-            'user': request.user,
-        }
+    def get_object(self, queryset=None):
+        return self.request.user
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        context = self.get_context_data(object=self.get_object())
         return render(request, self.template_name, context)
-    
-    def post(self, request):
-        user = request.user
-        if(Ordine.objects.filter(utente=user,stato_consegna="spedito").exists()):
-            return render(request, self.template_name,{"evento":"ship"})
-        if(Ordine.objects.filter(
+
+    def post(self, request, *args, **kwargs):
+        user = self.get_object()
+        if Ordine.objects.filter(utente=user, stato_consegna="spedito").exists():
+            return render(request, self.template_name, {"evento": "ship"})
+        if Ordine.objects.filter(
             prodotto__annuncio__inserzionista=user,
             stato_consegna='spedito'
-            ).exists()):
-            return render(request, self.template_name,{"evento":"shipd"})
-        
-        ordine_ex=Ordine.objects.filter(utente=user)
-        ordine_in=Ordine.objects.filter(prodotto__annuncio__inserzionista=user)
-        
+        ).exists():
+            return render(request, self.template_name, {"evento": "shipd"})
+
+        ordine_ex = Ordine.objects.filter(utente=user)
+        ordine_in = Ordine.objects.filter(prodotto__annuncio__inserzionista=user)
+
         for ordine in ordine_ex:
-            annulla_ordine_free(request,ordine.id) #type:ignore
-        
+            annulla_ordine_free(request, ordine.id)  # type: ignore
+
         for ordine in ordine_in:
-            annulla_ordine_free(request,ordine.id) #type:ignore
+            annulla_ordine_free(request, ordine.id)  # type: ignore
 
         Annuncio.objects.filter(inserzionista=user).delete()
-        Iban.objects.filter(utente=request.user).delete()
-        Cart.objects.filter(utente=request.user).delete()
-        CommentoAnnuncio.objects.filter(utente=request.user).delete()
-        Notification.objects.filter(recipient=request.user).delete()
+        Iban.objects.filter(utente=user).delete()
+        Cart.objects.filter(utente=user).delete()
+        CommentoAnnuncio.objects.filter(utente=user).delete()
+        Notification.objects.filter(recipient=user).delete()
         logout(request)
         user.delete()
         return redirect('sylvelius:home')
