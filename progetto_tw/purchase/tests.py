@@ -1004,7 +1004,7 @@ class ModelStrTests(TestCase):
         )
         self.assertEqual(
             str(invoice),
-            'inv-456 - utente(prodotto)'
+            'inv-456 - utente (prodotto)'
         )
 
     def test_iban_str_with_iban(self):
