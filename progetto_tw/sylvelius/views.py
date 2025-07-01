@@ -24,9 +24,9 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views import View
 from django.views.decorators.http import require_POST
-from django.views.generic import CreateView, TemplateView
+from django.views.generic import TemplateView
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import UpdateView, DeleteView
+from django.views.generic.edit import UpdateView, DeleteView, CreateView
 from progetto_tw.constants import (
     ALIQUOTE_LIST_VALS,
     MAX_ANNUNCI_PER_DETTAGLI_VALUE,
