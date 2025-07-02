@@ -1075,6 +1075,11 @@ class FunctionBasedViewTests(TestCase):
             prodotto=prodotto,
             qta_magazzino=5
         )
+        ordine = Ordine.objects.create(
+            utente=self.user,
+            prodotto=prodotto,
+            stato_consegna='da spedire'
+        )
         
         response = self.client.post(
             reverse('sylvelius:elimina_annuncio', args=[annuncio.id]), #type:ignore
@@ -1099,7 +1104,11 @@ class FunctionBasedViewTests(TestCase):
         )
         
         self.client.login(username='moderator', password='modpass123')
-        
+        ordine = Ordine.objects.create(
+            utente=self.user,
+            prodotto=another_prodotto,
+            stato_consegna='da spedire'
+        )
         response = self.client.post(
             reverse('sylvelius:elimina_annuncio', args=[another_annuncio.id]), #type:ignore
             HTTP_REFERER=reverse('sylvelius:home')

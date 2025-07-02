@@ -121,22 +121,22 @@ def annulla_ordine_free(request, order_id):
             "status": "error",
             "message": "Ordine non trovato o già spedito"
         }, status=400)
-    if((request.user == ordine.utente or request.user == ordine.prodotto.annuncio.inserzionista or request.user.groups.filter(name=_MODS_GRP_NAME).exists())): #type:ignore
+    if(request.user == ordine.utente or request.user.groups.filter(name=_MODS_GRP_NAME).exists() or request.user == ordine.prodotto.annuncio.inserzionista): #type:ignore
         if request.user == ordine.utente and ordine.stato_consegna=='da spedire':
             ordine.stato_consegna = 'annullato'
             ordine.save()
             create_notification(recipient=ordine.prodotto.annuncio.inserzionista,title="Ordine annullato", sender=request.user, #type:ignore
                                 message=f"Il tuo ordine di {ordine.prodotto.nome} è stato annullato dal compratore")
-        if ordine.stato_consegna=='da spedire' and request.user == ordine.prodotto.annuncio.inserzionista:#type:ignore
-            ordine.stato_consegna = 'annullato'
-            ordine.save()
-            create_notification(recipient=ordine.utente,title="Ordine rifiutato", sender=request.user, #type:ignore
-                                message=f"Il tuo ordine di {ordine.prodotto.nome} è stato rifiutato dal venditore, riceverai un rimborso a breve")
         if request.user.groups.filter(name=_MODS_GRP_NAME).exists() and (ordine.stato_consegna=='da spedire' or ordine.stato_consegna=='spedito'):
             ordine.stato_consegna = 'annullato'
             ordine.save()
             create_notification(recipient=ordine.utente,title="Ordine cancellato", sender=request.user, #type:ignore
                                 message=f"Il tuo ordine di {ordine.prodotto.nome} è stato cancellato da un moderatore, riceverai un rimborso a breve")
+        if ordine.stato_consegna=='da spedire' and request.user == ordine.prodotto.annuncio.inserzionista:#type:ignore
+            ordine.stato_consegna = 'annullato'
+            ordine.save()
+            create_notification(recipient=ordine.utente,title="Ordine rifiutato", sender=request.user, #type:ignore
+                                message=f"Il tuo ordine di {ordine.prodotto.nome} è stato rifiutato dal venditore, riceverai un rimborso a breve")
         return JsonResponse({"status": "success"})
     else: return JsonResponse({"status": "error", "message": "Ordine non trovato o già spedito"}, status=400)
 #non callable
@@ -824,11 +824,19 @@ def toggle_pubblicazione(request, id):
 def delete_pubblicazione(request, id):
     if request.user.groups.filter(name=_MODS_GRP_NAME).exists():
         annuncio = get_object_or_404(Annuncio, id=id)
+        ordini = Ordine.objects.filter(prodotto__annuncio=annuncio, stato_consegna='da spedire')
+        for ordine in ordini:
+            annulla_ordine_free(request,ordine.id) # type: ignore
         annuncio.delete()  
         return redirect(f'{reverse("sylvelius:home")}?evento=elimina_pub')
     else:
         annuncio = get_object_or_404(Annuncio, id=id, inserzionista=request.user)
-        annuncio.delete()  
+        ordini = Ordine.objects.filter(prodotto__annuncio=annuncio, stato_consegna='da spedire')
+        for ordine in ordini:
+            create_notification(recipient=request.user,title="Ordine annullato", #type:ignore
+                                message=f"L'ordine di {ordine.utente.username} contenente {ordine.prodotto.nome} è stato rifiutato dopo l'eliminazione dell'annuncio")
+            annulla_ordine_free(request,ordine.id) # type: ignore
+        annuncio.delete()
         page = request.POST.get('page', 1)
         return redirect(f'{reverse("sylvelius:profile_annunci")}?page={page}&evento=elimina')
 
